@@ -33,7 +33,7 @@ require('../class/contrat.class.php');*/
 
 
 $contrat = new TRH_Contrat;
-$ATMdb = new TPDOdb;
+$PDOdb = new TPDOdb;
 
 
 /**
@@ -54,7 +54,7 @@ class ContratTest extends PHPUnit_Framework_TestCase
  
     public static function tearDownAfterClass()
     {
-    	global $ATMdb;
+    	global $PDOdb;
 		print "\nFin du test des Contrats.\n";
     }
 	
@@ -68,8 +68,8 @@ class ContratTest extends PHPUnit_Framework_TestCase
 	
 	public function testload_liste()
     {
-    	global $contrat, $ATMdb;
-		$contrat->load_liste($ATMdb);
+    	global $contrat, $PDOdb;
+		$contrat->load_liste($PDOdb);
 		$this->assertNotEmpty($contrat->TTypeRessource);
 		$this->assertNotEmpty($contrat->TAgence);
 		$this->assertNotEmpty($contrat->TFournisseur);
@@ -79,24 +79,24 @@ class ContratTest extends PHPUnit_Framework_TestCase
 	
 	public function testSaveDelete()
     {
-    	global $contrat, $ATMdb;
+    	global $contrat, $PDOdb;
 		
 		//cas particulier de non-concordance des dates
 		$contrat->date_fin = 10;
 		$contrat->date_debut = 20;
 		
-		$contrat->save($ATMdb);
-		$contrat->delete($ATMdb);
+		$contrat->save($PDOdb);
+		$contrat->delete($PDOdb);
 		
 		print __METHOD__."\n";
     }
 	
 	public function testCreateAssoc()
     {
-    	global $contrat, $ATMdb;
+    	global $contrat, $PDOdb;
 		$assoc = new TRH_Contrat_Ressource;
-		$assoc->save($ATMdb);
-		$assoc->delete($ATMdb);
+		$assoc->save($PDOdb);
+		$assoc->delete($PDOdb);
 		print __METHOD__."\n";
     }
 	

@@ -7,7 +7,7 @@
 	$langs->load('ressource@ressource');
 	
 	//if (!$user->rights->financement->affaire->read)	{ accessforbidden(); }
-	$ATMdb=new TPDOdb;
+	$PDOdb=new TPDOdb;
 	$ressourceType=new TRH_ressource_type;
 	$regle = new TRH_Ressource_Regle;
 	$mesg = '';
@@ -17,45 +17,45 @@
 		switch($_REQUEST['action']) {
 			case 'add':
 			case 'new':
-				//$ATMdb->db->debug=true;
-				$ressourceType->load($ATMdb, $_REQUEST['id']);
-				//$ressourceType->save($ATMdb);
-				_fiche($ATMdb, $regle, $ressourceType,'new');
+				//$PDOdb->db->debug=true;
+				$ressourceType->load($PDOdb, $_REQUEST['id']);
+				//$ressourceType->save($PDOdb);
+				_fiche($PDOdb, $regle, $ressourceType,'new');
 				break;
 				
 			case 'edit'	:
-				//$ATMdb->db->debug=true;
-				$ressourceType->load($ATMdb, $_REQUEST['id']);
-				$regle->load($ATMdb, $_REQUEST['idRegle']);
-				_fiche($ATMdb,  $regle, $ressourceType,'edit');
+				//$PDOdb->db->debug=true;
+				$ressourceType->load($PDOdb, $_REQUEST['id']);
+				$regle->load($PDOdb, $_REQUEST['idRegle']);
+				_fiche($PDOdb,  $regle, $ressourceType,'edit');
 				break;
 				
 			case 'save':
-				//$ATMdb->db->debug=true;
-				$ressourceType->load($ATMdb, $_REQUEST['id']);
+				//$PDOdb->db->debug=true;
+				$ressourceType->load($PDOdb, $_REQUEST['id']);
 				$mesg = '<div class="ok">Modifications effectuées</div>';
 				$mode = 'view';
-				$regle->load($ATMdb, $_REQUEST['idRegle']);
+				$regle->load($PDOdb, $_REQUEST['idRegle']);
 				$regle->set_values($_REQUEST);
 				$regle->duree = timeToInt($_REQUEST['dureeH'],$_REQUEST['dureeM'] );
 				$regle->dureeInt = timeToInt($_REQUEST['dureeHInt'],$_REQUEST['dureeMInt'] );
 				$regle->dureeExt = timeToInt($_REQUEST['dureeHExt'],$_REQUEST['dureeMExt'] );
 								
-				$regle->save($ATMdb);
-				$ressourceType->load($ATMdb, $_REQUEST['id']);
-				_fiche($ATMdb,  $regle, $ressourceType,$mode);
+				$regle->save($PDOdb);
+				$ressourceType->load($PDOdb, $_REQUEST['id']);
+				_fiche($PDOdb,  $regle, $ressourceType,$mode);
 				break;
 			
 			case 'view':
-				$ressourceType->load($ATMdb, $_REQUEST['id']);
-				$regle->load($ATMdb, $_REQUEST['idRegle']);
-				_fiche($ATMdb,  $regle, $ressourceType,'view');
+				$ressourceType->load($PDOdb, $_REQUEST['id']);
+				$regle->load($PDOdb, $_REQUEST['idRegle']);
+				_fiche($PDOdb,  $regle, $ressourceType,'view');
 				break;
 		
 			case 'delete':
-				$regle->load($ATMdb, $_REQUEST['idRegle']);
-				$regle->delete($ATMdb);
-				//$ATMdb->db->debug=true;
+				$regle->load($PDOdb, $_REQUEST['idRegle']);
+				$regle->delete($PDOdb);
+				//$PDOdb->db->debug=true;
 				
 				/*
 				?>
@@ -63,36 +63,36 @@
 					document.location.href="?delete_ok=1";					
 				</script>
 				<?*/
-				$ressourceType->load($ATMdb, $_REQUEST['id']);
+				$ressourceType->load($PDOdb, $_REQUEST['id']);
 				$mesg = '<div class="ok">Le type de ressource est utilisé par une ressource. Il ne peut pas être supprimé.</div>';
-				_liste($ATMdb, $ressourceType, $regle);
+				_liste($PDOdb, $ressourceType, $regle);
 			
 				break;
 		}
 	}
 	elseif(isset($_REQUEST['id']) && isset($_REQUEST['idRegle'])) {
-		$ressourceType->load($ATMdb, $_REQUEST['id']);
-		$regle->load($ATMdb, $_REQUEST['idRegle']);
-		_fiche($ATMdb,  $regle, $ressourceType,'view');
+		$ressourceType->load($PDOdb, $_REQUEST['id']);
+		$regle->load($PDOdb, $_REQUEST['idRegle']);
+		_fiche($PDOdb,  $regle, $ressourceType,'view');
 	}
 	
 	elseif(isset($_REQUEST['id'])) {
-		$ressourceType->load($ATMdb, $_REQUEST['id']);
-		_liste($ATMdb, $ressourceType, $regle);
+		$ressourceType->load($PDOdb, $_REQUEST['id']);
+		_liste($PDOdb, $ressourceType, $regle);
 		
 	}
 	else {
 		/*
 		 * Liste
 		 */
-		 _liste($ATMdb, $ressourceType, $regle);
+		 _liste($PDOdb, $ressourceType, $regle);
 	}
 	
 	
-	$ATMdb->close();
+	$PDOdb->close();
 	
 	
-function _liste(&$ATMdb, &$ressourceType, &$regle) {
+function _liste(&$PDOdb, &$ressourceType, &$regle) {
 	global $langs,$conf, $db, $user;	
 	
 	llxHeader('','Règles sur les Ressources');
@@ -122,7 +122,7 @@ function _liste(&$ATMdb, &$ressourceType, &$regle) {
 	$form=new TFormCore($_SERVER['PHP_SELF'].'?id='.$ressourceType->getId(),'formtranslateList','GET');
 	echo $form->hidden('id',$ressourceType->getId());
 	
-	$r->liste($ATMdb, $sql, array(
+	$r->liste($PDOdb, $sql, array(
 		'limit'=>array(
 			'page'=>$page
 			,'nbLine'=>'30'
@@ -206,7 +206,7 @@ function TousOuPas($choix, $val){
 	return htmlentities($val, ENT_COMPAT , "ISO8859-1");
 }
 
-function _fiche(&$ATMdb, &$regle, &$ressourceType, $mode) {
+function _fiche(&$PDOdb, &$regle, &$ressourceType, $mode) {
 	global $user;
 	llxHeader('','Règle sur les Ressources', '', '', 0, 0);
 	
@@ -221,7 +221,7 @@ function _fiche(&$ATMdb, &$regle, &$ressourceType, $mode) {
 	
 	$TBool = array('faux'=>'Non', 'vrai'=>'Oui');
 	$TBS=new TTemplateTBS();
-	$regle->load_liste($ATMdb);
+	$regle->load_liste($PDOdb);
 	
 	if ($mode == 'new'){
 		$regle->choixApplication = 'all';

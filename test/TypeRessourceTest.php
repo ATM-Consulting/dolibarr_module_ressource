@@ -35,7 +35,7 @@ require('../class/ressource.class.php');*/
 
 $type = new TRH_Ressource_type;
 $field = new TRH_Ressource_field;
-$ATMdb = new TPDOdb;
+$PDOdb = new TPDOdb;
 
 
 /**
@@ -57,7 +57,7 @@ class TypeRessourceTest extends PHPUnit_Framework_TestCase
  
     public static function tearDownAfterClass()
     {
-    	global $ATMdb;
+    	global $PDOdb;
 		print "\nFin du test de Type de Ressource.\n";
     }
 	
@@ -70,78 +70,78 @@ class TypeRessourceTest extends PHPUnit_Framework_TestCase
     }
 	
 	public function testload_by_code(){
-		global $type, $ATMdb;
-		$ret = $type->load_by_code($ATMdb, 'voiture');
+		global $type, $PDOdb;
+		$ret = $type->load_by_code($PDOdb, 'voiture');
 		$this->assertTrue($ret);
-		$ret = $type->load_by_code($ATMdb, 'nimportequoi');
+		$ret = $type->load_by_code($PDOdb, 'nimportequoi');
 		$this->assertFalse($ret);
 		print __METHOD__."\n";
 	}
 	
 	public function testchargement(){
-		global $type, $field,  $ATMdb;
+		global $type, $field,  $PDOdb;
 		$type = new TRH_Ressource_type;
 		//test de chargement et save
-		$type->chargement($ATMdb, 'testlibelle', 'testcode', 1);
+		$type->chargement($PDOdb, 'testlibelle', 'testcode', 1);
 		$this->assertEquals('testlibelle', $type->libelle);
 		$this->assertEquals('testcode', $type->code);
 		$this->assertEquals(1, $type->supprimable);
 		
 		//test de suppression d'un supprimable
-		$ret = $type->delete($ATMdb);
+		$ret = $type->delete($PDOdb);
 		$this->assertTrue($ret);
 		
 		//test de suppression d'un non supprimable
-		$type->chargement($ATMdb, 'testlibelle', 'testcode', 0);
-		$field->chargement($ATMdb, 'a','a','chaine',0,100,'',1,$type->getId());
-		$type->save($ATMdb);
-		$type->load($ATMdb, $type->getId());
-		$ret = $type->delete($ATMdb);
+		$type->chargement($PDOdb, 'testlibelle', 'testcode', 0);
+		$field->chargement($PDOdb, 'a','a','chaine',0,100,'',1,$type->getId());
+		$type->save($PDOdb);
+		$type->load($PDOdb, $type->getId());
+		$ret = $type->delete($PDOdb);
 		$this->assertFalse($ret);
 		print __METHOD__."\n";
 	}
 	
 	public function testSaveType(){
-		global $type, $ATMdb;
+		global $type, $PDOdb;
 		$type->TField[]=new TRH_Ressource_field;
 		$type->libelle = 'un deux';
 		$type->code = '';
-		$type->save($ATMdb);
+		$type->save($PDOdb);
 		$this->assertEquals('undeux', $type->code);
-		$type->delete($ATMdb);
+		$type->delete($PDOdb);
 				
 	}
 	
 	public function testcode_format(){
-		global $type, $ATMdb;
+		global $type, $PDOdb;
 		$ret = TRH_Ressource_type::code_format('Habééé o lo');
 		$this->assertEquals('habolo', $ret);
 		print __METHOD__."\n";
 	}
 	
 	public function testisUsedByRessource(){
-		global $type, $ATMdb;
+		global $type, $PDOdb;
 		
 		//cas vrai : il y a des voitures
-		$type->load_by_code($ATMdb, 'voiture');
-		$ret = $type->isUsedByRessource($ATMdb);
+		$type->load_by_code($PDOdb, 'voiture');
+		$ret = $type->isUsedByRessource($PDOdb);
 		$this->assertTrue($ret);
 		//cas faux : il n'y a pas de badges area.
-		$type->load_by_code($ATMdb, 'badgearea');
-		$ret = $type->isUsedByRessource($ATMdb);
+		$type->load_by_code($PDOdb, 'badgearea');
+		$ret = $type->isUsedByRessource($PDOdb);
 		$this->assertFalse($ret);
 		print __METHOD__."\n";
 	}
 	
 	public function testload_field(){
-		global $type, $ATMdb;
+		global $type, $PDOdb;
 		
-		$type->load_by_code($ATMdb, 'voiture');
+		$type->load_by_code($PDOdb, 'voiture');
 		$sqlReq="SELECT COUNT(rowid) as 'nb' FROM ".MAIN_DB_PREFIX."rh_ressource_field WHERE fk_rh_ressource_type=".$type->getId();
-		$ATMdb->Execute($sqlReq);
-		if ($ATMdb->Get_line()) {$nb= intval($ATMdb->Get_field('nb'));}
+		$PDOdb->Execute($sqlReq);
+		if ($PDOdb->Get_line()) {$nb= intval($PDOdb->Get_field('nb'));}
 		
-		$ret = $type->load_field($ATMdb);
+		$ret = $type->load_field($PDOdb);
 		$this->assertCount( $nb, $type->TField);
 		
 		print __METHOD__."\n";
@@ -149,8 +149,8 @@ class TypeRessourceTest extends PHPUnit_Framework_TestCase
 	
 	
 	public function testField(){
-		global $type, $ATMdb;
-		$type->load_by_code($ATMdb, 'voiture');
+		global $type, $PDOdb;
+		$type->load_by_code($PDOdb, 'voiture');
 		$TNField = array("code"=>'testField'
 						,"ordre"=>100
 						,"libelle"=>'testField'
@@ -158,11 +158,11 @@ class TypeRessourceTest extends PHPUnit_Framework_TestCase
 						,"options"=>""
 						,"obligatoire"=>1);
 		//ajout
-		$idField = $type->addField($ATMdb, $TNField);
+		$idField = $type->addField($PDOdb, $TNField);
 		$this->assertNotEquals(0, $idField);
 		
 		//suppression
-		$ret = $type->delField($ATMdb, $idField);
+		$ret = $type->delField($PDOdb, $idField);
 		$this->assertTrue($ret);
 		print __METHOD__."\n";
 	}
@@ -187,20 +187,20 @@ class TypeRessourceTest extends PHPUnit_Framework_TestCase
 	 
 	public function testFieldload_by_code()
     {
-    	global $field, $ATMdb;
-		$ret = $field->load_by_code($ATMdb, 'kit');
+    	global $field, $PDOdb;
+		$ret = $field->load_by_code($PDOdb, 'kit');
 		$this->assertTrue($ret);
 		
-		$ret = $field->load_by_code($ATMdb, 'nimp');
+		$ret = $field->load_by_code($PDOdb, 'nimp');
 		$this->assertFalse($ret);
 		print __METHOD__."\n";
     }
 	
 	public function testFieldchargement(){
-		global $type, $ATMdb;
+		global $type, $PDOdb;
 		$field = new TRH_Ressource_field;
 		
-		$field->chargement($ATMdb,'libField', 'codeField', 'chaine' , 1, 100, '', 1, $type->rowid);
+		$field->chargement($PDOdb,'libField', 'codeField', 'chaine' , 1, 100, '', 1, $type->rowid);
 		$this->assertEquals('libField', $field->libelle);
 		$this->assertEquals('codefield', $field->code);
 		$this->assertEquals('chaine', $field->type);
@@ -211,12 +211,12 @@ class TypeRessourceTest extends PHPUnit_Framework_TestCase
 		$this->assertEquals($type->rowid, $field->fk_rh_ressource_type);
 		
 		//test de suppression d'un supprimable
-		$ret = $field->delete($ATMdb);
+		$ret = $field->delete($PDOdb);
 		$this->assertFalse($ret);
 		
 		//test de suppression d'un non supprimable
-		$field->load_by_code($ATMdb, 'kit');
-		$ret = $field->delete($ATMdb);
+		$field->load_by_code($PDOdb, 'kit');
+		$ret = $field->delete($PDOdb);
 		$this->assertFalse($ret);
 		print __METHOD__."\n";
 	}

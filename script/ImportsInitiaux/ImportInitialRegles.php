@@ -7,7 +7,7 @@ require('../../lib/ressource.lib.php');
 
 global $conf;
 
-$ATMdb=new TPDOdb;
+$PDOdb=new TPDOdb;
 // relever le point de départ
 $timestart=microtime(true);
 
@@ -15,16 +15,16 @@ $timestart=microtime(true);
 //on charge quelques listes pour avoir les clés externes.
 $TUser = array();
 $sql="SELECT rowid, lastname, firstname FROM ".MAIN_DB_PREFIX."user WHERE entity IN (0, ".$conf->entity.")";
-$ATMdb->Execute($sql);
-while($ATMdb->Get_line()) {
-	$TUser[strtolower($ATMdb->Get_field('lastname').' '.$ATMdb->Get_field('firstname'))] = $ATMdb->Get_field('rowid');
+$PDOdb->Execute($sql);
+while($PDOdb->Get_line()) {
+	$TUser[strtolower($PDOdb->Get_field('lastname').' '.$PDOdb->Get_field('firstname'))] = $PDOdb->Get_field('rowid');
 	}
 
 $idCarteSim = getIdType('cartesim');
 $idTel = getIdType('telephone');
 
 
-$TRessource = getIDRessource($ATMdb, $idCarteSim);
+$TRessource = getIDRessource($PDOdb, $idCarteSim);
 
 
 $nomFichier = "reglesAppels.csv";
@@ -67,7 +67,7 @@ if (($handle = fopen("../fichierImports/".$nomFichier, "r")) !== FALSE) {
 					$temp->fk_user = intval($TUser[strtolower($nom.' '.$prenom)]);
 					$temp->choixLimite = ($temp->duree==0) ? 'extint' :  'gen' ;		
 					
-					$temp->save($ATMdb);
+					$temp->save($PDOdb);
 					$cpt++;
 				}
 				else {echo 'Utilisateur inconnu : '.$nom.' '.$prenom.'<br>';}

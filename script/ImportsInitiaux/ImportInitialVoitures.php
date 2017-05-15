@@ -7,52 +7,52 @@ require('../../lib/ressource.lib.php');
 
 global $conf;
 
-$ATMdb=new TPDOdb;
+$PDOdb=new TPDOdb;
 // relever le point de départ
 $timestart=microtime(true);
 		
 //on charge quelques listes pour avoir les clés externes.
 $TTrigramme = array();
 $sql="SELECT rowid, login FROM ".MAIN_DB_PREFIX."user WHERE entity IN (0,".$conf->entity.")";
-$ATMdb->Execute($sql);
-while($ATMdb->Get_line()) {
-	$TTrigramme[strtolower($ATMdb->Get_field('login'))] = $ATMdb->Get_field('rowid');
+$PDOdb->Execute($sql);
+while($PDOdb->Get_line()) {
+	$TTrigramme[strtolower($PDOdb->Get_field('login'))] = $PDOdb->Get_field('rowid');
 	}
 
 
 //listes des entités
 $TEntity = array();
 $sql="SELECT rowid,label FROM ".MAIN_DB_PREFIX."entity WHERE 1";
-$ATMdb->Execute($sql);
-while($ATMdb->Get_line()) {
-	$TEntity[str_replace("'", "", strtolower(htmlentities($ATMdb->Get_field('label'), ENT_COMPAT , 'ISO8859-1')))] = $ATMdb->Get_field('rowid');
+$PDOdb->Execute($sql);
+while($PDOdb->Get_line()) {
+	$TEntity[str_replace("'", "", strtolower(htmlentities($PDOdb->Get_field('label'), ENT_COMPAT , 'ISO8859-1')))] = $PDOdb->Get_field('rowid');
 	}
 
 
 //loueurs
 $TFournisseur = array();
 $sql="SELECT rowid, nom FROM ".MAIN_DB_PREFIX."societe";
-$ATMdb->Execute($sql);
-while($ATMdb->Get_line()) {
-	$TFournisseur[str_replace("'", "",strtolower($ATMdb->Get_field('nom')))] = $ATMdb->Get_field('rowid');
+$PDOdb->Execute($sql);
+while($PDOdb->Get_line()) {
+	$TFournisseur[str_replace("'", "",strtolower($PDOdb->Get_field('nom')))] = $PDOdb->Get_field('rowid');
 	}
 
 
 // société proprietaires
 $TGroups = array();
 $sql="SELECT rowid, nom FROM ".MAIN_DB_PREFIX."usergroup WHERE entity IN (0,".$conf->entity.")";
-$ATMdb->Execute($sql);
-while($ATMdb->Get_line()) {
-	$nom = str_replace("'", "",strtolower($ATMdb->Get_field('nom')));
-	$TGroups[$nom] = $ATMdb->Get_field('rowid');
+$PDOdb->Execute($sql);
+while($PDOdb->Get_line()) {
+	$nom = str_replace("'", "",strtolower($PDOdb->Get_field('nom')));
+	$TGroups[$nom] = $PDOdb->Get_field('rowid');
 	}
 
 
 $TTVA = array();
 $sqlReq="SELECT rowid, taux FROM ".MAIN_DB_PREFIX."c_tva WHERE fk_pays=".$conf->global->MAIN_INFO_SOCIETE_COUNTRY[0];
-$ATMdb->Execute($sqlReq);
-while($ATMdb->Get_line()) {
-	$TTVA[$ATMdb->Get_field('taux')] = $ATMdb->Get_field('rowid');
+$PDOdb->Execute($sqlReq);
+while($PDOdb->Get_line()) {
+	$TTVA[$PDOdb->Get_field('taux')] = $PDOdb->Get_field('rowid');
 	}
 
 
@@ -61,9 +61,9 @@ $idVoiture = getIdType('voiture');
 
 echo 'Import initial des voitures.<br><br>';
 
-$TIdContrat = chargeContrat($ATMdb, $idVoiture); //numContrat=>rowid
+$TIdContrat = chargeContrat($PDOdb, $idVoiture); //numContrat=>rowid
 $TContrat = array(); //ici les contrats
-$TIdRessource = getIDRessource($ATMdb, $idVoiture); //là dedans, on charge les numId=>ID
+$TIdRessource = getIDRessource($PDOdb, $idVoiture); //là dedans, on charge les numId=>ID
 $TRessource = array(); //ici on chargera les ressources
 
 
@@ -95,13 +95,13 @@ if (($handle = fopen("./".$nomFichier, "r")) !== FALSE) {
 			else if (!empty($TIdRessource[$plaque])){
 				echo $plaque.' existe déjà<br>';
 				$TRessource[$plaque] = new TRH_Ressource;
-				$TRessource[$plaque]->load($ATMdb, $TIdRessource[$plaque]);
+				$TRessource[$plaque]->load($PDOdb, $TIdRessource[$plaque]);
 			}
 			else {
 				//clés externes
 				$TRessource[$plaque] = new TRH_Ressource;
 				$TRessource[$plaque]->fk_rh_ressource_type = $idVoiture;
-				$TRessource[$plaque]->load_ressource_type($ATMdb);
+				$TRessource[$plaque]->load_ressource_type($PDOdb);
 				$TRessource[$plaque]->numId = $plaque;
 				$TRessource[$plaque]->set_date('date_achat', $infos[5]);
 				$TRessource[$plaque]->set_date('date_vente', $infos[14]);
@@ -119,7 +119,7 @@ if (($handle = fopen("./".$nomFichier, "r")) !== FALSE) {
 				$TRessource[$plaque]->cle = true;
 				$TRessource[$plaque]->kit = true; 
 				$cpt ++;
-				$TRessource[$plaque]->save($ATMdb);
+				$TRessource[$plaque]->save($PDOdb);
 				$TIdRessource[$plaque]=$TRessource[$plaque]->getId(); 
 				//echo $plaque.' ajoutee.<BR>';
 				
@@ -132,7 +132,7 @@ if (($handle = fopen("./".$nomFichier, "r")) !== FALSE) {
 					$emprunt->fk_rh_ressource_type = $idVoiture;
 					$emprunt->set_date('date_debut', $infos[5]);
 					$emprunt->set_date('date_fin', $infos[14]);
-					$emprunt->save($ATMdb);
+					$emprunt->save($PDOdb);
 				}
 				else {
 					echo 'Trigramme inexistant : '.$infos[15].' : '.$infos[16].'<br>';
@@ -154,18 +154,18 @@ if (($handle = fopen("./".$nomFichier, "r")) !== FALSE) {
 				if (empty($TFournisseur['parcours'])){echo $plaque.' : pas de fournisseur du nom de \'Parcours\' dans la BD<br>';}
 				else {$TContrat[$numContrat]->fk_tier_fournisseur = $TFournisseur['parcours'];}
 				$cptContrat++;
-				$TContrat[$numContrat]->save($ATMdb);
+				$TContrat[$numContrat]->save($PDOdb);
 				$TIdContrat[$numContrat] = $TContrat[$numContrat]->getId();
 				//association contrat-ressource
 				$assoc = new TRH_Contrat_Ressource;
 				$assoc->fk_rh_ressource = $TRessource[$plaque]->getId();
 				$assoc->fk_rh_contrat = $TContrat[$numContrat]->getId();
 				$assoc->commentaire = 'Créé à l\'import initial';
-				$assoc->save($ATMdb);
+				$assoc->save($PDOdb);
 			}
 			else {
 				$TContrat[$numContrat] = new TRH_Contrat;
-				$TContrat[$numContrat]->load($ATMdb, $TIdContrat[$numContrat]);
+				$TContrat[$numContrat]->load($PDOdb, $TIdContrat[$numContrat]);
 			}
 		}
 		$numLigne++;
@@ -208,7 +208,7 @@ foreach ($TFichier as $nomEntity=>$nomFichier) {
 					$TRessource[$plaque]->bailvoit = 'Location';
 					$TRessource[$plaque]->typevehicule = $infos[9];
 					$cpt ++;
-					$TRessource[$plaque]->save($ATMdb);
+					$TRessource[$plaque]->save($PDOdb);
 					//echo $plaque.' : completee.<br>';
 				}
 				
@@ -263,13 +263,13 @@ if (($handle = fopen("./".$nomFichier, "r")) !== FALSE) {
 			else if (!empty($TIdRessource[$plaque])){
 				echo $plaque.' existe déjà<br>';
 				$TRessource[$plaque] = new TRH_Ressource;
-				$TRessource[$plaque]->load($ATMdb, $TIdRessource[$plaque]);
+				$TRessource[$plaque]->load($PDOdb, $TIdRessource[$plaque]);
 			}
 			else {
 				//clés externes
 				$TRessource[$plaque] = new TRH_Ressource;
 				$TRessource[$plaque]->fk_rh_ressource_type = $idVoiture;
-				$TRessource[$plaque]->load_ressource_type($ATMdb);
+				$TRessource[$plaque]->load_ressource_type($PDOdb);
 				$TRessource[$plaque]->libelle = $infos[6].' '.$infos[7];
 				$TRessource[$plaque]->numId = $plaque;
 				$TRessource[$plaque]->immatriculation = (string)$plaque;
@@ -316,7 +316,7 @@ if (($handle = fopen("./".$nomFichier, "r")) !== FALSE) {
 				$TRessource[$plaque]->cle = true;
 				$TRessource[$plaque]->kit = true; 
 				$cpt ++;
-				$TRessource[$plaque]->save($ATMdb);
+				$TRessource[$plaque]->save($PDOdb);
 				$TIdRessource[$plaque]=$TRessource[$plaque]->getId(); 
 				//echo $plaque.' ajoutee.<BR>';
 				
@@ -334,7 +334,7 @@ if (($handle = fopen("./".$nomFichier, "r")) !== FALSE) {
 						$emprunt->set_date('date_debut', '01/01/2013');
 						$emprunt->set_date('date_fin', '31/12/2013');
 					}
-					$emprunt->save($ATMdb);
+					$emprunt->save($PDOdb);
 				}
 				else {
 					if (!empty($infos[2])){
@@ -363,7 +363,7 @@ if (($handle = fopen("./".$nomFichier, "r")) !== FALSE) {
 					else {$TContrat[$numContrat]->fk_tier_fournisseur = $TFournisseur[strtolower($infos[11])];}
 					
 					$cptContrat++;
-					$TContrat[$numContrat]->save($ATMdb);
+					$TContrat[$numContrat]->save($PDOdb);
 					$TIdContrat[$numContrat] = $TContrat[$numContrat]->getId();
 					
 					//association contrat-ressource
@@ -371,7 +371,7 @@ if (($handle = fopen("./".$nomFichier, "r")) !== FALSE) {
 					$assoc->fk_rh_ressource = $TRessource[$plaque]->getId();
 					$assoc->fk_rh_contrat = $TContrat[$numContrat]->getId();
 					$assoc->commentaire = 'Créé à l\'import initial';
-					$assoc->save($ATMdb);
+					$assoc->save($PDOdb);
 				}
 			}
 		}
@@ -386,12 +386,12 @@ fclose($handle);
 
 //sauvegarde finale
 foreach ($TRessource as $value) {
-	$value->save($ATMdb);
+	$value->save($PDOdb);
 }
 foreach ($TContrat as $key => $value) {
-	$value->save($ATMdb);
+	$value->save($PDOdb);
 }
-$ATMdb->close();
+$PDOdb->close();
 
 //Fin du code PHP : Afficher le temps d'éxecution
 $timeend=microtime(true);
@@ -405,15 +405,15 @@ echo 'Fin du traitement. Duree : '.$page_load_time . " sec";
 /**
  * Renvoie les contrats liés à une voiture
  */
-function chargeContrat(&$ATMdb, $idVoiture){
+function chargeContrat(&$PDOdb, $idVoiture){
 	global $conf;
 	$sql="SELECT rowid, numContrat FROM ".MAIN_DB_PREFIX."rh_contrat
 	WHERE fk_rh_ressource_type=".$idVoiture;
 	$TListe = array();
-	$ATMdb->Execute($sql);
-	while($ATMdb->Get_line()) {
-		$TListe[$ATMdb->Get_field('numContrat')] = $ATMdb->Get_field('rowid');//new TRH_Contrat;
-		//$TListe[$ATMdb->Get_field('numContrat')]->load($ATMdb, $ATMdb->Get_field('rowid'));
+	$PDOdb->Execute($sql);
+	while($PDOdb->Get_line()) {
+		$TListe[$PDOdb->Get_field('numContrat')] = $PDOdb->Get_field('rowid');//new TRH_Contrat;
+		//$TListe[$PDOdb->Get_field('numContrat')]->load($PDOdb, $PDOdb->Get_field('rowid'));
 		
 	}
 	return $TListe;

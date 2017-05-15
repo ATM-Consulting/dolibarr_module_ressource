@@ -12,18 +12,18 @@
 	$langs->load('main');
 	$langs->load('other');
 	
-	$ATMdb=new TPDOdb;
+	$PDOdb=new TPDOdb;
 	$contrat=new TRH_contrat;
 	
 	if(isset($_REQUEST['id'])) {
-		$contrat->load($ATMdb, $_REQUEST['id']);
-		_fiche($ATMdb, $contrat);
+		$contrat->load($PDOdb, $_REQUEST['id']);
+		_fiche($PDOdb, $contrat);
 	}
 	
-	$ATMdb->close();
+	$PDOdb->close();
 	llxFooter();
 	
-	function _fiche(&$ATMdb, &$contrat) {
+	function _fiche(&$PDOdb, &$contrat) {
 		global $db,$user,$conf,$langs;
 		llxHeader('','Fichiers joints');
 		$dir_base = DOL_DATA_ROOT.'/ressource/';

@@ -14,22 +14,22 @@ require('../lib/ressource.lib.php');//*/
 
 global $conf;
 
-$ATMdb=new TPDOdb;
-$ATMdbEvent=new TPDOdb;
+$PDOdb=new TPDOdb;
+$PDOdbEvent=new TPDOdb;
 
 // relever le point de départ
 $timestart=microtime(true);
 
 $TUser = array();
 $sql="SELECT rowid, lastname, firstname FROM ".MAIN_DB_PREFIX."user WHERE entity=".$conf->entity;
-$ATMdb->Execute($sql);
-while($ATMdb->Get_line()) {
-	$TUser[strtolower($ATMdb->Get_field('firstname').' '.$ATMdb->Get_field('lastname'))] = $ATMdb->Get_field('rowid');
+$PDOdb->Execute($sql);
+while($PDOdb->Get_line()) {
+	$TUser[strtolower($PDOdb->Get_field('firstname').' '.$PDOdb->Get_field('lastname'))] = $PDOdb->Get_field('rowid');
 }
 $idVoiture = getIdType('voiture');
-$idEuromaster = getIdSociete($ATMdb, 'euromaster');
+$idEuromaster = getIdSociete($PDOdb, 'euromaster');
 if (!$idEuromaster){echo 'Pas de fournisseur (tiers) du nom de Euromaster !';exit();}
-$TRessource = chargeVoiture($ATMdb);
+$TRessource = chargeVoiture($PDOdb);
 $TNonAttribuee = array();
 $TNoPlaque = array();
 if (empty($nomFichier)){$nomFichier = "./fichierImports/B60465281_Masterplan-CPRO_M_20130430.csv";}
@@ -39,14 +39,14 @@ $message = 'Traitement du fichier '.$nomFichier.' : <br><br>';
 //pour avoir un joli nom, on prend la chaine après le dernier caractère /  et on remplace les espaces par des underscores
 $idImport = Tools::url_format(basename($nomFichier), false, true);
 
-$ATMdb->Execute("DELETE FROM ".MAIN_DB_PREFIX."rh_evenement WHERE idImport='$idImport'");
+$PDOdb->Execute("DELETE FROM ".MAIN_DB_PREFIX."rh_evenement WHERE idImport='$idImport'");
 
 
-$idRessFactice = createRessourceFactice($ATMdb, $idVoiture, $idImport, $entity, $idEuromaster);
-$idSuperAdmin = getIdSuperAdmin($ATMdb);
+$idRessFactice = createRessourceFactice($PDOdb, $idVoiture, $idImport, $entity, $idEuromaster);
+$idSuperAdmin = getIdSuperAdmin($PDOdb);
 
 $ressource_source = new TRH_Evenement;
-$ressource_source->load_liste($ATMdb);
+$ressource_source->load_liste($PDOdb);
 
 //début du parsing
 $numLigne = 0;
@@ -83,7 +83,7 @@ if (($handle = fopen($nomFichier, "r")) !== FALSE) {
 			
 			$style = '';
 			if (!empty($plaque) && !empty($TRessource[$plaque])){
-				$idUser = ressourceIsEmpruntee($ATMdb, $TRessource[$plaque], $date);
+				$idUser = ressourceIsEmpruntee($PDOdb, $TRessource[$plaque], $date);
 				if ($idUser==0){ //si il trouve, on l'affecte à l'utilisateur 
 					$idUser = $idSuperAdmin;
 					$cptNoAttribution++;
@@ -95,7 +95,7 @@ if (($handle = fopen($nomFichier, "r")) !== FALSE) {
 				$id_ressource = $TRessource[$plaque];
 				
 				$ressource = new TRH_Ressource();
-                $ressource->load($ATMdb, $TRessource[$plaque]);
+                $ressource->load($PDOdb, $TRessource[$plaque]);
                 $typeVehicule = $ressource->typevehicule;
 				
 			}	
@@ -153,7 +153,7 @@ if (($handle = fopen($nomFichier, "r")) !== FALSE) {
 			$temp->date_facture = dateToInt($infos[25]);
 			
 			
-			$temp->save($ATMdbEvent);
+			$temp->save($PDOdbEvent);
 		
 			?><td><?=$infos[27] ?></td><td><?=$ressource_source->TTVA[$temp->TVA] ?></td><td><?=$info ?></td></tr><?
 		
@@ -196,15 +196,15 @@ function getTVAId(&$TTVA, $tva) {
 	
 }
 
-function chargeAssocies(&$ATMdb){
+function chargeAssocies(&$PDOdb){
 	global $conf;
 	$sqlReq="SELECT rowid, fk_rh_ressource 
 	FROM ".MAIN_DB_PREFIX."rh_ressource 
 	WHERE entity=".$conf->entity;
 	$TAssoc = array();
-	$ATMdb->Execute($sqlReq);
-	while($ATMdb->Get_line()) {
-		$TAssoc[$ATMdb->Get_field('rowid')] = $ATMdb->Get_field('fk_rh_ressource');
+	$PDOdb->Execute($sqlReq);
+	while($PDOdb->Get_line()) {
+		$TAssoc[$PDOdb->Get_field('rowid')] = $PDOdb->Get_field('fk_rh_ressource');
 	}
 	return $TAssoc;
 	
@@ -222,7 +222,7 @@ function getUser(&$listeEmprunts , $id, $jour){
 	return 0;
 }
 
-function chargeEmprunts(&$ATMdb){
+function chargeEmprunts(&$PDOdb){
 	global $conf;
 	$sqlReq="SELECT DISTINCT e.date_debut, e.date_fin , e.fk_user, e.fk_rh_ressource, u.firstname, u.lastname 
 	FROM ".MAIN_DB_PREFIX."rh_evenement as e  
@@ -231,28 +231,28 @@ function chargeEmprunts(&$ATMdb){
 	AND e.entity=".$conf->entity."
 	ORDER BY date_debut";
 	$TUsers = array();
-	$ATMdb->Execute($sqlReq);
-	while($ATMdb->Get_line()) {
-		$TUsers[$ATMdb->Get_field('fk_rh_ressource')][] = array(
-			'debut'=>$ATMdb->Get_field('date_debut')
-			,'fin'=>$ATMdb->Get_field('date_fin')
-			,'fk_user'=>$ATMdb->Get_field('fk_user')
-			,'user'=>$ATMdb->Get_field('firstname').' '.$ATMdb->Get_field('lastname')
+	$PDOdb->Execute($sqlReq);
+	while($PDOdb->Get_line()) {
+		$TUsers[$PDOdb->Get_field('fk_rh_ressource')][] = array(
+			'debut'=>$PDOdb->Get_field('date_debut')
+			,'fin'=>$PDOdb->Get_field('date_fin')
+			,'fk_user'=>$PDOdb->Get_field('fk_user')
+			,'user'=>$PDOdb->Get_field('firstname').' '.$PDOdb->Get_field('lastname')
 		);
 	}
 	return $TUsers;
 }
 
-function chargeVoiture(&$ATMdb){
+function chargeVoiture(&$PDOdb){
 	global $conf;
 	$TRessource = array();
 	$sql="SELECT r.rowid as 'ID', t.rowid as 'IdType', r.numId FROM ".MAIN_DB_PREFIX."rh_ressource as r 
 	LEFT JOIN ".MAIN_DB_PREFIX."rh_ressource_type as t on (r.fk_rh_ressource_type = t.rowid)
 	WHERE 1 AND (t.code='voiture' OR t.code='cartearea') "; // r.entity=".$conf->entity."
 
-	$ATMdb->Execute($sql);
-	while($ATMdb->Get_line()) {
-		$TRessource[$ATMdb->Get_field('numId')] = $ATMdb->Get_field('ID');
+	$PDOdb->Execute($sql);
+	while($PDOdb->Get_line()) {
+		$TRessource[$PDOdb->Get_field('numId')] = $PDOdb->Get_field('ID');
 		}
 	return $TRessource;
 }

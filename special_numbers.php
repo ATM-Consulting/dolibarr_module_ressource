@@ -44,7 +44,7 @@ dol_include_once('/ressource/class/numeros_speciaux.class.php');
 // Translations
 $langs->load("ressource@ressource");
 
-$ATMdb = new TPDOdb;
+$PDOdb = new TPDOdb;
 
 // Access control
 if(!$user->rights->ressource->ressource->accessSpecialNumbers)
@@ -69,7 +69,7 @@ switch ($action) {
 		
 		$TNumerosSpeciaux = $_REQUEST['TNumerosSpeciaux'];
 		
-		if(_saveNumerosSpeciaux($ATMdb, $TNumerosSpeciaux)) {
+		if(_saveNumerosSpeciaux($PDOdb, $TNumerosSpeciaux)) {
 			
 			setEventMessage($langs->trans('NumerosSpeciauxSaved'));
 			
@@ -99,7 +99,7 @@ print_fiche_titre($langs->trans($page_name), $linkback);
 // Setup page goes here
 //echo $langs->trans("FraisDePortSetup");
 
-function _saveNumerosSpeciaux(&$ATMdb, $TNumerosSpeciaux) {
+function _saveNumerosSpeciaux(&$PDOdb, $TNumerosSpeciaux) {
 		
 	global $db;
 	
@@ -110,7 +110,7 @@ function _saveNumerosSpeciaux(&$ATMdb, $TNumerosSpeciaux) {
 		if(!empty($num) && !TRH_Numero_special::existeNumber($db, $num)){
 			$number = new TRH_Numero_special;
 			$number->numero = $num;
-			$number->save($ATMdb);
+			$number->save($PDOdb);
 		}
 	}
 	

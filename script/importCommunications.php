@@ -5,22 +5,22 @@ require('../class/ressource.class.php');
 require('../lib/ressource.lib.php');
 global $conf;
 
-$ATMdb=new TPDOdb;
+$PDOdb=new TPDOdb;
 
 		
 //on charge quelques listes pour avoir les clés externes.
 $TNumero = array();
 $sql="SELECT rowid, numero FROM ".MAIN_DB_PREFIX."rh_ressource WHERE entity=".$conf->entity;
-$ATMdb->Execute($sql);
-while($ATMdb->Get_line()) {
-	$TNumero[$ATMdb->Get_field('numero')] = $ATMdb->Get_field('rowid');
+$PDOdb->Execute($sql);
+while($PDOdb->Get_line()) {
+	$TNumero[$PDOdb->Get_field('numero')] = $PDOdb->Get_field('rowid');
 	}
 
 $TUser = array();
 $sql="SELECT rowid, lastname, firstname FROM ".MAIN_DB_PREFIX."user WHERE entity=".$conf->entity;
-$ATMdb->Execute($sql);
-while($ATMdb->Get_line()) {
-	$TUser[strtolower($ATMdb->Get_field('lastname'))] = $ATMdb->Get_field('rowid');
+$PDOdb->Execute($sql);
+while($PDOdb->Get_line()) {
+	$TUser[strtolower($PDOdb->Get_field('lastname'))] = $PDOdb->Get_field('rowid');
 }
 
 
@@ -48,14 +48,14 @@ if (($handle = fopen($nomFichier, "r")) !== FALSE) {
 			//clés externes
 			$temp->fk_rh_ressource_type = (int)$idCarteSim;
 			
-			$temp->load_ressource_type($ATMdb);
+			$temp->load_ressource_type($PDOdb);
 			
 			//infos sur la carte SIM
 			$temp->coutminuteinterne = '0.09';
 			$temp->coutminuteexterne = '0.09';
 			$temp->numerotel = $infos[1];
 
-			$temp->save($ATMdb);
+			$temp->save($PDOdb);
 			$cpt++;
 				
 		}

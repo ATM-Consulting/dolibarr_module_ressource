@@ -6,7 +6,7 @@
 	$langs->load('ressource@ressource');
 	
 	//if (!$user->rights->financement->affaire->read)	{ accessforbidden(); }
-	$ATMdb=new TPDOdb;
+	$PDOdb=new TPDOdb;
 	$ressource=new TRH_ressource_type;
 	
 	$mesg = '';
@@ -16,21 +16,21 @@
 		switch($_REQUEST['action']) {
 			case 'add':
 			case 'new':
-				//$ATMdb->db->debug=true;
+				//$PDOdb->db->debug=true;
 				$ressource->set_values($_REQUEST);
-				//$ressource->save($ATMdb);
-				_fiche($ATMdb, $ressource,'edit');
+				//$ressource->save($PDOdb);
+				_fiche($PDOdb, $ressource,'edit');
 				
 				break;	
 			case 'edit'	:
-				//$ATMdb->db->debug=true;
-				$ressource->load($ATMdb, $_REQUEST['id']);
-				_fiche($ATMdb, $ressource,'edit');
+				//$PDOdb->db->debug=true;
+				$ressource->load($PDOdb, $_REQUEST['id']);
+				_fiche($PDOdb, $ressource,'edit');
 				break;
 				
 			case 'save':
-				//$ATMdb->db->debug=true;
-				$ressource->load($ATMdb, $_REQUEST['id']);
+				//$PDOdb->db->debug=true;
+				$ressource->load($PDOdb, $_REQUEST['id']);
 				$ressource->set_values($_REQUEST);
 				$mesg = '<div class="ok">Modifications effectuées</div>';
 				$mode = 'view';
@@ -43,7 +43,7 @@
 				}
 				
 				if ($_REQUEST['TNField']['libelle']!=''){
-					$ressource->addField($ATMdb, $_REQUEST['TNField']);
+					$ressource->addField($PDOdb, $_REQUEST['TNField']);
 					$mesg = '<div class="ok">Le champs a bien été créé</div>';
 				}
 				if(isset($_REQUEST['newField'])) {
@@ -51,51 +51,51 @@
 				}
 
 				
-				$ressource->save($ATMdb);
-				$ressource->load($ATMdb, $_REQUEST['id']);
-				_fiche($ATMdb, $ressource,$mode);
+				$ressource->save($PDOdb);
+				$ressource->load($PDOdb, $_REQUEST['id']);
+				_fiche($PDOdb, $ressource,$mode);
 				break;
 			
 			case 'view':
-				$ressource->load($ATMdb, $_REQUEST['id']);
-				_fiche($ATMdb, $ressource,'view');
+				$ressource->load($PDOdb, $_REQUEST['id']);
+				_fiche($PDOdb, $ressource,'view');
 				break;
 		
 			case 'deleteField':
-				//$ATMdb->db->debug=true;
-				if ($ressource->delField($ATMdb, $_REQUEST['idField'])){
+				//$PDOdb->db->debug=true;
+				if ($ressource->delField($PDOdb, $_REQUEST['idField'])){
 					$mesg = '<div class="ok">Le champ a bien été supprimé</div>';
 				}
 				else {
 					$mesg = '<div class="error">Ce champ ne peut pas être supprimé</div>';
 				}
-				$ressource->load($ATMdb, $_REQUEST['id']);
+				$ressource->load($PDOdb, $_REQUEST['id']);
 				
 				
 				$mode = 'edit';
-				_fiche($ATMdb, $ressource,$mode);
+				_fiche($PDOdb, $ressource,$mode);
 				break;
 				
 		}
 	}
 	elseif(isset($_REQUEST['id'])) {
-		$ressource->load($ATMdb, $_REQUEST['id']);
+		$ressource->load($PDOdb, $_REQUEST['id']);
 		
-		_fiche($ATMdb, $ressource, 'view');
+		_fiche($PDOdb, $ressource, 'view');
 		
 	}
 	else {
 		/*
 		 * Liste
 		 */
-		 _liste($ATMdb, $ressource);
+		 _liste($PDOdb, $ressource);
 	}
 	
 	
-	$ATMdb->close();
+	$PDOdb->close();
 	
 	
-function _liste(&$ATMdb, &$ressource) {
+function _liste(&$PDOdb, &$ressource) {
 	global $langs,$conf, $db;	
 	
 	llxHeader('','Type Ressource');
@@ -112,7 +112,7 @@ function _liste(&$ATMdb, &$ressource) {
 				
 	$page = isset($_REQUEST['page']) ? $_REQUEST['page'] : 1;			
 	//print $page;
-	$r->liste($ATMdb, $sql, array(
+	$r->liste($PDOdb, $sql, array(
 		'limit'=>array(
 			'page'=>$page
 			,'nbLine'=>'30'
@@ -142,7 +142,7 @@ function _liste(&$ATMdb, &$ressource) {
 	llxFooter();
 }	
 	
-function _fiche(&$ATMdb, &$ressource, $mode) {
+function _fiche(&$PDOdb, &$ressource, $mode) {
 	global $db,$user;
 
 

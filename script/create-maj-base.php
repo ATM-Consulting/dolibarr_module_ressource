@@ -12,38 +12,38 @@
 	require('../class/regle.class.php');
 	require('../class/numeros_speciaux.class.php');
 
-	$ATMdb=new TPDOdb;
-	$ATMdb->db->debug=true;
+	$PDOdb=new TPDOdb;
+	$PDOdb->db->debug=true;
 
 	$o=new TRH_Ressource_type;
-	$o->init_db_by_vars($ATMdb);
+	$o->init_db_by_vars($PDOdb);
 	
 	$p=new TRH_Ressource_field;
-	$p->init_db_by_vars($ATMdb);
+	$p->init_db_by_vars($PDOdb);
 	
 	$p=new TRH_Ressource;
-	$p->init_db_by_vars($ATMdb);
+	$p->init_db_by_vars($PDOdb);
 	
 	$p=new TRH_Numero_special;
-	$p->init_db_by_vars($ATMdb);
+	$p->init_db_by_vars($PDOdb);
 	
 	$p=new TRH_Contrat;
-	$p->init_db_by_vars($ATMdb);
+	$p->init_db_by_vars($PDOdb);
 	
 	$p=new TRH_Contrat_Ressource;
-	$p->init_db_by_vars($ATMdb);
+	$p->init_db_by_vars($PDOdb);
 	
 	$p=new TRH_Evenement;
-	$p->init_db_by_vars($ATMdb);
+	$p->init_db_by_vars($PDOdb);
 	//ALTER table customer modify Addr char(30)
 	$sqlReq="ALTER TABLE ".MAIN_DB_PREFIX."rh_evenement MODIFY appels LONGTEXT";
-	$ATMdb->Execute($sqlReq);
+	$PDOdb->Execute($sqlReq);
 	
 	$p=new TRH_Type_Evenement;
-	$p->init_db_by_vars($ATMdb);
+	$p->init_db_by_vars($PDOdb);
 	
 	$p=new TRH_Evenement_appel;
-	$p->init_db_by_vars($ATMdb);
+	$p->init_db_by_vars($PDOdb);
 	
 	$p=new TRH_Ressource_Regle;
-	$p->init_db_by_vars($ATMdb);
+	$p->init_db_by_vars($PDOdb);

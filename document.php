@@ -13,18 +13,18 @@
 	$langs->load('main');
 	$langs->load('other');
 	
-	$ATMdb=new TPDOdb;
+	$PDOdb=new TPDOdb;
 	$ressource=new TRH_ressource;
 	
 	if(isset($_REQUEST['id'])) {
-		$ressource->load($ATMdb, $_REQUEST['id']);
-		_fiche($ATMdb, $ressource);
+		$ressource->load($PDOdb, $_REQUEST['id']);
+		_fiche($PDOdb, $ressource);
 	}
 	
-	$ATMdb->close();
+	$PDOdb->close();
 	llxFooter();
 	
-	function _fiche(&$ATMdb, &$ressource) {
+	function _fiche(&$PDOdb, &$ressource) {
 		global $db,$user,$conf,$langs;
 		llxHeader('','Fichiers joints');
 		$dir_base = DOL_DATA_ROOT.'/ressource/';
@@ -133,7 +133,7 @@
 			$formfile->list_of_documents($filearray, $ressource, 'ressource', '&id='.$ressource->getId(),0,'ressource/'.$ressource->getId().'/',0);
 		}
 		
-		?><div style="clear:both"></div><?
+		?><div style="clear:both"></div><?php
 		
 		dol_fiche_end();
 		llxFooter();

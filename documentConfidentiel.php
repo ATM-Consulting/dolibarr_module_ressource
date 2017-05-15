@@ -13,18 +13,18 @@
 	$langs->load('main');
 	$langs->load('other');
 	
-	$ATMdb=new TPDOdb;
+	$PDOdb=new TPDOdb;
 	$ressource=new TRH_ressource;
 	
 	if(isset($_REQUEST['id'])) {
-		$ressource->load($ATMdb, $_REQUEST['id']);
-		_fiche($ATMdb, $ressource);
+		$ressource->load($PDOdb, $_REQUEST['id']);
+		_fiche($PDOdb, $ressource);
 	}
 	
-	$ATMdb->close();
+	$PDOdb->close();
 	llxFooter();
 	
-	function _fiche(&$ATMdb, &$ressource) {
+	function _fiche(&$PDOdb, &$ressource) {
 		global $db,$user,$conf,$langs;
 		llxHeader('','Fichiers confidentiels');
 		$dir_base = DOL_DATA_ROOT.'/ressource/';

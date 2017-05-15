@@ -8,7 +8,7 @@
 	require('../../config.php');
 	
 	
-	$ATMdb=new TPDOdb;
+	$PDOdb=new TPDOdb;
 	$langs->load('mails');
 	
 	$sql = "SELECT r.numId, r.libelle, u.lastname, u.firstname, e.date_fin
@@ -19,24 +19,24 @@
 	AND DATEDIFF(e.date_fin,NOW())<".DAYS_BEFORE_ALERT."
 	AND DATEDIFF(e.date_fin,NOW())>=0";
 	
-	$ATMdb->Execute($sql);
+	$PDOdb->Execute($sql);
 	$TAttribution = array();
-	while($ATMdb->Get_line()) {
+	while($PDOdb->Get_line()) {
 		$TAttribution[] = array(
-			'ressourceID'=>$ATMdb->Get_field('numId')
-			,'ressourceName'=>$ATMdb->Get_field('libelle')
-			,'userName'=>$ATMdb->Get_field('lastname')
-			,'userFirstname'=>$ATMdb->Get_field('firstname')
-			,'dateFinAttribution'=>$ATMdb->Get_field('date_fin')
+			'ressourceID'=>$PDOdb->Get_field('numId')
+			,'ressourceName'=>$PDOdb->Get_field('libelle')
+			,'userName'=>$PDOdb->Get_field('lastname')
+			,'userFirstname'=>$PDOdb->Get_field('firstname')
+			,'dateFinAttribution'=>$PDOdb->Get_field('date_fin')
 		);
 		
 	}
 	
-	_mail_attribution($ATMdb, $TAttribution);
+	_mail_attribution($PDOdb, $TAttribution);
 	
 	return 1;
 	
-function _mail_attribution(&$ATMdb, &$TAttribution) {
+function _mail_attribution(&$PDOdb, &$TAttribution) {
 	
 	$from = USER_MAIL_SENDER;
 	$sendto = USER_MAIL_RECEIVER;

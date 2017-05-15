@@ -35,7 +35,7 @@ require('../class/evenement.class.php');*/
 
 $event = new TRH_Evenement;
 $typeEvent = new TRH_Type_Evenement;
-$ATMdb = new TPDOdb;
+$PDOdb = new TPDOdb;
 
 
 /**
@@ -56,7 +56,7 @@ class EvenementTest extends PHPUnit_Framework_TestCase
  
     public static function tearDownAfterClass()
     {
-    	global $ATMdb;
+    	global $PDOdb;
 		print "\nFin du test des Evenements.\n";
     }
 	
@@ -70,8 +70,8 @@ class EvenementTest extends PHPUnit_Framework_TestCase
 	
 	public function testLoad_liste()
     {
-    	global $event, $ATMdb;
-		$event->load_liste($ATMdb);
+    	global $event, $PDOdb;
+		$event->load_liste($PDOdb);
 		$this->assertNotEmpty($event->TTVA);
 		$this->assertNotEmpty($event->TUser);
 		print __METHOD__."\n";
@@ -79,7 +79,7 @@ class EvenementTest extends PHPUnit_Framework_TestCase
 	
 	public function testload_liste_type()
     {
-    	global $event, $ATMdb;
+    	global $event, $PDOdb;
 		$event->fk_rh_ressource_type = 1;
 		$event->load_liste_type(1);
 		$this->assertNotEmpty($event->TType);
@@ -89,31 +89,31 @@ class EvenementTest extends PHPUnit_Framework_TestCase
 	
 	public function testSaveDelete()
     {
-    	global $event, $ATMdb;
+    	global $event, $PDOdb;
 		
 		//cas particulier de non-concordance des dates
 		$event->date_fin = 10;
 		$event->date_debut = 20;
 		$event->type = 'emprunt';
-		$event->save($ATMdb);
+		$event->save($PDOdb);
 		$sqlReq="SELECT type FROM ".MAIN_DB_PREFIX."rh_evenement WHERE rowid= ".$event->getId();
-		$ATMdb->Execute($sqlReq);
-		if ($row = $ATMdb->Get_line()) {$this->assertEquals('emprunt', $row->type);}
+		$PDOdb->Execute($sqlReq);
+		if ($row = $PDOdb->Get_line()) {$this->assertEquals('emprunt', $row->type);}
 		
 		$event->type = 'accident';
-		$event->save($ATMdb);
+		$event->save($PDOdb);
 		$event->type = 'reparation';
-		$event->save($ATMdb);
+		$event->save($PDOdb);
 		$event->type = 'facture';
-		$event->save($ATMdb);
+		$event->save($PDOdb);
 		$event->type = 'divers';
-		$event->save($ATMdb);
+		$event->save($PDOdb);
 		
-		$event->delete($ATMdb);
+		$event->delete($PDOdb);
 		
 		$sqlReq="SELECT COUNT(rowid) as 'nb' FROM ".MAIN_DB_PREFIX."rh_evenement WHERE rowid= ".$event->getId();
-		$ATMdb->Execute($sqlReq);
-		if ($row = $ATMdb->Get_line()) {$this->assertEquals(0, $row->nb);}
+		$PDOdb->Execute($sqlReq);
+		if ($row = $PDOdb->Get_line()) {$this->assertEquals(0, $row->nb);}
 				
 		print __METHOD__."\n";
     }
@@ -128,37 +128,37 @@ class EvenementTest extends PHPUnit_Framework_TestCase
     }
 	
 	public function testload_by_code(){
-		global $typeEvent, $ATMdb;
-		$ret = $typeEvent->load_by_code($ATMdb, 'accident');
+		global $typeEvent, $PDOdb;
+		$ret = $typeEvent->load_by_code($PDOdb, 'accident');
 		$this->assertTrue($ret);
-		$ret = $typeEvent->load_by_code($ATMdb, 'innexistantnimpotequoi');
+		$ret = $typeEvent->load_by_code($PDOdb, 'innexistantnimpotequoi');
 		$this->assertFalse($ret);
 		print __METHOD__."\n";
 	}
 	
 	public function testchargement(){
-		global $typeEvent, $ATMdb;
+		global $typeEvent, $PDOdb;
 		$typeEvent = new TRH_Type_Evenement;
 		//test de chargement et save
-		$typeEvent->chargement($ATMdb, 'testlibelle', 'testcode', '1234', 0, 0);
+		$typeEvent->chargement($PDOdb, 'testlibelle', 'testcode', '1234', 0, 0);
 		$this->assertEquals('testlibelle', $typeEvent->libelle);
 		$this->assertEquals('testcode', $typeEvent->code);
 		$this->assertEquals('1234', $typeEvent->codecomptable);
 		$this->assertEquals('vrai', $typeEvent->supprimable);
 		$this->assertEquals(0, $typeEvent->fk_rh_ressource_type);
 		//suppression de l'élément de test qui est vide
-		$typeEvent->delete($ATMdb);
+		$typeEvent->delete($PDOdb);
 	}
 	
 	public function testsave(){
-		global $typeEvent, $ATMdb;	
+		global $typeEvent, $PDOdb;	
 		//save et suppression de l'élément de test qui est vide
 		$typeEvent = new TRH_Type_Evenement;
-		$typeEvent->save($ATMdb);
+		$typeEvent->save($PDOdb);
 		$this->assertEquals('vrai', $typeEvent->supprimable);
 		$this->assertEquals(0, $typeEvent->fk_rh_ressource_type);
 		
-		$typeEvent->delete($ATMdb);
+		$typeEvent->delete($PDOdb);
 		
 		
 		print __METHOD__."\n";

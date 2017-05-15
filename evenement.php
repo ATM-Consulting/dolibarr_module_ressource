@@ -5,7 +5,7 @@
 	require('./lib/ressource.lib.php');
 	$langs->load('ressource@ressource');
 	
-	$ATMdb=new TPDOdb;
+	$PDOdb=new TPDOdb;
 	$evenement=new TRH_Evenement;
 	$ressource = new TRH_Ressource;
 	$mesg = '';
@@ -15,25 +15,25 @@
 		switch($_REQUEST['action']) {
 			case 'add':
 			case 'new':
-				//$ATMdb->db->debug=true;
-				$ressource->load($ATMdb, $_REQUEST['id']);
+				//$PDOdb->db->debug=true;
+				$ressource->load($PDOdb, $_REQUEST['id']);
 				$evenement->set_values($_REQUEST);
-				_fiche($ATMdb, $evenement,$ressource,'edit');
+				_fiche($PDOdb, $evenement,$ressource,'edit');
 				
 				break;	
 			case 'edit'	:
-				//$ATMdb->db->debug=true;
-				$ressource->load($ATMdb, $_REQUEST['id']);
-				$evenement->load($ATMdb, $_REQUEST['idEven']);
-				_fiche($ATMdb, $evenement,$ressource,'edit');
+				//$PDOdb->db->debug=true;
+				$ressource->load($PDOdb, $_REQUEST['id']);
+				$evenement->load($PDOdb, $_REQUEST['idEven']);
+				_fiche($PDOdb, $evenement,$ressource,'edit');
 				break;
 				
 			case 'save':
-				//$ATMdb->db->debug=true;
-				$evenement->load($ATMdb, $_REQUEST['idEven']);
+				//$PDOdb->db->debug=true;
+				$evenement->load($PDOdb, $_REQUEST['idEven']);
 				$evenement->set_values($_REQUEST);
 				
-				$evenement->save($ATMdb);
+				$evenement->save($PDOdb);
 				if (!isset($_REQUEST['motif'])|| $_REQUEST['motif']==''){
 					$mesg = '<div class="error">Le motif doit être renseigné.</div>';
 					$mode = 'edit';
@@ -43,57 +43,57 @@
 					$mesg = '<div class="ok">Modifications effectuées</div>';
 					$mode = 'view';
 				}
-				$ressource->load($ATMdb, $_REQUEST['id']);
-				_fiche($ATMdb, $evenement,$ressource,$mode);
+				$ressource->load($PDOdb, $_REQUEST['id']);
+				_fiche($PDOdb, $evenement,$ressource,$mode);
 				break;
 			
 			case 'view':
-				//$ATMdb->db->debug=true;
-				$ressource->load($ATMdb, $_REQUEST['id']);
-				$evenement->load($ATMdb, $_REQUEST['idEven'],true);
+				//$PDOdb->db->debug=true;
+				$ressource->load($PDOdb, $_REQUEST['id']);
+				$evenement->load($PDOdb, $_REQUEST['idEven'],true);
 				
-				_fiche($ATMdb, $evenement,$ressource,'view');
+				_fiche($PDOdb, $evenement,$ressource,'view');
 				break;
 			
 			case 'deleteEvent':
-				//$ATMdb->db->debug=true;
-				$evenement->load($ATMdb, $_REQUEST['idEven']);
-				$evenement->delete($ATMdb);
+				//$PDOdb->db->debug=true;
+				$evenement->load($PDOdb, $_REQUEST['idEven']);
+				$evenement->delete($PDOdb);
 				?>
 				<script language="javascript">
 					document.location.href="?id=<?php echo $_REQUEST['id'];?>&delete_ok=1";					
 				</script>
 				<?php
-				/*$ressource->load($ATMdb, $_REQUEST['id']);
+				/*$ressource->load($PDOdb, $_REQUEST['id']);
 				$mesg = '<div class="ok">L\'attribution a bien été supprimée.</div>';
-				_liste($ATMdb, $evenement, $ressource, $_REQUEST['type']);*/
+				_liste($PDOdb, $evenement, $ressource, $_REQUEST['type']);*/
 				break;
 				
 			case 'afficherListe':
-				$ressource->load($ATMdb, $_REQUEST['id']);
-				_liste($ATMdb, $evenement, $ressource, $_REQUEST['type']);
+				$ressource->load($PDOdb, $_REQUEST['id']);
+				_liste($PDOdb, $evenement, $ressource, $_REQUEST['type']);
 				break;
 			
 		}
 	}
 	elseif(isset($_REQUEST['id'])) {
-		$ressource->load($ATMdb, $_REQUEST['id']);
-		_liste($ATMdb, $evenement,$ressource);
+		$ressource->load($PDOdb, $_REQUEST['id']);
+		_liste($PDOdb, $evenement,$ressource);
 	}
 	else {
 		/*
 		 * Liste
 		 */
-		 //$ATMdb->db->debug=true;
-		 _liste($ATMdb, $evenement,$ressource);
+		 //$PDOdb->db->debug=true;
+		 _liste($PDOdb, $evenement,$ressource);
 	}
 	
 	
-	$ATMdb->close();
+	$PDOdb->close();
 	
 	llxFooter();
 	
-function _liste(&$ATMdb, &$evenement, &$ressource, $type = "all") {
+function _liste(&$PDOdb, &$evenement, &$ressource, $type = "all") {
 	global $conf,$user;	
 	llxHeader('','Liste des événements');
 	
@@ -158,7 +158,7 @@ function _liste(&$ATMdb, &$evenement, &$ressource, $type = "all") {
 	if(isset($_REQUEST['orderUp']))$TOrder = array($_REQUEST['orderUp']=>'ASC');
 				
 	$page = isset($_REQUEST['page']) ? $_REQUEST['page'] : 1;			
-	$r->liste($ATMdb, $sql, array(
+	$r->liste($PDOdb, $sql, array(
 		'limit'=>array(
 			'page'=>$page
 			,'nbLine'=>'30'
@@ -206,7 +206,7 @@ function _liste(&$ATMdb, &$evenement, &$ressource, $type = "all") {
 	llxFooter();
 }	
 
-function _fiche(&$ATMdb, &$evenement,&$ressource,  $mode) {
+function _fiche(&$PDOdb, &$evenement,&$ressource,  $mode) {
 	global $db,$user,$conf,$langs;
 	llxHeader('', 'Evénement');
 
@@ -216,9 +216,9 @@ function _fiche(&$ATMdb, &$evenement,&$ressource,  $mode) {
 	echo $form->hidden('action', 'save');
 	echo $form->hidden('idEven',$evenement->getId());
 
-	$evenement->load_liste($ATMdb);
+	$evenement->load_liste($PDOdb);
 	$evenement->load_liste_type($ressource->fk_rh_ressource_type);
-	$idUserCourant =  $ressource->isEmpruntee($ATMdb, date("Y-m-d", time()));
+	$idUserCourant =  $ressource->isEmpruntee($PDOdb, date("Y-m-d", time()));
 
 	$tab = $evenement->TType;
 

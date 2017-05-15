@@ -9,7 +9,7 @@ require('../../class/ressource.class.php');
 require('../../lib/ressource.lib.php');
 
 global $conf;
-$ATMdb=new TPDOdb;
+$PDOdb=new TPDOdb;
 // relever le point de départ
 $timestart=microtime(true);
 
@@ -20,22 +20,22 @@ $idVoiture=  getIdType('voiture');
 $TVoiture = array();
 $sql="SELECT rowid, numId FROM ".MAIN_DB_PREFIX."rh_ressource 
 	WHERE fk_rh_ressource_type=".$idVoiture." AND entity IN (0,".$conf->entity.")";
-$ATMdb->Execute($sql);
-while($ATMdb->Get_line()) {
-	$TVoiture[$ATMdb->Get_field('numId')] = $ATMdb->Get_field('rowid');
+$PDOdb->Execute($sql);
+while($PDOdb->Get_line()) {
+	$TVoiture[$PDOdb->Get_field('numId')] = $PDOdb->Get_field('rowid');
 	}
 
 
 //pour augmenter les chances de trouver les groupes, on met en minuscule et on enlève les ' et les espaces
 $TGroups = array();
 $sql="SELECT rowid, nom FROM ".MAIN_DB_PREFIX."usergroup WHERE entity IN (0,".$conf->entity.")";
-$ATMdb->Execute($sql);
-while($ATMdb->Get_line()) {
-	$nom = str_replace(' ','',$ATMdb->Get_field('nom'));
+$PDOdb->Execute($sql);
+while($PDOdb->Get_line()) {
+	$nom = str_replace(' ','',$PDOdb->Get_field('nom'));
 	$nom = str_replace('\'','',$nom);
 	$nom = strtolower($nom);
-	//echo $ATMdb->Get_field('nom').'   '.$nom.'<br>';
-	$TGroups[$nom] = $ATMdb->Get_field('rowid');
+	//echo $PDOdb->Get_field('nom').'   '.$nom.'<br>';
+	$TGroups[$nom] = $PDOdb->Get_field('rowid');
 }
 
 //exit();
@@ -49,7 +49,7 @@ $cptOkGroupe = 0;
 $cptNoGroup = 0;
 $nomFichier = "Carte TOTAL.csv";
 echo 'Traitement du fichier '.$nomFichier.' : <br>';
-$TRessource = getIDRessource($ATMdb, $idCarteTotal);
+$TRessource = getIDRessource($PDOdb, $idCarteTotal);
 
 //début du parsing
 $numLigne = 0;
@@ -78,7 +78,7 @@ if (($handle = fopen("./".$nomFichier, "r")) !== FALSE) {
 			else {
 				$carteTotal = new TRH_Ressource;
 				//clés externes
-				$carteTotal->load_by_numId($ATMdb, $numId);
+				$carteTotal->load_by_numId($PDOdb, $numId);
 				$jointurePlaque = true;
 				$jointureGroupe = true;
 				$carteTotal->fk_rh_ressource_type = $idCarteTotal;
@@ -104,7 +104,7 @@ if (($handle = fopen("./".$nomFichier, "r")) !== FALSE) {
 				else {$carteTotal->fk_utilisatrice = $TGroups[$gp];}
 				
 				//champs propres aux cartes total
-				$carteTotal->load_ressource_type($ATMdb);
+				$carteTotal->load_ressource_type($PDOdb);
 				
 				$carteTotal->totalnumcarte = $numId;
 				$carteTotal->totalcomptesupport = $infos[1];
@@ -131,7 +131,7 @@ if (($handle = fopen("./".$nomFichier, "r")) !== FALSE) {
 				if ($jointureGroupe){$cptOkGroupe++;}
 				$cptCarteTotal ++;
 				
-				$carteTotal->save($ATMdb);
+				$carteTotal->save($PDOdb);
 				$TRessource[$numId]=$carteTotal->getId();
 					
 				
@@ -149,6 +149,6 @@ echo $cptOkGroupe.' cartes dont le groupe n\'a pas été trouvé,  C\'PRO GROUPE
 $timeend=microtime(true);
 $page_load_time = number_format($timeend-$timestart, 3);
 echo 'Fin du traitement. Durée : '.$page_load_time . " sec<br><br>";
-$ATMdb->close();
+$PDOdb->close();
 
 	

@@ -7,7 +7,7 @@
 	$langs->load('ressource@ressource');
 	
 	//if (!$user->rights->financement->affaire->read)	{ accessforbidden(); }
-	$ATMdb=new TPDOdb;
+	$PDOdb=new TPDOdb;
 	$ressourceType=new TRH_ressource_type;
 	$typeEven = new TRH_Type_Evenement;
 	$mesg = '';
@@ -17,20 +17,20 @@
 	
 	
 	if(isset($_REQUEST['id'])){
-		$ressourceType->load($ATMdb, $_REQUEST['id']);
+		$ressourceType->load($PDOdb, $_REQUEST['id']);
 		if (isset($_REQUEST['action'])){
 			switch($_REQUEST['action']){
 				case 'add':	
 				case 'new':
-					//$typeEven->load($ATMdb, $_REQUEST['idTypeEvent']);
-					_fiche($ATMdb, $typeEven, $ressourceType, 'edit');
+					//$typeEven->load($PDOdb, $_REQUEST['idTypeEvent']);
+					_fiche($PDOdb, $typeEven, $ressourceType, 'edit');
 					break;
 				case 'edit' :
-					$typeEven->load($ATMdb, $_REQUEST['idTypeEvent']);
-					_fiche($ATMdb, $typeEven, $ressourceType, 'edit');
+					$typeEven->load($PDOdb, $_REQUEST['idTypeEvent']);
+					_fiche($PDOdb, $typeEven, $ressourceType, 'edit');
 					break;
 				case 'save':
-					$typeEven->load($ATMdb, $_REQUEST['idTypeEvent']);
+					$typeEven->load($PDOdb, $_REQUEST['idTypeEvent']);
 					$mode = 'edit';
 					if (empty($_REQUEST['libelle'])){
 						$mesg = '<div class="error">Veuillez remplir le libellé.</div>';						
@@ -46,19 +46,19 @@
 						$mode = 'view';
 					}
 					$typeEven->set_values($_REQUEST);
-					$typeEven->save($ATMdb);
-					_fiche($ATMdb, $typeEven, $ressourceType, $mode);
+					$typeEven->save($PDOdb);
+					_fiche($PDOdb, $typeEven, $ressourceType, $mode);
 					break;
 				case 'view':
-					//$ATMdb->db->debug=true;
-					$typeEven->load($ATMdb, $_REQUEST['idTypeEvent']);
-					_fiche($ATMdb, $typeEven, $ressourceType, 'view');
+					//$PDOdb->db->debug=true;
+					$typeEven->load($PDOdb, $_REQUEST['idTypeEvent']);
+					_fiche($PDOdb, $typeEven, $ressourceType, 'view');
 					break;
 				case 'delete' :
-					$typeEven->load($ATMdb, $_REQUEST['idTypeEvent']);
+					$typeEven->load($PDOdb, $_REQUEST['idTypeEvent']);
 					if ($typeEven->supprimable == 'vrai'){
-						$typeEven->delete($ATMdb);
-						$ressourceType->load($ATMdb, $_REQUEST['id']);
+						$typeEven->delete($PDOdb);
+						$ressourceType->load($PDOdb, $_REQUEST['id']);
 						?>
 						<script language="javascript">
 							document.location.href="?id=<?echo $_REQUEST['id'];?>&delete_ok=1";					
@@ -67,7 +67,7 @@
 					}
 					else {
 						$mesg = '<div class="ok">Impossible de supprimer ce type d\événement.</div>';
-						_fiche($ATMdb, $typeEven, $ressourceType, 'view');
+						_fiche($PDOdb, $typeEven, $ressourceType, 'view');
 						
 					}
 					break;
@@ -77,14 +77,14 @@
 			}
 		}
 		else {
-			_liste($ATMdb, $ressourceType, $typeEven);
+			_liste($PDOdb, $ressourceType, $typeEven);
 		}
 	}
 
-	$ATMdb->close();
+	$PDOdb->close();
 
 
-function _liste(&$ATMdb, &$ressourceType, &$even) {
+function _liste(&$PDOdb, &$ressourceType, &$even) {
 	global $langs,$conf, $db;	
 	
 	llxHeader('','Règles sur les Ressources');
@@ -111,7 +111,7 @@ function _liste(&$ATMdb, &$ressourceType, &$even) {
 	$form=new TFormCore($_SERVER['PHP_SELF'].'?id='.$ressourceType->getId(),'formtranslateList','GET');
 	echo $form->hidden('id',$ressourceType->getId());
 	
-	$r->liste($ATMdb, $sql, array(
+	$r->liste($PDOdb, $sql, array(
 		'limit'=>array(
 			'page'=>$page
 			,'nbLine'=>'30'
@@ -150,7 +150,7 @@ function _liste(&$ATMdb, &$ressourceType, &$even) {
 	llxFooter();
 }	
 
-function _fiche(&$ATMdb, &$typeEven, &$ressourceType, $mode) {
+function _fiche(&$PDOdb, &$typeEven, &$ressourceType, $mode) {
 	llxHeader('','Règle sur les Ressources', '', '', 0, 0);
 	
 

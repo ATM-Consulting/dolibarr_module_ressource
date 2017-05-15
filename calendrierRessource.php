@@ -25,9 +25,9 @@
 	);
 	
 		
-	$ATMdb=new TPDOdb;
+	$PDOdb=new TPDOdb;
 	$ressource=new TRH_ressource;
-	$ressource->load($ATMdb, $_REQUEST['id']);
+	$ressource->load($PDOdb, $_REQUEST['id']);
 	
 	$fiche = isset($_REQUEST['fiche']) ? $_REQUEST['fiche'] : false;
 	//$idCombo = isset($_REQUEST['idCombo']) ? $_REQUEST['idCombo'] : 0; 
@@ -45,20 +45,20 @@
 	//LISTE DE USERS
 	$TUser = array('');
 	$sqlReq="SELECT rowid, firstname, lastname FROM ".MAIN_DB_PREFIX."user WHERE entity IN (0,".$conf->entity.")";
-	$ATMdb->Execute($sqlReq);
-	while($ATMdb->Get_line()) {
-		$TUser[$ATMdb->Get_field('rowid')] = htmlentities($ATMdb->Get_field('firstname'), ENT_COMPAT , 'ISO8859-1')." ".htmlentities($ATMdb->Get_field('name'), ENT_COMPAT , 'ISO8859-1');
+	$PDOdb->Execute($sqlReq);
+	while($PDOdb->Get_line()) {
+		$TUser[$PDOdb->Get_field('rowid')] = htmlentities($PDOdb->Get_field('firstname'), ENT_COMPAT , 'ISO8859-1')." ".htmlentities($PDOdb->Get_field('name'), ENT_COMPAT , 'ISO8859-1');
 		}
 	
 	$TRessource = array('');
 	$sqlReq="SELECT rowid,libelle, numId FROM ".MAIN_DB_PREFIX."rh_ressource WHERE entity IN (0,".$conf->entity.")";
 	if ($type>0){$sqlReq .= " AND fk_rh_ressource_type = ".$type;}
-		$ATMdb->Execute($sqlReq);
-		while($ATMdb->Get_line()) {
-			$TRessource[$ATMdb->Get_field('rowid')] = $ATMdb->Get_field('libelle').' '.$ATMdb->Get_field('numId');
+		$PDOdb->Execute($sqlReq);
+		while($PDOdb->Get_line()) {
+			$TRessource[$PDOdb->Get_field('rowid')] = $PDOdb->Get_field('libelle').' '.$PDOdb->Get_field('numId');
 			}
 
-	$ressource->load_liste_type_ressource($ATMdb);
+	$ressource->load_liste_type_ressource($PDOdb);
 	$TType = array_merge($ressource->TType);
 	if ($fiche) {
 		$TTypeEvent = getTypeEvent($ressource->fk_rh_ressource_type,true);

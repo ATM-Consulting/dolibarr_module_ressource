@@ -6,7 +6,7 @@
 	$langs->load('ressource@ressource');
 	
 	//if (!$user->rights->financement->affaire->read)	{ accessforbidden(); }
-	$ATMdb=new TPDOdb;
+	$PDOdb=new TPDOdb;
 	$association = new TRH_Contrat_Ressource;
 	$ressource = new TRH_Ressource;
 	$mesg = '';
@@ -16,64 +16,64 @@
 		switch($_REQUEST['action']) {
 			case 'add':
 			case 'new':
-				$ressource->load($ATMdb, $_REQUEST['id']);
-				_fiche($ATMdb, $association,$ressource,'edit');
+				$ressource->load($PDOdb, $_REQUEST['id']);
+				_fiche($PDOdb, $association,$ressource,'edit');
 				
 				break;	
 			case 'edit'	:
-				//$ATMdb->db->debug=true;
-				$ressource->load($ATMdb, $_REQUEST['id']);
-				$association->load($ATMdb, $_REQUEST['idAssoc']);
-				_fiche($ATMdb, $association, $ressource,'edit');
+				//$PDOdb->db->debug=true;
+				$ressource->load($PDOdb, $_REQUEST['id']);
+				$association->load($PDOdb, $_REQUEST['idAssoc']);
+				_fiche($PDOdb, $association, $ressource,'edit');
 				break;
 				
 			case 'save':
-				//$ATMdb->db->debug=true;
-				$association->load($ATMdb, $_REQUEST['idAssoc']);
+				//$PDOdb->db->debug=true;
+				$association->load($PDOdb, $_REQUEST['idAssoc']);
 				$mesg = '<div class="ok">Modifications effectuées</div>';
 				$mode = 'view';
 			
 				$association->set_values($_REQUEST);
-				$association->save($ATMdb);
+				$association->save($PDOdb);
 				
-				$ressource->load($ATMdb, $_REQUEST['id']);
-				$association->load($ATMdb, $_REQUEST['idAssoc']);
-				_fiche($ATMdb, $association, $ressource, $mode);
+				$ressource->load($PDOdb, $_REQUEST['id']);
+				$association->load($PDOdb, $_REQUEST['idAssoc']);
+				_fiche($PDOdb, $association, $ressource, $mode);
 				break;
 	
 			case 'deleteAssoc':
-				//$ATMdb->db->debug=true;
-				$association->load($ATMdb, $_REQUEST['idAssoc']);
-				$association->delete($ATMdb);
-				$ressource->load($ATMdb, $_REQUEST['id']);
+				//$PDOdb->db->debug=true;
+				$association->load($PDOdb, $_REQUEST['idAssoc']);
+				$association->delete($PDOdb);
+				$ressource->load($PDOdb, $_REQUEST['id']);
 				$mesg = '<div class="ok">Le lien avec le contrat a été supprimée.</div>';
-				_liste($ATMdb, $association, $ressource,'view');
+				_liste($PDOdb, $association, $ressource,'view');
 				break;
 		}
 	}
 	elseif(isset($_REQUEST['id']) && isset($_REQUEST['idAssoc'])) {
-		$ressource->load($ATMdb, $_REQUEST['id']);
-		$association->load($ATMdb, $_REQUEST['idAssoc']);
-		_fiche($ATMdb, $association, $ressource,'view');
+		$ressource->load($PDOdb, $_REQUEST['id']);
+		$association->load($PDOdb, $_REQUEST['idAssoc']);
+		_fiche($PDOdb, $association, $ressource,'view');
 	}
 	elseif(isset($_REQUEST['id'])) {
-		$ressource->load($ATMdb, $_REQUEST['id']);
-		_liste($ATMdb, $association, $ressource,'view');
+		$ressource->load($PDOdb, $_REQUEST['id']);
+		_liste($PDOdb, $association, $ressource,'view');
 	}
 	else {
 		/*
 		 * Liste
 		 */
-		 //$ATMdb->db->debug=true;
-		 _liste($ATMdb, $evenement);
+		 //$PDOdb->db->debug=true;
+		 _liste($PDOdb, $evenement);
 	}
 	
 	
-	$ATMdb->close();
+	$PDOdb->close();
 	
 	llxFooter();
 	
-function _liste(&$ATMdb, &$association, &$ressource,  $mode) {
+function _liste(&$PDOdb, &$association, &$ressource,  $mode) {
 	global $langs,$conf,$user;	
 	llxHeader('','Liste des contrats');
 	getStandartJS();
@@ -99,7 +99,7 @@ function _liste(&$ATMdb, &$association, &$ressource,  $mode) {
 				
 	$page = isset($_REQUEST['page']) ? $_REQUEST['page'] : 1;			
 	//print $page;
-	$r->liste($ATMdb, $sql, array(
+	$r->liste($PDOdb, $sql, array(
 		'limit'=>array(
 			'page'=>$page
 			,'nbLine'=>'30'
@@ -138,7 +138,7 @@ function _liste(&$ATMdb, &$association, &$ressource,  $mode) {
 	llxFooter();
 }	
 	
-function _fiche(&$ATMdb,  &$association, &$ressource,  $mode) {
+function _fiche(&$PDOdb,  &$association, &$ressource,  $mode) {
 	global $db,$user;
 	llxHeader('', 'Contrats');
 
@@ -149,8 +149,8 @@ function _fiche(&$ATMdb,  &$association, &$ressource,  $mode) {
 	echo $form->hidden('idAssoc',$association->getId());
 	
 	
-	$ressource->load_contrat($ATMdb);
-	$ressource->load_liste_type_ressource($ATMdb);
+	$ressource->load_contrat($PDOdb);
+	$ressource->load_liste_type_ressource($PDOdb);
 	$TBS=new TTemplateTBS();
 	print $TBS->render('./tpl/contratRessource.tpl.php'
 		,array(

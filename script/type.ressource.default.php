@@ -12,124 +12,124 @@
 	require('../class/evenement.class.php');
 	require('../class/regle.class.php');
 
-	$ATMdb=new TPDOdb;
-	$ATMdb->db->debug=true;
+	$PDOdb=new TPDOdb;
+	$PDOdb->db->debug=true;
 
 //Création des types d'évenement par défaut.
 $tempEven = new TRH_Type_Evenement;
-$tempEven->chargement($ATMdb, '', 'all', '0000', 'faux', 0);
+$tempEven->chargement($PDOdb, '', 'all', '0000', 'faux', 0);
 $tempEven = new TRH_Type_Evenement;
-$tempEven->chargement($ATMdb, 'Divers', 'divers', '0000', 'faux', 0);
+$tempEven->chargement($PDOdb, 'Divers', 'divers', '0000', 'faux', 0);
 $tempEven = new TRH_Type_Evenement;
-$tempEven->chargement($ATMdb, 'Réparation', 'reparation', '0000', 'faux', 0);
+$tempEven->chargement($PDOdb, 'Réparation', 'reparation', '0000', 'faux', 0);
 $tempEven = new TRH_Type_Evenement;
-$tempEven->chargement($ATMdb, 'Accident', 'accident', '0000', 'faux', 0);
+$tempEven->chargement($PDOdb, 'Accident', 'accident', '0000', 'faux', 0);
 $tempEven = new TRH_Type_Evenement;
-$tempEven->chargement($ATMdb, 'Facture', 'facture', '0000', 'faux', 0);
+$tempEven->chargement($PDOdb, 'Facture', 'facture', '0000', 'faux', 0);
 
 
 
 
 //VOITURE
 	$tempType = new TRH_Ressource_type;
-	$tempType->chargement($ATMdb, 'Voiture', 'voiture', 1);
+	$tempType->chargement($PDOdb, 'Voiture', 'voiture', 1);
 $cpt = 0;
 	$tempField = new TRH_Ressource_field;
-	$tempField->chargement($ATMdb, 'Immatriculation', 'immatriculation','chaine', 0, $cpt, '', 1, $tempType->rowid);$cpt++;
+	$tempField->chargement($PDOdb, 'Immatriculation', 'immatriculation','chaine', 0, $cpt, '', 1, $tempType->rowid);$cpt++;
 	$tempField = new TRH_Ressource_field;
-	$tempField->chargement($ATMdb,'Marque', 'marqueVoit', 'chaine',0, $cpt, '', 1, $tempType->rowid);$cpt++;
+	$tempField->chargement($PDOdb,'Marque', 'marqueVoit', 'chaine',0, $cpt, '', 1, $tempType->rowid);$cpt++;
 	$tempField = new TRH_Ressource_field;
-	$tempField->chargement($ATMdb,'Modèle', 'modleVoit', 'chaine',0, $cpt, '', 1, $tempType->rowid);$cpt++;
+	$tempField->chargement($PDOdb,'Modèle', 'modleVoit', 'chaine',0, $cpt, '', 1, $tempType->rowid);$cpt++;
 	$tempField = new TRH_Ressource_field;
-	$tempField->chargement($ATMdb,'Modèle version commerciale', 'modleVoitversioncomm', 'chaine',0, $cpt, '', 1, $tempType->rowid);$cpt++;
+	$tempField->chargement($PDOdb,'Modèle version commerciale', 'modleVoitversioncomm', 'chaine',0, $cpt, '', 1, $tempType->rowid);$cpt++;
 	$tempField = new TRH_Ressource_field;
-	$tempField->chargement($ATMdb,'Bail', 'bailVoit', 'liste',0, $cpt, 'IMMO;LOCATION;CREDIT BAIL;EN ATTENTE', 1, $tempType->rowid, "oui");$cpt++;
+	$tempField->chargement($PDOdb,'Bail', 'bailVoit', 'liste',0, $cpt, 'IMMO;LOCATION;CREDIT BAIL;EN ATTENTE', 1, $tempType->rowid, "oui");$cpt++;
 	$tempField = new TRH_Ressource_field;
-	$tempField->chargement($ATMdb,'Puissance Fiscale', 'pf', 'chaine',0, $cpt, '', 1, $tempType->rowid);$cpt++;
+	$tempField->chargement($PDOdb,'Puissance Fiscale', 'pf', 'chaine',0, $cpt, '', 1, $tempType->rowid);$cpt++;
 	$tempField = new TRH_Ressource_field;
-	$tempField->chargement($ATMdb,'Localisation', 'localisationvehicule', 'chaine',1, $cpt, '', 1, $tempType->rowid);$cpt++;
+	$tempField->chargement($PDOdb,'Localisation', 'localisationvehicule', 'chaine',1, $cpt, '', 1, $tempType->rowid);$cpt++;
 	$tempField = new TRH_Ressource_field;
-	$tempField->chargement($ATMdb,'Type de véhicule', 'typeVehicule', 'liste',0, $cpt, 'VU;VP', 1, $tempType->rowid);$cpt++;
+	$tempField->chargement($PDOdb,'Type de véhicule', 'typeVehicule', 'liste',0, $cpt, 'VU;VP', 1, $tempType->rowid);$cpt++;
 	$tempField = new TRH_Ressource_field;
-	$tempField->chargement($ATMdb,'Clé', 'cle', 'checkbox',1, $cpt, '', 1, $tempType->rowid);$cpt++;
+	$tempField->chargement($PDOdb,'Clé', 'cle', 'checkbox',1, $cpt, '', 1, $tempType->rowid);$cpt++;
 	$tempField = new TRH_Ressource_field;
-	$tempField->chargement($ATMdb,'Kit de Sécurité', 'kit', 'checkbox',1, $cpt, '', 1, $tempType->rowid);$cpt++;
+	$tempField->chargement($PDOdb,'Kit de Sécurité', 'kit', 'checkbox',1, $cpt, '', 1, $tempType->rowid);$cpt++;
 
 	$tempEven = new TRH_Type_Evenement;
-	$tempEven->chargement($ATMdb, 'Facture Loyer', '','0000', 'faux', $tempType->rowid);
+	$tempEven->chargement($PDOdb, 'Facture Loyer', '','0000', 'faux', $tempType->rowid);
 	$tempEven = new TRH_Type_Evenement;
-	$tempEven->chargement($ATMdb, 'Facture Gestion et Entretien', '','0000', 'faux', $tempType->rowid);
+	$tempEven->chargement($PDOdb, 'Facture Gestion et Entretien', '','0000', 'faux', $tempType->rowid);
 	$tempEven = new TRH_Type_Evenement;
-	$tempEven->chargement($ATMdb, 'Changement de pneu', '', '0000', 'faux', $tempType->rowid);
+	$tempEven->chargement($PDOdb, 'Changement de pneu', '', '0000', 'faux', $tempType->rowid);
 
 
 //CARTE TOTAL
 	$tempType = new TRH_Ressource_type;
-	$tempType->chargement($ATMdb, 'Carte Total', 'cartetotal', 1);
+	$tempType->chargement($PDOdb, 'Carte Total', 'cartetotal', 1);
 	$cpt = 0;
 
 	$tempField = new TRH_Ressource_field;
-	$tempField->chargement($ATMdb,'Numéro carte', 'totalnumcarte', 'chaine',0, $cpt, '', 1, $tempType->rowid);$cpt++;
+	$tempField->chargement($PDOdb,'Numéro carte', 'totalnumcarte', 'chaine',0, $cpt, '', 1, $tempType->rowid);$cpt++;
 	$tempField = new TRH_Ressource_field;
-	$tempField->chargement($ATMdb,'Compte support', 'totalcomptesupport', 'chaine',1, $cpt, '', 1, $tempType->rowid);$cpt++;
+	$tempField->chargement($PDOdb,'Compte support', 'totalcomptesupport', 'chaine',1, $cpt, '', 1, $tempType->rowid);$cpt++;
 	$tempField = new TRH_Ressource_field;
-	$tempField->chargement($ATMdb,'Type support', 'totaltypesupport', 'chaine',1, $cpt, '', 1, $tempType->rowid);$cpt++;
+	$tempField->chargement($PDOdb,'Type support', 'totaltypesupport', 'chaine',1, $cpt, '', 1, $tempType->rowid);$cpt++;
 	$tempField = new TRH_Ressource_field;
-	$tempField->chargement($ATMdb,'Infos saisis en station', 'totalinfostation', 'chaine',1, $cpt, '', 1, $tempType->rowid);$cpt++;
+	$tempField->chargement($PDOdb,'Infos saisis en station', 'totalinfostation', 'chaine',1, $cpt, '', 1, $tempType->rowid);$cpt++;
 	$tempField = new TRH_Ressource_field;
-	$tempField->chargement($ATMdb,'Libellé estampé', 'totallibeestampe', 'chaine',1, $cpt, '', 1, $tempType->rowid);$cpt++;
+	$tempField->chargement($PDOdb,'Libellé estampé', 'totallibeestampe', 'chaine',1, $cpt, '', 1, $tempType->rowid);$cpt++;
 	$tempField = new TRH_Ressource_field;
-	$tempField->chargement($ATMdb,'Adresse estampée', 'totaladresseestampe', 'chaine',1, $cpt, '', 1, $tempType->rowid);$cpt++;
+	$tempField->chargement($PDOdb,'Adresse estampée', 'totaladresseestampe', 'chaine',1, $cpt, '', 1, $tempType->rowid);$cpt++;
 	$tempField = new TRH_Ressource_field;
-	$tempField->chargement($ATMdb,'Type code confidentiel', 'totaltypecodeconfidentiel', 'chaine',1, $cpt, '', 1, $tempType->rowid);$cpt++;
+	$tempField->chargement($PDOdb,'Type code confidentiel', 'totaltypecodeconfidentiel', 'chaine',1, $cpt, '', 1, $tempType->rowid);$cpt++;
 	$tempField = new TRH_Ressource_field;
-	$tempField->chargement($ATMdb,'Carburant', 'totalcarburant', 'chaine',1, $cpt, '', 1, $tempType->rowid);$cpt++;
+	$tempField->chargement($PDOdb,'Carburant', 'totalcarburant', 'chaine',1, $cpt, '', 1, $tempType->rowid);$cpt++;
 	$tempField = new TRH_Ressource_field;
-	$tempField->chargement($ATMdb,'Plafond carburant', 'totalplafondcarburant', 'chaine',1, $cpt, '', 1, $tempType->rowid);$cpt++;
+	$tempField->chargement($PDOdb,'Plafond carburant', 'totalplafondcarburant', 'chaine',1, $cpt, '', 1, $tempType->rowid);$cpt++;
 	$tempField = new TRH_Ressource_field;
-	$tempField->chargement($ATMdb,'Type plafond Carburant', 'totaltypeplafond', 'chaine',1, $cpt, '', 1, $tempType->rowid);$cpt++;
+	$tempField->chargement($PDOdb,'Type plafond Carburant', 'totaltypeplafond', 'chaine',1, $cpt, '', 1, $tempType->rowid);$cpt++;
 	$tempField = new TRH_Ressource_field;
-	$tempField->chargement($ATMdb,'Produit', 'totalproduit', 'chaine',1, $cpt, '', 1, $tempType->rowid);$cpt++;
+	$tempField->chargement($PDOdb,'Produit', 'totalproduit', 'chaine',1, $cpt, '', 1, $tempType->rowid);$cpt++;
 	$tempField = new TRH_Ressource_field;
-	$tempField->chargement($ATMdb,'Périodicité plafond carburant', 'totalperiodiciteplafond', 'chaine',1, $cpt, '', 1, $tempType->rowid);$cpt++;
+	$tempField->chargement($PDOdb,'Périodicité plafond carburant', 'totalperiodiciteplafond', 'chaine',1, $cpt, '', 1, $tempType->rowid);$cpt++;
 	$tempField = new TRH_Ressource_field;
-	$tempField->chargement($ATMdb,'Quantité plafond carburant', 'totalqtplafond', 'float',1, $cpt, '', 1, $tempType->rowid);$cpt++;
+	$tempField->chargement($PDOdb,'Quantité plafond carburant', 'totalqtplafond', 'float',1, $cpt, '', 1, $tempType->rowid);$cpt++;
 	$tempField = new TRH_Ressource_field;
-	$tempField->chargement($ATMdb,'Unité plafond carburant', 'totaluniteplafond', 'chaine',1, $cpt, '', 1, $tempType->rowid);$cpt++;
+	$tempField->chargement($PDOdb,'Unité plafond carburant', 'totaluniteplafond', 'chaine',1, $cpt, '', 1, $tempType->rowid);$cpt++;
 	$tempField = new TRH_Ressource_field;
-	$tempField->chargement($ATMdb,'Options service', 'totaloptionservice', 'chaine',1, $cpt, '', 1, $tempType->rowid);$cpt++;
+	$tempField->chargement($PDOdb,'Options service', 'totaloptionservice', 'chaine',1, $cpt, '', 1, $tempType->rowid);$cpt++;
 	$tempField = new TRH_Ressource_field;
-	$tempField->chargement($ATMdb,'Plafond service', 'totalplafondservice', 'chaine',1, $cpt, '', 1, $tempType->rowid);$cpt++;
+	$tempField->chargement($PDOdb,'Plafond service', 'totalplafondservice', 'chaine',1, $cpt, '', 1, $tempType->rowid);$cpt++;
 	$tempField = new TRH_Ressource_field;
-	$tempField->chargement($ATMdb,'Service', 'totalserviceplafondservice', 'chaine',1, $cpt, '', 1, $tempType->rowid);$cpt++;
+	$tempField->chargement($PDOdb,'Service', 'totalserviceplafondservice', 'chaine',1, $cpt, '', 1, $tempType->rowid);$cpt++;
 	$tempField = new TRH_Ressource_field;
-	$tempField->chargement($ATMdb,'Périodicité plafond service', 'totalperiodiciteplafondservice', 'chaine',1, $cpt, '', 1, $tempType->rowid);$cpt++;
+	$tempField->chargement($PDOdb,'Périodicité plafond service', 'totalperiodiciteplafondservice', 'chaine',1, $cpt, '', 1, $tempType->rowid);$cpt++;
 	$tempField = new TRH_Ressource_field;
-	$tempField->chargement($ATMdb,'Quantité plafond service', 'totalqtplafondservice', 'float',1, $cpt, '', 1, $tempType->rowid);$cpt++;
+	$tempField->chargement($PDOdb,'Quantité plafond service', 'totalqtplafondservice', 'float',1, $cpt, '', 1, $tempType->rowid);$cpt++;
 	$tempField = new TRH_Ressource_field;
-	$tempField->chargement($ATMdb,'Unité plafond service', 'totaluniteplafondservice', 'chaine',1, $cpt, '', 1, $tempType->rowid);$cpt++;
+	$tempField->chargement($PDOdb,'Unité plafond service', 'totaluniteplafondservice', 'chaine',1, $cpt, '', 1, $tempType->rowid);$cpt++;
 	
 	
 	$tempEven = new TRH_Type_Evenement;
-	$tempEven->chargement($ATMdb, 'Péage TVA', '', '0000', 'faux', $tempType->rowid);
+	$tempEven->chargement($PDOdb, 'Péage TVA', '', '0000', 'faux', $tempType->rowid);
 	$tempEven = new TRH_Type_Evenement;
-	$tempEven->chargement($ATMdb, 'FRAIS DE SERVICE PEAGE', '','0000', 'faux', $tempType->rowid);
+	$tempEven->chargement($PDOdb, 'FRAIS DE SERVICE PEAGE', '','0000', 'faux', $tempType->rowid);
 	$tempEven = new TRH_Type_Evenement;
-	$tempEven->chargement($ATMdb, 'Gazole Premier', '','0000', 'faux', $tempType->rowid);
+	$tempEven->chargement($PDOdb, 'Gazole Premier', '','0000', 'faux', $tempType->rowid);
 	$tempEven = new TRH_Type_Evenement;
-	$tempEven->chargement($ATMdb, 'Gazole Excellium','', '0000', 'faux', $tempType->rowid);
+	$tempEven->chargement($PDOdb, 'Gazole Excellium','', '0000', 'faux', $tempType->rowid);
 	$tempEven = new TRH_Type_Evenement;
-	$tempEven->chargement($ATMdb, 'GESTION +', '',  '0000', 'faux', $tempType->rowid);
+	$tempEven->chargement($PDOdb, 'GESTION +', '',  '0000', 'faux', $tempType->rowid);
 	$tempEven = new TRH_Type_Evenement;
-	$tempEven->chargement($ATMdb, 'FRAIS DE SERVICE PEAGE PARKING','', '0000', 'faux', $tempType->rowid);
+	$tempEven->chargement($PDOdb, 'FRAIS DE SERVICE PEAGE PARKING','', '0000', 'faux', $tempType->rowid);
 	$tempEven = new TRH_Type_Evenement;
-	$tempEven->chargement($ATMdb, 'FRAIS DE SERVICE PEAGE', '','0000', 'faux', $tempType->rowid);
+	$tempEven->chargement($PDOdb, 'FRAIS DE SERVICE PEAGE', '','0000', 'faux', $tempType->rowid);
 	$tempEven = new TRH_Type_Evenement;
-	$tempEven->chargement($ATMdb, 'Carte à puce offline', '','0000', 'faux', $tempType->rowid);
+	$tempEven->chargement($PDOdb, 'Carte à puce offline', '','0000', 'faux', $tempType->rowid);
 	$tempEven = new TRH_Type_Evenement;
-	$tempEven->chargement($ATMdb, 'Parking', '', '0000', 'faux', $tempType->rowid);
+	$tempEven->chargement($PDOdb, 'Parking', '', '0000', 'faux', $tempType->rowid);
 	$tempEven = new TRH_Type_Evenement;
-	$tempEven->chargement($ATMdb, 'SECU 24/24', '','0000', 'faux', $tempType->rowid);
+	$tempEven->chargement($PDOdb, 'SECU 24/24', '','0000', 'faux', $tempType->rowid);
 	
 	
 
@@ -140,111 +140,111 @@ $cpt = 0;
 
 //BADGE AREA
 	$tempType = new TRH_Ressource_type;
-	$tempType->chargement($ATMdb, 'Badge Area', 'badgearea', 1);
+	$tempType->chargement($PDOdb, 'Badge Area', 'badgearea', 1);
 	
 	$tempField = new TRH_Ressource_field;
-	$tempField->chargement($ATMdb,'Numéro carte', 'numcarte', 'chaine',0, 0, '', 1, $tempType->rowid);
+	$tempField->chargement($PDOdb,'Numéro carte', 'numcarte', 'chaine',0, 0, '', 1, $tempType->rowid);
 	$tempField = new TRH_Ressource_field;
-	$tempField->chargement($ATMdb,'Immatriculation carte', 'immCarte', 'chaine',0, 1, '', 1, $tempType->rowid);
+	$tempField->chargement($PDOdb,'Immatriculation carte', 'immCarte', 'chaine',0, 1, '', 1, $tempType->rowid);
 	$tempField = new TRH_Ressource_field;
-	$tempField->chargement($ATMdb,'Compte support', 'comptesupport', 'chaine',1, 4, '', 1, $tempType->rowid);
+	$tempField->chargement($PDOdb,'Compte support', 'comptesupport', 'chaine',1, 4, '', 1, $tempType->rowid);
 	
 	$tempEven = new TRH_Type_Evenement;
-	$tempEven->chargement($ATMdb, 'Trajet', '', '0000', 'faux', $tempType->rowid);
+	$tempEven->chargement($PDOdb, 'Trajet', '', '0000', 'faux', $tempType->rowid);
 	
 //TELEPHONE
 	$tempType = new TRH_Ressource_type;
-	$tempType->chargement($ATMdb, 'Téléphone', 'telephone', 1);
+	$tempType->chargement($PDOdb, 'Téléphone', 'telephone', 1);
 	
 	$tempField = new TRH_Ressource_field;
-	$tempField->chargement($ATMdb,'Marque', 'marquetel', 'chaine',0, 0, '', 1, $tempType->rowid);
+	$tempField->chargement($PDOdb,'Marque', 'marquetel', 'chaine',0, 0, '', 1, $tempType->rowid);
 	$tempField = new TRH_Ressource_field;
-	$tempField->chargement($ATMdb,'Modèle', 'modletel', 'chaine',0, 1, '', 1, $tempType->rowid);
+	$tempField->chargement($PDOdb,'Modèle', 'modletel', 'chaine',0, 1, '', 1, $tempType->rowid);
 	
 	
 	
 //CARTE SIM
 	$tempType = new TRH_Ressource_type;
-	$tempType->chargement($ATMdb, 'Carte SIM', 'carteSim', 1);
+	$tempType->chargement($PDOdb, 'Carte SIM', 'carteSim', 1);
 	
 	$tempField = new TRH_Ressource_field;
-	$tempField->chargement($ATMdb,'Numéro', 'numeroTel', 'chaine',0, 0, '', 1, $tempType->rowid);
+	$tempField->chargement($PDOdb,'Numéro', 'numeroTel', 'chaine',0, 0, '', 1, $tempType->rowid);
 	$tempField = new TRH_Ressource_field;
-	$tempField->chargement($ATMdb,'Coût minute interne', 'coutMinuteInt', 'float',0, 1, '', 1, $tempType->rowid);
+	$tempField->chargement($PDOdb,'Coût minute interne', 'coutMinuteInt', 'float',0, 1, '', 1, $tempType->rowid);
 	$tempField = new TRH_Ressource_field;
-	$tempField->chargement($ATMdb,'Coût minute externe', 'coutMinuteExt', 'float',0, 2, '', 1, $tempType->rowid);
+	$tempField->chargement($PDOdb,'Coût minute externe', 'coutMinuteExt', 'float',0, 2, '', 1, $tempType->rowid);
 	
 	
 	
 	$tempEven = new TRH_Type_Evenement;
-	$tempEven->chargement($ATMdb, 'Facture Téléphonique', 'factTel', '0000', 'faux', $tempType->rowid);
+	$tempEven->chargement($PDOdb, 'Facture Téléphonique', 'factTel', '0000', 'faux', $tempType->rowid);
 	
 	
 	/*$tempField = new TRH_Ressource_field;
-	$tempField->chargement($ATMdb,'Coût minutaire interne', 'coutMinuteInterne', 'chaine',0, 1, '', 1, $tempType->rowid);
+	$tempField->chargement($PDOdb,'Coût minutaire interne', 'coutMinuteInterne', 'chaine',0, 1, '', 1, $tempType->rowid);
 
-	$tempField->chargement($ATMdb,'Coût minutaire externe', 'coutMinuteExterne', 'chaine',0, 2, '', 1, $tempType->rowid);
+	$tempField->chargement($PDOdb,'Coût minutaire externe', 'coutMinuteExterne', 'chaine',0, 2, '', 1, $tempType->rowid);
 	/*
 
-	$tempField->chargement($ATMdb,'Communications vers fixe métropolitain en Euros ht', 'commFixeMetrop', 'chaine',1, 3, '', 1, $tempType->rowid);
+	$tempField->chargement($PDOdb,'Communications vers fixe métropolitain en Euros ht', 'commFixeMetrop', 'chaine',1, 3, '', 1, $tempType->rowid);
 
-	$tempField->chargement($ATMdb,'Communications vers mobiles Orange en Euros ht', 'commMobileOrange', 'chaine',1, 4, '', 1, $tempType->rowid);
+	$tempField->chargement($PDOdb,'Communications vers mobiles Orange en Euros ht', 'commMobileOrange', 'chaine',1, 4, '', 1, $tempType->rowid);
 
-	$tempField->chargement($ATMdb,'Communications vers mobiles SFR en Euros ht', 'commMobileSFR', 'chaine',1, 5, '', 1, $tempType->rowid);
+	$tempField->chargement($PDOdb,'Communications vers mobiles SFR en Euros ht', 'commMobileSFR', 'chaine',1, 5, '', 1, $tempType->rowid);
 
-	$tempField->chargement($ATMdb,'Communications vers mobiles Bouygues en Euros ht', 'commMobileBouygues', 'chaine',1, 6, '', 1, $tempType->rowid);
+	$tempField->chargement($PDOdb,'Communications vers mobiles Bouygues en Euros ht', 'commMobileBouygues', 'chaine',1, 6, '', 1, $tempType->rowid);
 
-	$tempField->chargement($ATMdb,'Communications vers l\'international en Euros ht', 'commToInternational', 'chaine',1, 7, '', 1, $tempType->rowid);
+	$tempField->chargement($PDOdb,'Communications vers l\'international en Euros ht', 'commToInternational', 'chaine',1, 7, '', 1, $tempType->rowid);
 
-	$tempField->chargement($ATMdb,'Communications depuis l\'international en Euros ht', 'commFromInternational', 'chaine',1, 8, '', 1, $tempType->rowid);
+	$tempField->chargement($PDOdb,'Communications depuis l\'international en Euros ht', 'commFromInternational', 'chaine',1, 8, '', 1, $tempType->rowid);
 
-	$tempField->chargement($ATMdb,'Communications internes en Euros ht', 'commInterne', 'chaine',1, 9, '', 1, $tempType->rowid);
+	$tempField->chargement($PDOdb,'Communications internes en Euros ht', 'commInterne', 'chaine',1, 9, '', 1, $tempType->rowid);
 
-	$tempField->chargement($ATMdb,'Communications VPNonsite en Euros ht', 'commVPN', 'chaine',1, 10, '', 1, $tempType->rowid);
+	$tempField->chargement($PDOdb,'Communications VPNonsite en Euros ht', 'commVPN', 'chaine',1, 10, '', 1, $tempType->rowid);
 
-	$tempField->chargement($ATMdb,'Connexions GPRS en Euros ht', 'connGPRS', 'chaine',1, 11, '', 1, $tempType->rowid);
+	$tempField->chargement($PDOdb,'Connexions GPRS en Euros ht', 'connGPRS', 'chaine',1, 11, '', 1, $tempType->rowid);
 
-	$tempField->chargement($ATMdb,'Connexions GPRS depuis l\'international en Euros ht', 'connGPRSFromInternational', 'chaine',1, 12, '', 1, $tempType->rowid);
+	$tempField->chargement($PDOdb,'Connexions GPRS depuis l\'international en Euros ht', 'connGPRSFromInternational', 'chaine',1, 12, '', 1, $tempType->rowid);
 
-	$tempField->chargement($ATMdb,'Connexions 3G en Euros ht', 'conn3G', 'chaine',1, 13, '', 1, $tempType->rowid);
+	$tempField->chargement($PDOdb,'Connexions 3G en Euros ht', 'conn3G', 'chaine',1, 13, '', 1, $tempType->rowid);
 
-	$tempField->chargement($ATMdb,'Connexions 3G depuis l’international en Euros ht', 'conn3GFromInternational', 'chaine',1, 14, '', 1, $tempType->rowid);
+	$tempField->chargement($PDOdb,'Connexions 3G depuis l’international en Euros ht', 'conn3GFromInternational', 'chaine',1, 14, '', 1, $tempType->rowid);
 
-	$tempField->chargement($ATMdb,'SMS en Euros ht', 'sms', 'chaine',1, 15, '', 1, $tempType->rowid);
+	$tempField->chargement($PDOdb,'SMS en Euros ht', 'sms', 'chaine',1, 15, '', 1, $tempType->rowid);
 
-	$tempField->chargement($ATMdb,'SMS sans frontière en Euros ht', 'smsSansFrontiere', 'chaine',1, 16, '', 1, $tempType->rowid);
+	$tempField->chargement($PDOdb,'SMS sans frontière en Euros ht', 'smsSansFrontiere', 'chaine',1, 16, '', 1, $tempType->rowid);
 
-	$tempField->chargement($ATMdb,'Service SMS en Euros ht', 'serviceSMS', 'chaine',1, 17, '', 1, $tempType->rowid);
+	$tempField->chargement($PDOdb,'Service SMS en Euros ht', 'serviceSMS', 'chaine',1, 17, '', 1, $tempType->rowid);
 
-	$tempField->chargement($ATMdb,'MMS en Euros ht', 'mms', 'chaine',1, 18, '', 1, $tempType->rowid);
+	$tempField->chargement($PDOdb,'MMS en Euros ht', 'mms', 'chaine',1, 18, '', 1, $tempType->rowid);
 
-	$tempField->chargement($ATMdb,'MMS sans frontière en Euros ht', 'mmsSansFrontiere', 'chaine',1, 19, '', 1, $tempType->rowid);
+	$tempField->chargement($PDOdb,'MMS sans frontière en Euros ht', 'mmsSansFrontiere', 'chaine',1, 19, '', 1, $tempType->rowid);
 
-	$tempField->chargement($ATMdb,'Connexions Wifi en Euros ht', 'ConnexionsWifi', 'chaine',1, 20, '', 1, $tempType->rowid);
+	$tempField->chargement($PDOdb,'Connexions Wifi en Euros ht', 'ConnexionsWifi', 'chaine',1, 20, '', 1, $tempType->rowid);
 
-	$tempField->chargement($ATMdb,'Connexions Wifi surtaxes en Euros ht', 'ConnexionsWifiSurtaxes', 'chaine',1, 21, '', 1, $tempType->rowid);
+	$tempField->chargement($PDOdb,'Connexions Wifi surtaxes en Euros ht', 'ConnexionsWifiSurtaxes', 'chaine',1, 21, '', 1, $tempType->rowid);
 
-	$tempField->chargement($ATMdb,'Wifi depuis l\'international en Euros ht', 'WifiFromInternational', 'chaine',1, 22, '', 1, $tempType->rowid);
+	$tempField->chargement($PDOdb,'Wifi depuis l\'international en Euros ht', 'WifiFromInternational', 'chaine',1, 22, '', 1, $tempType->rowid);
 
-	$tempField->chargement($ATMdb,'Autres communications en Euros ht', 'autresCommunications', 'chaine',1, 23, '', 1, $tempType->rowid);
+	$tempField->chargement($PDOdb,'Autres communications en Euros ht', 'autresCommunications', 'chaine',1, 23, '', 1, $tempType->rowid);
 
-	$tempField->chargement($ATMdb,'Communications au-delà Optima en Euros ht', 'commOptima', 'chaine',1, 24, '', 1, $tempType->rowid);
+	$tempField->chargement($PDOdb,'Communications au-delà Optima en Euros ht', 'commOptima', 'chaine',1, 24, '', 1, $tempType->rowid);
 
-	$tempField->chargement($ATMdb,'Dépassement facturation utilisateur en Euros ht', 'depassementFacturation', 'chaine',1, 25, '', 1, $tempType->rowid);
+	$tempField->chargement($PDOdb,'Dépassement facturation utilisateur en Euros ht', 'depassementFacturation', 'chaine',1, 25, '', 1, $tempType->rowid);
 
-	$tempField->chargement($ATMdb,'Déduction forfait unique en Euros ht', 'deductionForfait', 'chaine',1, 26, '', 1, $tempType->rowid);
+	$tempField->chargement($PDOdb,'Déduction forfait unique en Euros ht', 'deductionForfait', 'chaine',1, 26, '', 1, $tempType->rowid);
 
-	$tempField->chargement($ATMdb,'Total communications en Euros ht', 'totalComm', 'chaine',1, 27, '', 1, $tempType->rowid);
+	$tempField->chargement($PDOdb,'Total communications en Euros ht', 'totalComm', 'chaine',1, 27, '', 1, $tempType->rowid);
 
-	$tempField->chargement($ATMdb,'Communications semaine en Euros ht', 'commSemaine', 'chaine',1, 28, '', 1, $tempType->rowid);
+	$tempField->chargement($PDOdb,'Communications semaine en Euros ht', 'commSemaine', 'chaine',1, 28, '', 1, $tempType->rowid);
 
-	$tempField->chargement($ATMdb,'Communications week-end en Euros ht', 'commWeekEnd', 'chaine',1, 29, '', 1, $tempType->rowid);
+	$tempField->chargement($PDOdb,'Communications week-end en Euros ht', 'commWeekEnd', 'chaine',1, 29, '', 1, $tempType->rowid);
 
-	$tempField->chargement($ATMdb,'Libellé de la flotte', 'libFlotte', 'chaine',1, 30, '', 1, $tempType->rowid);
+	$tempField->chargement($PDOdb,'Libellé de la flotte', 'libFlotte', 'chaine',1, 30, '', 1, $tempType->rowid);
 	 */
 		
 
-$ATMdb->close();
+$PDOdb->close();
 
 
 
