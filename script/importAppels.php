@@ -5,7 +5,7 @@ require('../class/ressource.class.php');
 
 global $conf;
 
-$ATMdb=new TPDOdb;
+$PDOdb=new TPDOdb;
 $default = 100000; //consideration conso infinie
 		
 //on charge quelques listes pour avoir les clés externes.
@@ -13,16 +13,16 @@ $TUser = array();
 $TCompteurs = array();
 $TLimites = array();
 $sql="SELECT rowid, lastname, firstname FROM ".MAIN_DB_PREFIX."user WHERE entity=".$conf->entity;
-$ATMdb->Execute($sql);
-while($ATMdb->Get_line()) {
-	$TUser[strtolower($ATMdb->Get_field('firstname').' '.$ATMdb->Get_field('lastname'))] = $ATMdb->Get_field('rowid');
-	$TCompteurs[$ATMdb->Get_field('rowid')] = array(
+$PDOdb->Execute($sql);
+while($PDOdb->Get_line()) {
+	$TUser[strtolower($PDOdb->Get_field('firstname').' '.$PDOdb->Get_field('lastname'))] = $PDOdb->Get_field('rowid');
+	$TCompteurs[$PDOdb->Get_field('rowid')] = array(
 		'consoInterne' => 0 	//en sec
 		,'consoExterne' => 0 	//en sec
 		,'conso3G' => 0
 		,'consoSMS' => 0
 		);
-	$TLimites[$ATMdb->Get_field('rowid')] = array(
+	$TLimites[$PDOdb->Get_field('rowid')] = array(
 		'limInterne' => $default	//en sec
 		,'limExterne' => $default	//en sec
 		,'lim3G' => $default
@@ -34,9 +34,9 @@ while($ATMdb->Get_line()) {
 /*
 $TNumero = array();
 $sql="SELECT rowid, numero FROM ".MAIN_DB_PREFIX."rh_ressource WHERE entity=".$conf->entity;
-$ATMdb->Execute($sql);
-while($ATMdb->Get_line()) {
-	$TNumero[$ATMdb->Get_field('numero')] = $ATMdb->Get_field('rowid');
+$PDOdb->Execute($sql);
+while($PDOdb->Get_line()) {
+	$TNumero[$PDOdb->Get_field('numero')] = $PDOdb->Get_field('rowid');
 	}
 //*/
 
@@ -46,9 +46,9 @@ $sql="SELECT fk_user, fk_usergroup
 	FROM ".MAIN_DB_PREFIX."usergroup_user
 	WHERE entity=".$conf->entity."
 	";
-$ATMdb->Execute($sql);
-while($ATMdb->Get_line()) {
-	$TGroups[$ATMdb->Get_field('fk_usergroup')][] = $ATMdb->Get_field('fk_user');
+$PDOdb->Execute($sql);
+while($PDOdb->Get_line()) {
+	$TGroups[$PDOdb->Get_field('fk_usergroup')][] = $PDOdb->Get_field('fk_user');
 
 }
 
@@ -59,36 +59,36 @@ $sql="SELECT fk_user, fk_usergroup, choixApplication, dureeHInt, dureeMInt, dure
 	WHERE entity=".$conf->entity."
 	";
 
-$ATMdb->Execute($sql);
-while($ATMdb->Get_line()) {
-	if ($ATMdb->Get_field('choixApplication')=='user'){
-		modifierLimites($TLimites, $ATMdb->Get_field('fk_user')
-			, $ATMdb->Get_field('dureeHInt')
-			, $ATMdb->Get_field('dureeMInt')
-			, $ATMdb->Get_field('dureeHExt')
-			, $ATMdb->Get_field('dureeMExt')
-			, $ATMdb->Get_field('limSMS')
+$PDOdb->Execute($sql);
+while($PDOdb->Get_line()) {
+	if ($PDOdb->Get_field('choixApplication')=='user'){
+		modifierLimites($TLimites, $PDOdb->Get_field('fk_user')
+			, $PDOdb->Get_field('dureeHInt')
+			, $PDOdb->Get_field('dureeMInt')
+			, $PDOdb->Get_field('dureeHExt')
+			, $PDOdb->Get_field('dureeMExt')
+			, $PDOdb->Get_field('limSMS')
 			);
 		}
-	else if ($ATMdb->Get_field('choixApplication')=='group'){
-		foreach ($TGroups[$ATMdb->Get_field('fk_usergroup')] as $members) {
+	else if ($PDOdb->Get_field('choixApplication')=='group'){
+		foreach ($TGroups[$PDOdb->Get_field('fk_usergroup')] as $members) {
 			modifierLimites($TLimites, $members
-				, $ATMdb->Get_field('dureeHInt')
-				, $ATMdb->Get_field('dureeMInt')
-				, $ATMdb->Get_field('dureeHExt')
-				, $ATMdb->Get_field('dureeMExt')
-				, $ATMdb->Get_field('limSMS')
+				, $PDOdb->Get_field('dureeHInt')
+				, $PDOdb->Get_field('dureeMInt')
+				, $PDOdb->Get_field('dureeHExt')
+				, $PDOdb->Get_field('dureeMExt')
+				, $PDOdb->Get_field('limSMS')
 				);
 			}
 		}
-	else if ($ATMdb->Get_field('choixApplication')=='all'){
+	else if ($PDOdb->Get_field('choixApplication')=='all'){
 		foreach ($TUser as $idUser) {
 			modifierLimites($TLimites, $idUser
-				, $ATMdb->Get_field('dureeHInt')
-				, $ATMdb->Get_field('dureeMInt')
-				, $ATMdb->Get_field('dureeHExt')
-				, $ATMdb->Get_field('dureeMExt')
-				, $ATMdb->Get_field('limSMS')
+				, $PDOdb->Get_field('dureeHInt')
+				, $PDOdb->Get_field('dureeMInt')
+				, $PDOdb->Get_field('dureeHExt')
+				, $PDOdb->Get_field('dureeMExt')
+				, $PDOdb->Get_field('limSMS')
 				);
 			}
 		}
@@ -144,7 +144,7 @@ if (($handle = fopen($nomFichier, "r")) !== FALSE) {
 			$temp->coutEntrepriseHT = (float)$infos[12];
 			$temp->coutHT = (float)$infos[12];
 			echo ' : Ajoutee.';
-			$temp->save($ATMdb);		
+			$temp->save($PDOdb);		
 			//*/
 			
 			//echo $TUser[];

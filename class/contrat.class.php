@@ -25,42 +25,42 @@ class TRH_Contrat  extends TObjetStd {
 		
 	}
 	
-	function load_liste(&$ATMdb){
+	function load_liste(&$PDOdb){
 		global $conf;
 		//chargement des listes pour les combos
 		
 		$this->TTypeRessource = array();
 		$sqlReq="SELECT rowid, libelle FROM ".MAIN_DB_PREFIX."rh_ressource_type ";
-		$ATMdb->Execute($sqlReq);
-		while($ATMdb->Get_line()) {
-			$this->TTypeRessource[$ATMdb->Get_field('rowid')] = $ATMdb->Get_field('libelle');
+		$PDOdb->Execute($sqlReq);
+		while($PDOdb->Get_line()) {
+			$this->TTypeRessource[$PDOdb->Get_field('rowid')] = $PDOdb->Get_field('libelle');
 			}
 		
 		//chargement d'une liste de touts les groupes
 		$this->TAgence = array();
 		//$sqlReq="SELECT rowid, nom FROM ".MAIN_DB_PREFIX."usergroup WHERE entity IN (0,".$conf->entity.")";
 		$sqlReq="SELECT rowid, nom FROM ".MAIN_DB_PREFIX."usergroup";
-		$ATMdb->Execute($sqlReq);
-		while($ATMdb->Get_line()) {
-			$this->TAgence[$ATMdb->Get_field('rowid')] = htmlentities($ATMdb->Get_field('nom'), ENT_COMPAT , 'ISO8859-1');
+		$PDOdb->Execute($sqlReq);
+		while($PDOdb->Get_line()) {
+			$this->TAgence[$PDOdb->Get_field('rowid')] = htmlentities($PDOdb->Get_field('nom'), ENT_COMPAT , 'ISO8859-1');
 			}
 		
 		//chargement d'une liste des tiers
 		$this->TFournisseur = array();
 		//$sqlReq="SELECT rowid, nom FROM ".MAIN_DB_PREFIX."societe WHERE entity IN (0,".$conf->entity.")";
 		$sqlReq="SELECT rowid, nom FROM ".MAIN_DB_PREFIX."societe";
-		$ATMdb->Execute($sqlReq);
-		while($ATMdb->Get_line()) {
-			$this->TFournisseur[$ATMdb->Get_field('rowid')] = htmlentities($ATMdb->Get_field('nom'), ENT_COMPAT , 'ISO8859-1');
+		$PDOdb->Execute($sqlReq);
+		while($PDOdb->Get_line()) {
+			$this->TFournisseur[$PDOdb->Get_field('rowid')] = htmlentities($PDOdb->Get_field('nom'), ENT_COMPAT , 'ISO8859-1');
 			}
 		
 		
 		//chargement d'une liste de toutes les TVA
 		$this->TTVA = array();
 		$sqlReq="SELECT rowid, taux FROM ".MAIN_DB_PREFIX."c_tva WHERE fk_pays=".$conf->global->MAIN_INFO_SOCIETE_COUNTRY[0];
-		$ATMdb->Execute($sqlReq);
-		while($ATMdb->Get_line()) {
-			$this->TTVA[$ATMdb->Get_field('rowid')] = $ATMdb->Get_field('taux');
+		$PDOdb->Execute($sqlReq);
+		while($PDOdb->Get_line()) {
+			$this->TTVA[$PDOdb->Get_field('rowid')] = $PDOdb->Get_field('taux');
 			}
 		
 	}
@@ -76,14 +76,14 @@ class TRH_Contrat  extends TObjetStd {
 		parent::save($db);
 	}
 	
-	function delete(&$ATMdb){
+	function delete(&$PDOdb){
 		global $conf;
 		//avant de supprimer le contrat, on supprime les liaisons contrat-ressource associés.
 		$sql="DELETE FROM ".MAIN_DB_PREFIX."rh_contrat_ressource WHERE fk_rh_contrat=".$this->getId();
-		$ATMdb->Execute($sql);
+		$PDOdb->Execute($sql);
 		
 		//puis on supprime le contrat.
-		parent::delete($ATMdb);
+		parent::delete($PDOdb);
 		
 		
 	}

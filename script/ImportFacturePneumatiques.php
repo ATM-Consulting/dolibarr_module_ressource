@@ -17,7 +17,7 @@ require('../class/contrat.class.php');
 global $conf;
 $entity = (isset($_REQUEST['entity'])) ? $_REQUEST['entity'] : $conf->entity;
 
-$ATMdb=new TPDOdb;
+$PDOdb=new TPDOdb;
 
 $mapping = array(
 				'id_agence'=>0
@@ -40,7 +40,7 @@ $mapping = array(
 $timestart=microtime(true);
 
 $idVoiture = getIdType('voiture');
-$idTiers = getIdSociete($ATMdb, strtolower('Cote-Route'));
+$idTiers = getIdSociete($PDOdb, strtolower('Cote-Route'));
 if (!$idTiers){echo 'Pas de fournisseur (tiers) du nom de "Cote-Route" ! Pensez à le créer';exit();}
 
 if ($idTiers == 0){echo 'Aucun fournisseur du nom de "Cote-Route" ! Pensez à le créer';exit;}
@@ -84,7 +84,7 @@ if (($handle = fopen($nomFichier, "r")) !== FALSE) {
 	echo '</pre>';*/
 	
 		$r = new TRH_Ressource;
-		$r->load_by_numId($ATMdb, $infos[$mapping['vehicule']]);
+		$r->load_by_numId($PDOdb, $infos[$mapping['vehicule']]);
 		
 		if($r->rowid <= 0) $TVehiculesNonTrouve[] = array('line'=>$numLigne, 'num_id'=>$infos[$mapping['vehicule']]);
 		
@@ -97,7 +97,7 @@ if (($handle = fopen($nomFichier, "r")) !== FALSE) {
 			
 			//echo $infos[$mapping['vehicule']].' : '.$r->typevehicule.'<br>';
 			
-			$idUser = ressourceIsEmpruntee($ATMdb, $r->rowid, $date);
+			$idUser = ressourceIsEmpruntee($PDOdb, $r->rowid, $date);
 			if(empty($idUser)) $idUser = 3;
 			
 			$fact = new TRH_Evenement;
@@ -132,7 +132,7 @@ if (($handle = fopen($nomFichier, "r")) !== FALSE) {
 			$fact->fk_fournisseur = $idTiers;
 			$fact->idImport = $idImport;
 			$fact->date_facture = dateToInt($infos[$mapping['date_facture']]);
-			$fact->save($ATMdb);
+			$fact->save($PDOdb);
 			$cptFactureLoyer++;
 			
 			print '<tr>';

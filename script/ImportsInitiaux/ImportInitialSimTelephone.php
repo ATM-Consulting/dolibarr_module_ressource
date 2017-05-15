@@ -9,7 +9,7 @@ require('../../class/ressource.class.php');
 require('../../lib/ressource.lib.php');
 
 global $conf;
-$ATMdb=new TPDOdb;
+$PDOdb=new TPDOdb;
 // relever le point de départ
 $timestart=microtime(true);
 
@@ -17,18 +17,18 @@ $timestart=microtime(true);
 //on charge quelques listes pour avoir les clés externes.
 $TTrigramme = array();
 $sql="SELECT rowid, lastname, firstname,login FROM ".MAIN_DB_PREFIX."user WHERE entity IN (0,".$conf->entity.")";
-$ATMdb->Execute($sql);
-while($ATMdb->Get_line()) {
-	 /*strtoupper($ATMdb->Get_field('firstname')).' '.strtoupper($ATMdb->Get_field('name'))*/
-	$TTrigramme[strtolower($ATMdb->Get_field('login'))] = $ATMdb->Get_field('rowid');
+$PDOdb->Execute($sql);
+while($PDOdb->Get_line()) {
+	 /*strtoupper($PDOdb->Get_field('firstname')).' '.strtoupper($PDOdb->Get_field('name'))*/
+	$TTrigramme[strtolower($PDOdb->Get_field('login'))] = $PDOdb->Get_field('rowid');
 	}
 
 
 $TGroups = array();
 $sql="SELECT rowid, nom FROM ".MAIN_DB_PREFIX."usergroup WHERE entity IN (0,".$conf->entity.")";
-$ATMdb->Execute($sql);
-while($ATMdb->Get_line()) {
-	$TGroups[$ATMdb->Get_field('nom')] = $ATMdb->Get_field('rowid');
+$PDOdb->Execute($sql);
+while($PDOdb->Get_line()) {
+	$TGroups[$PDOdb->Get_field('nom')] = $PDOdb->Get_field('rowid');
 }
 //------------------------------------------------------------------------------------------
 //--------------------------------------Import des téléphones-------------------------------
@@ -39,9 +39,9 @@ $idSim = getIdType('carteSim');
 $TUserInexistants = array();
 $TUser = array();
 $sql="SELECT rowid, lastname, firstname FROM ".MAIN_DB_PREFIX."user WHERE entity IN (0,".$conf->entity.") ";
-$ATMdb->Execute($sql);
-while($ATMdb->Get_line()) {
-	$TUser[strtoupper($ATMdb->Get_field('name').' '.$ATMdb->Get_field('firstname'))] = $ATMdb->Get_field('rowid');
+$PDOdb->Execute($sql);
+while($PDOdb->Get_line()) {
+	$TUser[strtoupper($PDOdb->Get_field('name').' '.$PDOdb->Get_field('firstname'))] = $PDOdb->Get_field('rowid');
 	}
 //print_r($TUser);exit();
 
@@ -49,7 +49,7 @@ $nomFichier = "reglesAppels.csv";
 echo 'Traitement du fichier '.$nomFichier.' : <br>';
 $cptTel = 0;
 $cptAttr = 0;
-$TNumero = getIDRessource($ATMdb, $idSim);
+$TNumero = getIDRessource($PDOdb, $idSim);
 
 //début du parsing
 $numLigne = 0;
@@ -95,7 +95,7 @@ if (($handle = fopen("../fichierImports/".$nomFichier, "r")) !== FALSE) {
 			
 				$tel = new TRH_Ressource;
 				$tel->fk_rh_ressource_type = $idTel;
-				$tel->load_ressource_type($ATMdb);
+				$tel->load_ressource_type($PDOdb);
 				$tel->numId = 'Téléphone n°'.$cptTel;
 				$tel->libelle = empty($marque) ? 'Téléphone' : $marque.' '.$modle;
 				$tel->fk_proprietaire = $TAgence[strtolower($infos[3])];
@@ -103,12 +103,12 @@ if (($handle = fopen("../fichierImports/".$nomFichier, "r")) !== FALSE) {
 				$tel->set_date('date_garantie', '');
 				$tel->marquetel = $marque;	
 				$tel->modletel	= $modle;
-				$tel->save($ATMdb);
+				$tel->save($PDOdb);
 				
 				$sim = new TRH_Ressource;
 				$sim->fk_rh_ressource_type = $idSim;
 				$sim->fk_rh_ressource = $tel->getId(); //association de la carte Sim au Téléphone.
-				$sim->load_ressource_type($ATMdb);
+				$sim->load_ressource_type($PDOdb);
 				$sim->numId = $numIdSim;
 				$sim->libelle = 'Carte Sim '.$numIdSim;
 				$sim->fk_proprietaire = $TAgence[strtolower($infos[3])];
@@ -117,7 +117,7 @@ if (($handle = fopen("../fichierImports/".$nomFichier, "r")) !== FALSE) {
 				$sim->numerotel = $numIdSim;
 				$sim->coutminuteint = 0.09;
 				$sim->coutminuteext = 0.09;
-				$sim->save($ATMdb);
+				$sim->save($PDOdb);
 				$TNumero[$numIdSim] = $sim->getId();
 				
 				if (!empty($TUser[strtoupper($nom.' '.$prenom)])){
@@ -129,7 +129,7 @@ if (($handle = fopen("../fichierImports/".$nomFichier, "r")) !== FALSE) {
 					$emprunt->fk_rh_ressource_type = $idTel;
 					$emprunt->set_date('date_debut', '01/01/2013');
 					$emprunt->set_date('date_fin', '31/12/2013');
-					$emprunt->save($ATMdb);
+					$emprunt->save($PDOdb);
 				}
 				else {
 					$TUserInexistants[$nom.' '.$prenom] = 1;
@@ -155,5 +155,5 @@ echo $cptAttr.' Telephones liés à un user.<br>';
 $timeend=microtime(true);
 $page_load_time = number_format($timeend-$timestart, 3);
 echo 'Fin du traitement. Durée : '.$page_load_time . " sec<br><br>";
-$ATMdb->close();
+$PDOdb->close();
 

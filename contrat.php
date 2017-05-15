@@ -6,7 +6,7 @@
 	$langs->load('ressource@ressource');
 	
 	//if (!$user->rights->financement->affaire->read)	{ accessforbidden(); }
-	$ATMdb=new TPDOdb;
+	$PDOdb=new TPDOdb;
 	$contrat=new TRH_contrat;
 	
 	$mesg = '';
@@ -17,20 +17,20 @@
 			case 'add':
 			case 'new':
 				$contrat->set_values($_REQUEST);
-				_fiche($ATMdb, $contrat,'new');
+				_fiche($PDOdb, $contrat,'new');
 				
 				break;	
 			case 'edit'	:
-				$contrat->load($ATMdb, $_REQUEST['id']);
-				_fiche($ATMdb, $contrat,'edit');
+				$contrat->load($PDOdb, $_REQUEST['id']);
+				_fiche($PDOdb, $contrat,'edit');
 				break;
 				
 			case 'save':
-				//$ATMdb->db->debug=true;
-				$contrat->load($ATMdb, $_REQUEST['id']);
+				//$PDOdb->db->debug=true;
+				$contrat->load($PDOdb, $_REQUEST['id']);
 				$contrat->set_values($_REQUEST);
-				$contrat->save($ATMdb);
-				$contrat->load($ATMdb, $_REQUEST['id']);
+				$contrat->save($PDOdb);
+				$contrat->load($PDOdb, $_REQUEST['id']);
 				if ($_REQUEST['libelle']!=''){
 					
 					$mesg = '<div class="ok">Modifications effectuées</div>';
@@ -41,18 +41,18 @@
 					$mode = 'edit';
 				}
 
-					_fiche($ATMdb, $contrat,$mode);
+					_fiche($PDOdb, $contrat,$mode);
 				break;
 			
 			case 'view':
-				$contrat->load($ATMdb, $_REQUEST['id']);
-				_fiche($ATMdb, $contrat,'view');
+				$contrat->load($PDOdb, $_REQUEST['id']);
+				_fiche($PDOdb, $contrat,'view');
 				break;
 
 			case 'delete':
-				//$ATMdb->db->debug=true;
-				$contrat->load($ATMdb, $_REQUEST['id']);
-				$contrat->delete($ATMdb);
+				//$PDOdb->db->debug=true;
+				$contrat->load($PDOdb, $_REQUEST['id']);
+				$contrat->delete($PDOdb);
 				?>
 				<script language="javascript">
 					document.location.href="?delete_ok=1";					
@@ -62,23 +62,23 @@
 		}
 	}
 	elseif(isset($_REQUEST['id'])) {
-		$contrat->load($ATMdb, $_REQUEST['id']);
-		_fiche($ATMdb, $contrat, 'view');
+		$contrat->load($PDOdb, $_REQUEST['id']);
+		_fiche($PDOdb, $contrat, 'view');
 	}
 	else {
 		/*
 		 * Liste
 		 */
-		 //$ATMdb->db->debug=true;
-		 _liste($ATMdb, $contrat);
+		 //$PDOdb->db->debug=true;
+		 _liste($PDOdb, $contrat);
 	}
 	
 	
-	$ATMdb->close();
+	$PDOdb->close();
 	
 	llxFooter();
 	
-function _liste(&$ATMdb, &$contrat) {
+function _liste(&$PDOdb, &$contrat) {
 	global $langs,$conf,$db,$user;
 	llxHeader('','Liste des contrats');
 	print dol_get_fiche_head(array()  , '', 'Liste contrats');
@@ -112,7 +112,7 @@ function _liste(&$ATMdb, &$contrat) {
 	if(isset($_REQUEST['orderUp']))$TOrder = array($_REQUEST['orderUp']=>'ASC');
 				
 	$page = isset($_REQUEST['page']) ? $_REQUEST['page'] : 1;
-	$r->liste($ATMdb, $sql, array(
+	$r->liste($PDOdb, $sql, array(
 		'limit'=>array(
 			'page'=>$page
 			,'nbLine'=>'30'
@@ -155,7 +155,7 @@ function _liste(&$ATMdb, &$contrat) {
 	llxFooter();
 }	
 	
-function _fiche(&$ATMdb, &$contrat, $mode) {
+function _fiche(&$PDOdb, &$contrat, $mode) {
 	global $db,$user, $conf;
 	llxHeader('', 'Contrat');
 
@@ -164,7 +164,7 @@ function _fiche(&$ATMdb, &$contrat, $mode) {
 	$form->Set_typeaff($mode);
 	echo $form->hidden('id', $contrat->getId());
 	echo $form->hidden('action', 'save');
-	$contrat->load_liste($ATMdb);
+	$contrat->load_liste($PDOdb);
 	
 	$TBS=new TTemplateTBS();
 	print $TBS->render('./tpl/contrat.tpl.php'
@@ -230,7 +230,7 @@ function _fiche(&$ATMdb, &$contrat, $mode) {
 					
 		$page = isset($_REQUEST['page']) ? $_REQUEST['page'] : 1;			
 		//print $page;
-		$r->liste($ATMdb, $sql, array(
+		$r->liste($PDOdb, $sql, array(
 			'limit'=>array(
 				'page'=>$page
 				,'nbLine'=>'30'
@@ -270,7 +270,7 @@ function _fiche(&$ATMdb, &$contrat, $mode) {
 		if(isset($_REQUEST['orderUp']))$TOrder = array($_REQUEST['orderUp']=>'ASC');
 					
 		$page = isset($_REQUEST['page']) ? $_REQUEST['page'] : 1;
-		$r->liste($ATMdb, $sql, array(
+		$r->liste($PDOdb, $sql, array(
 			'limit'=>array(
 				'page'=>$page
 				,'nbLine'=>'30'

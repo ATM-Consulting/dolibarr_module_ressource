@@ -12,35 +12,35 @@
 
 global $conf;
 
-$ATMdb=new TPDOdb;
+$PDOdb=new TPDOdb;
 
 // relever le point de départ
 $timestart=microtime(true);
 
 $TUser = array();
 $sql="SELECT rowid, lastname, firstname FROM ".MAIN_DB_PREFIX."user WHERE entity=".$conf->entity;
-$ATMdb->Execute($sql);
-while($ATMdb->Get_line()) {
-	$TUser[strtolower($ATMdb->Get_field('lastname'))] = $ATMdb->Get_field('rowid');
+$PDOdb->Execute($sql);
+while($PDOdb->Get_line()) {
+	$TUser[strtolower($PDOdb->Get_field('lastname'))] = $PDOdb->Get_field('rowid');
 }
 
 		
-$idVoiture = getIdTypeVoiture($ATMdb);
-$idArea = getIdSociete($ATMdb, 'area');
+$idVoiture = getIdTypeVoiture($PDOdb);
+$idArea = getIdSociete($PDOdb, 'area');
 if (!$idArea){echo 'Pas de fournisseur (tiers) du nom de Area !';exit();}
 if (empty($nomFichier)){$nomFichier = "./fichierImports/fichier facture area.CSV";}
 $message = 'Traitement du fichier '.$nomFichier.' : <br><br>';
 
-$TRessource = chargeVoiture($ATMdb);
-$TEmprunts = chargeEmprunts($ATMdb);
-$TAssocies = chargeAssocies($ATMdb);
+$TRessource = chargeVoiture($PDOdb);
+$TEmprunts = chargeEmprunts($PDOdb);
+$TAssocies = chargeAssocies($PDOdb);
 $TCarteInexistantes = array();
 $TCarteNonAttribue = array();
 $cpt =0;
 //print_r($TRessource);
 
 $idImport = Tools::url_format(basename($nomFichier), false, true);
-$ATMdb->Execute("DELETE FROM ".MAIN_DB_PREFIX."rh_evenement WHERE idImport='$idImport'");
+$PDOdb->Execute("DELETE FROM ".MAIN_DB_PREFIX."rh_evenement WHERE idImport='$idImport'");
 
 //début du parsing
 $numLigne = 0;
@@ -50,7 +50,7 @@ if (($handle = fopen($nomFichier, "r")) !== FALSE) {
 		$infos = explode(';', $data[0]);
 		
 		$temp = new TRH_Evenement;
-		$temp->load_liste($ATMdb);
+		$temp->load_liste($PDOdb);
 		if (strpos((string) $infos[10], 'Trajet') !== FALSE ){
 			if (! array_key_exists ( $infos[6] , $TRessource )){
 				//echo 'Pas de carte  correspondante : '.$infos[6].'<br>';
@@ -99,7 +99,7 @@ if (($handle = fopen($nomFichier, "r")) !== FALSE) {
 				
 				$temp->idImport = $idImport;
 				
-				$temp->save($ATMdb);
+				$temp->save($PDOdb);
 				$cpt ++;
 			}
 		}
@@ -122,15 +122,15 @@ $message .= $cpt." événements trajets rajoutés.<br>";
 $message .= 'Fin du traitement. Durée : '.$page_load_time . " sec.<br><br>";
 send_mail_resources('Import - Factures AREA',$message);
 
-function chargeAssocies(&$ATMdb){
+function chargeAssocies(&$PDOdb){
 	global $conf;
 	$sqlReq="SELECT rowid, fk_rh_ressource 
 	FROM ".MAIN_DB_PREFIX."rh_ressource 
 	WHERE entity=".$conf->entity;
 	$TAssoc = array();
-	$ATMdb->Execute($sqlReq);
-	while($ATMdb->Get_line()) {
-		$TAssoc[$ATMdb->Get_field('rowid')] = $ATMdb->Get_field('fk_rh_ressource');
+	$PDOdb->Execute($sqlReq);
+	while($PDOdb->Get_line()) {
+		$TAssoc[$PDOdb->Get_field('rowid')] = $PDOdb->Get_field('fk_rh_ressource');
 	}
 	return $TAssoc;
 	
@@ -148,7 +148,7 @@ function getUser(&$listeEmprunts , $id, $jour){
 	return 0;
 }
 
-function chargeEmprunts(&$ATMdb){
+function chargeEmprunts(&$PDOdb){
 	global $conf;
 	$sqlReq="SELECT DISTINCT e.date_debut, e.date_fin , e.fk_user, e.fk_rh_ressource, u.firstname, u.lastname 
 	FROM ".MAIN_DB_PREFIX."rh_evenement as e  
@@ -157,42 +157,42 @@ function chargeEmprunts(&$ATMdb){
 	AND e.entity=".$conf->entity."
 	ORDER BY date_debut";
 	$TUsers = array();
-	$ATMdb->Execute($sqlReq);
-	while($ATMdb->Get_line()) {
-		$TUsers[$ATMdb->Get_field('fk_rh_ressource')][] = array(
-			'debut'=>$ATMdb->Get_field('date_debut')
-			,'fin'=>$ATMdb->Get_field('date_fin')
-			,'fk_user'=>$ATMdb->Get_field('fk_user')
-			,'user'=>$ATMdb->Get_field('firstname').' '.$ATMdb->Get_field('lastname')
+	$PDOdb->Execute($sqlReq);
+	while($PDOdb->Get_line()) {
+		$TUsers[$PDOdb->Get_field('fk_rh_ressource')][] = array(
+			'debut'=>$PDOdb->Get_field('date_debut')
+			,'fin'=>$PDOdb->Get_field('date_fin')
+			,'fk_user'=>$PDOdb->Get_field('fk_user')
+			,'user'=>$PDOdb->Get_field('firstname').' '.$PDOdb->Get_field('lastname')
 		);
 	}
 	return $TUsers;
 }
 
-function chargeVoiture(&$ATMdb){
+function chargeVoiture(&$PDOdb){
 	global $conf;
 	$TRessource = array();
 	$sql="SELECT r.rowid as 'ID', t.rowid as 'IdType', r.numId FROM ".MAIN_DB_PREFIX."rh_ressource as r 
 	LEFT JOIN ".MAIN_DB_PREFIX."rh_ressource_type as t on (r.fk_rh_ressource_type = t.rowid)
 	WHERE r.entity=".$conf->entity."
 	 AND (t.code='voiture' OR t.code='cartearea') ";
-	$ATMdb->Execute($sql);
-	while($ATMdb->Get_line()) {
-		$TRessource[$ATMdb->Get_field('numId')] = $ATMdb->Get_field('ID');
+	$PDOdb->Execute($sql);
+	while($PDOdb->Get_line()) {
+		$TRessource[$PDOdb->Get_field('numId')] = $PDOdb->Get_field('ID');
 		}
 	return $TRessource;
 }
 
 
-function getIdTypeVoiture(&$ATMdb){
+function getIdTypeVoiture(&$PDOdb){
 	global $conf;
 	
 	$sql="SELECT rowid as 'IdType' FROM ".MAIN_DB_PREFIX."rh_ressource_type 
 	WHERE entity=".$conf->entity."
 	 AND code='voiture' ";
-	$ATMdb->Execute($sql);
-	while($ATMdb->Get_line()) {
-		$idVoiture = $ATMdb->Get_field('IdType');
+	$PDOdb->Execute($sql);
+	while($PDOdb->Get_line()) {
+		$idVoiture = $PDOdb->Get_field('IdType');
 		}
 	return $idVoiture;
 }

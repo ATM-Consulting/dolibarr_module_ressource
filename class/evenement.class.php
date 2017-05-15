@@ -52,17 +52,17 @@ class TRH_Evenement  extends TObjetStd {
 			
 	}
 
-	function load(&$ATMdb, $id, $annexe=false) {
+	function load(&$PDOdb, $id, $annexe=false) {
 		global $conf;
 		
-		parent::load($ATMdb, $id);
+		parent::load($PDOdb, $id);
 		if($annexe) {
-			$this->load_liste($ATMdb);
+			$this->load_liste($PDOdb);
 			$this->load_liste_type($this->fk_rh_ressource_type);
 		}
 	}
 
-	function load_liste(&$ATMdb){
+	function load_liste(&$PDOdb){
 		global $conf, $user;
 		
 		list($fk_pays) = explode(':',$conf->global->MAIN_INFO_SOCIETE_COUNTRY);
@@ -70,17 +70,17 @@ class TRH_Evenement  extends TObjetStd {
 		//chargement d'une liste de touts les TVA (pour le combo "TVA")
 		$this->TTVA = array();
 		$sqlReq="SELECT rowid, taux FROM ".MAIN_DB_PREFIX."c_tva WHERE fk_pays=".$fk_pays.' AND active=1';
-		$ATMdb->Execute($sqlReq);
-		while($ATMdb->Get_line()) {
-			$this->TTVA[$ATMdb->Get_field('rowid')] = $ATMdb->Get_field('taux');
+		$PDOdb->Execute($sqlReq);
+		while($PDOdb->Get_line()) {
+			$this->TTVA[$PDOdb->Get_field('rowid')] = $PDOdb->Get_field('taux');
 		}
 		
 		//chargement d'une liste de touts les users (pour le combo "Utilisateur")
 		$this->TUser = array();
 		$sqlReq="SELECT rowid, firstname, lastname FROM ".MAIN_DB_PREFIX."user WHERE entity IN (0,".$conf->entity.") ORDER BY lastname, firstname";
-		$ATMdb->Execute($sqlReq);
-		while($ATMdb->Get_line()) {
-			$this->TUser[$ATMdb->Get_field('rowid')] = htmlentities($ATMdb->Get_field('firstname')." ".strtoupper($ATMdb->Get_field('lastname')), ENT_COMPAT , 'ISO8859-1'); 
+		$PDOdb->Execute($sqlReq);
+		while($PDOdb->Get_line()) {
+			$this->TUser[$PDOdb->Get_field('rowid')] = htmlentities($PDOdb->Get_field('firstname')." ".strtoupper($PDOdb->Get_field('lastname')), ENT_COMPAT , 'ISO8859-1'); 
 		}
 	}
 
@@ -146,7 +146,7 @@ class TRH_Evenement  extends TObjetStd {
 		
 	}
 	
-	function attributionAuto(&$ATMdb){
+	function attributionAuto(&$PDOdb){
 		global $conf, $db, $TGroupeAutomaticAttributionByAnalytique;
 		
 		if(defined('AUTOMATIC_ATTRIBUTION_USER_ENTITY_ON_RESSOURCE') && AUTOMATIC_ATTRIBUTION_USER_ENTITY_ON_RESSOURCE 
@@ -156,7 +156,7 @@ class TRH_Evenement  extends TObjetStd {
 		){
 			
 			$ressource = new TRH_Ressource();
-			$ressource->load($ATMdb, $this->fk_rh_ressource);
+			$ressource->load($PDOdb, $this->fk_rh_ressource);
 			
 			$utilisateur = new User($db);
 			
@@ -171,22 +171,22 @@ class TRH_Evenement  extends TObjetStd {
 			
 			if(isset($TGroupeAutomaticAttributionByAnalytique)) {
 		
-				$ressource->fk_utilisatrice = $this->get_AAGroupe($ATMdb, $TGroupeAutomaticAttributionByAnalytique);
+				$ressource->fk_utilisatrice = $this->get_AAGroupe($PDOdb, $TGroupeAutomaticAttributionByAnalytique);
 				
 			}
 			
 			//print_r($utilisateur);
-			$ressource->save($ATMdb);
+			$ressource->save($PDOdb);
 		}
 	}
 	
-	function get_AAGroupe(&$ATMdb, $TGroupeAutomaticAttributionByAnalytique) {
+	function get_AAGroupe(&$PDOdb, $TGroupeAutomaticAttributionByAnalytique) {
 		global $db;
 		
 				dol_include_once('/valideur/class/analytique_user.class.php');
 				dol_include_once('/user/class/usergroup.class.php');
 		
-				$TAnal = TRH_analytique_user::getUserAnalytique($ATMdb, $this->fk_user);
+				$TAnal = TRH_analytique_user::getUserAnalytique($PDOdb, $this->fk_user);
 				
 				foreach($TGroupeAutomaticAttributionByAnalytique as $mask=>$groupName) {
 					
@@ -208,15 +208,15 @@ class TRH_Evenement  extends TObjetStd {
 			return false;
 	}
 	
-	static function listTypeEvent(&$ATMdb, $id_ressource) {
+	static function listTypeEvent(&$PDOdb, $id_ressource) {
 		$TEvent = array();
 	
 		$sql="SELECT rowid, code, libelle FROM ".MAIN_DB_PREFIX."rh_type_evenement 
 		WHERE (fk_rh_ressource_type=".(int)$idTypeRessource." OR fk_rh_ressource_type=0) ORDER BY fk_rh_ressource_type";
 		
-		$ATMdb->Execute($sql);
+		$PDOdb->Execute($sql);
 		
-		while($row = $ATMdb->Get_line()) {
+		while($row = $PDOdb->Get_line()) {
 			$TEvent[$row->code] = $row->libelle;	
 		}
 		

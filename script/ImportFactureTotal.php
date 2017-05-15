@@ -14,37 +14,37 @@ require('../lib/ressource.lib.php');
 //*/
 global $conf;
 $entity = (isset($_REQUEST['entity'])) ? $_REQUEST['entity'] : $conf->entity;
-$ATMdb=new TPDOdb;
+$PDOdb=new TPDOdb;
 
 $TUser = array();
 $sql="SELECT rowid, lastname, firstname FROM ".MAIN_DB_PREFIX."user";
-$ATMdb->Execute($sql);
-while($ATMdb->Get_line()) {
-	$TUser[strtolower($ATMdb->Get_field('name'))] = $ATMdb->Get_field('rowid');
+$PDOdb->Execute($sql);
+while($PDOdb->Get_line()) {
+	$TUser[strtolower($PDOdb->Get_field('name'))] = $PDOdb->Get_field('rowid');
 }
 
 //	Chargement des types d'événements
 $TEvents = array();
 $sql="SELECT rowid, code, libelle, codecomptable FROM ".MAIN_DB_PREFIX."rh_type_evenement ";
-$ATMdb->Execute($sql);
-while($ATMdb->Get_line()) {
-	$TEvents[strtolower($ATMdb->Get_field('libelle'))] = $ATMdb->Get_field('code');
+$PDOdb->Execute($sql);
+while($PDOdb->Get_line()) {
+	$TEvents[strtolower($PDOdb->Get_field('libelle'))] = $PDOdb->Get_field('code');
 }
 
 $idVoiture = getIdType('voiture');
 $idCarteTotal = getIdType('cartetotal');
-$idTotal = getIdSociete($ATMdb, 'total');
+$idTotal = getIdSociete($PDOdb, 'total');
 if (!$idTotal){echo 'Pas de fournisseur (tiers) du nom de Total !';exit();}
 
-$TRessource = getIDRessource($ATMdb, $idVoiture);
+$TRessource = getIDRessource($PDOdb, $idVoiture);
 //foreach ($TRessource as $key => $value) {echo $key.'=>'.$value.'<br>';}//print_r($TRessource);exit;
 
 //charge une liste rowid de la voiture =>plaque de la voiture
 $TPlaque = array();
 $sql="SELECT rowid, numId FROM ".MAIN_DB_PREFIX."rh_ressource 
 		WHERE fk_rh_ressource_type=".$idVoiture;
-$ATMdb->Execute($sql);
-while($row = $ATMdb->Get_line()) {
+$PDOdb->Execute($sql);
+while($row = $PDOdb->Get_line()) {
 	$TPlaque[$row->rowid] = $row->numId;
 }
 
@@ -54,8 +54,8 @@ while($row = $ATMdb->Get_line()) {
 $TCarte = array();
 $sql="SELECT rowid, numId, fk_rh_ressource FROM ".MAIN_DB_PREFIX."rh_ressource 
 		WHERE fk_rh_ressource_type = ".$idCarteTotal;
-$ATMdb->Execute($sql);
-while($row = $ATMdb->Get_line()) {
+$PDOdb->Execute($sql);
+while($row = $PDOdb->Get_line()) {
 	if ($row->fk_rh_ressource!=0){
 		$TCarte[$TPlaque[$row->fk_rh_ressource]] = $row->rowid;}
 }
@@ -64,18 +64,18 @@ while($row = $ATMdb->Get_line()) {
 //Tableau des TVAs
 $TTVA = array();
 $sqlReq="SELECT rowid, taux FROM ".MAIN_DB_PREFIX."c_tva WHERE fk_pays=".$conf->global->MAIN_INFO_SOCIETE_COUNTRY[0].' AND active=1';
-$ATMdb->Execute($sqlReq);
-while($ATMdb->Get_line()) {
-	$TTVA[$ATMdb->Get_field('taux')] = $ATMdb->Get_field('rowid');
+$PDOdb->Execute($sqlReq);
+while($PDOdb->Get_line()) {
+	$TTVA[$PDOdb->Get_field('taux')] = $PDOdb->Get_field('rowid');
 	}
 
 //trouve l'id du SuperAdmin
-$idSuperAdmin = getIdSuperAdmin($ATMdb);
+$idSuperAdmin = getIdSuperAdmin($PDOdb);
 
 //donne l'user qui utilise la carte
 /*$TAttribution = array();
 foreach ($TCarte as $numId => $rowid) {
-	$idUser = ressourceIsEmpruntee($ATMdb, $rowid, date("Y-m-d", time()) );
+	$idUser = ressourceIsEmpruntee($PDOdb, $rowid, date("Y-m-d", time()) );
 	if ($idUser!=0){$TAttribution[$numId] = $idUser;} 
 }*/
 
@@ -89,12 +89,12 @@ $message = 'Traitement du fichier '.$nomFichier.' : <br><br>';
 $idImport = substr($nomFichier, $v+1);*/
 $idImport = Tools::url_format(basename($nomFichier), false, true);
 
-$ATMdb->Execute("DELETE FROM ".MAIN_DB_PREFIX."rh_evenement WHERE idImport='$idImport'");
+$PDOdb->Execute("DELETE FROM ".MAIN_DB_PREFIX."rh_evenement WHERE idImport='$idImport'");
 
 $TCarteInexistantes = array();
 $TCarteNonLie = array();
 $TCarteVoitureNonAttribue = array();
-$idRessFactice = createRessourceFactice($ATMdb, $idCarteTotal, $idImport, $entity, $idTotal);
+$idRessFactice = createRessourceFactice($PDOdb, $idCarteTotal, $idImport, $entity, $idTotal);
 
 ?>
 <table class="border">
@@ -140,8 +140,8 @@ if (($handle = fopen($nomFichier, "r")) !== FALSE) {
 				$idRess = $TCarte[$plaque];
 				
 				$ressourceLocale = new TRH_Ressource;
-				//$ATMdb->debug=true;
-				$ressourceLocale->load_by_numId($ATMdb, $plaque);
+				//$PDOdb->debug=true;
+				$ressourceLocale->load_by_numId($PDOdb, $plaque);
 				$typeVehicule = strtoupper( $ressourceLocale->typevehicule );
 				
 				?><tr>
@@ -154,7 +154,7 @@ if (($handle = fopen($nomFichier, "r")) !== FALSE) {
 			//else {
 				//print_r($infos);echo '<br>';
 				$temp = new TRH_Evenement;
-				//$temp->load_liste($ATMdb);
+				//$temp->load_liste($PDOdb);
 				$temp->fk_rh_ressource_type = $idCarteTotal;
 				$temp->fk_rh_ressource = $idRess;
 				$t = explode(' ',$infos[30]);
@@ -186,7 +186,7 @@ if (($handle = fopen($nomFichier, "r")) !== FALSE) {
 				?></tr><?
 				//utilisateur qui utilise la ressource au moment de l'évenement
 				if (!empty($TRessource[$plaque])){
-					$idUser = ressourceIsEmpruntee($ATMdb, $TRessource[$plaque], date("Y-m-d", dateToInt($infos[15])) );
+					$idUser = ressourceIsEmpruntee($PDOdb, $TRessource[$plaque], date("Y-m-d", dateToInt($infos[15])) );
 					if ($idUser!=0){ //si il trouve, on l'affecte à l'utilisateur 
 						$temp->fk_user = $idUser;}
 					else { //sinon à SuperAdmin.
@@ -230,7 +230,7 @@ if (($handle = fopen($nomFichier, "r")) !== FALSE) {
 				$temp->kilometrage = intval($infos[31]);
 				$temp->fk_fournisseur = $idTotal;
 				$temp->entity = $entity;
-				$temp->save($ATMdb);
+				$temp->save($PDOdb);
 				
 				$cpt++;
 			
@@ -273,16 +273,16 @@ $message .= 'Fin du traitement. '.$cpt.' événements créés.<br><br>';
 send_mail_resources('Import - Factures TOTAL',$message);
 echo $message;
 	
-function chargeVoiture(&$ATMdb){
+function chargeVoiture(&$PDOdb){
 	global $conf;
 	$TRessource = array();
 	$sql="SELECT r.rowid as 'ID', t.rowid as 'IdType', r.numId FROM ".MAIN_DB_PREFIX."rh_ressource as r 
 	LEFT JOIN ".MAIN_DB_PREFIX."rh_ressource_type as t on (r.fk_rh_ressource_type = t.rowid)
 	WHERE (t.code='voiture') ";
-	$ATMdb->Execute($sql);
-	while($ATMdb->Get_line()) {
-		//$idVoiture = $ATMdb->Get_field('IdType');
-		$TRessource[$ATMdb->Get_field('numId')] = $ATMdb->Get_field('ID');
+	$PDOdb->Execute($sql);
+	while($PDOdb->Get_line()) {
+		//$idVoiture = $PDOdb->Get_field('IdType');
+		$TRessource[$PDOdb->Get_field('numId')] = $PDOdb->Get_field('ID');
 		}
 	return $TRessource;
 }

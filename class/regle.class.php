@@ -35,52 +35,52 @@ class TRH_Ressource_Regle  extends TObjetStd {
 		parent::start();
 	}
 	
-	function load_liste(&$ATMdb){
+	function load_liste(&$PDOdb){
 		global $conf;
 		
 		//LISTE DE GROUPES
 		$this->TGroup  = array();
 		$sqlReq="SELECT rowid, nom FROM ".MAIN_DB_PREFIX."usergroup WHERE entity IN (0,".$conf->entity.")";
-		$ATMdb->Execute($sqlReq);
-		while($ATMdb->Get_line()) {
-			$this->TGroup[$ATMdb->Get_field('rowid')] = htmlentities($ATMdb->Get_field('nom'), ENT_COMPAT , 'ISO8859-1');
+		$PDOdb->Execute($sqlReq);
+		while($PDOdb->Get_line()) {
+			$this->TGroup[$PDOdb->Get_field('rowid')] = htmlentities($PDOdb->Get_field('nom'), ENT_COMPAT , 'ISO8859-1');
 			}
 		
 		//LISTE DE USERS
 		$this->TUser = array();
 		$sqlReq="SELECT rowid, firstname, lastname FROM ".MAIN_DB_PREFIX."user WHERE entity IN (0,".$conf->entity.") ORDER BY lastname, firstname";
-		$ATMdb->Execute($sqlReq);
-		while($ATMdb->Get_line()) {
-			$this->TUser[$ATMdb->Get_field('rowid')] = $ATMdb->Get_field('firstname')." ".$ATMdb->Get_field('lastname');
+		$PDOdb->Execute($sqlReq);
+		while($PDOdb->Get_line()) {
+			$this->TUser[$PDOdb->Get_field('rowid')] = $PDOdb->Get_field('firstname')." ".$PDOdb->Get_field('lastname');
 			}
 		
 	}
 	
-	function load_by_fk_user(&$ATMdb, $fk_user){
+	function load_by_fk_user(&$PDOdb, $fk_user){
 		$sqlReq="SELECT rowid FROM ".MAIN_DB_PREFIX."rh_ressource_regle WHERE fk_user='".$fk_user."'";
-		$ATMdb->Execute($sqlReq);
-		if ($ATMdb->Get_line()) {
-			return $this->load($ATMdb, $ATMdb->Get_field('rowid'));
+		$PDOdb->Execute($sqlReq);
+		if ($PDOdb->Get_line()) {
+			return $this->load($PDOdb, $PDOdb->Get_field('rowid'));
 		}
 		return false;
 	}
 		
 		
-	function load(&$ATMdb, $id) {
+	function load(&$PDOdb, $id) {
 		//global $conf;
-		parent::load($ATMdb, $id);
+		parent::load($PDOdb, $id);
 	}
 	
 	
 	
-	function save(&$ATMdb) {
+	function save(&$PDOdb) {
 		global $conf;
 		$this->entity = $conf->entity;
 		
 		switch ($this->choixApplication){
 			case 'all':$this->fk_user = 0;$this->fk_usergroup=0;break;
 			case 'user':
-				$this->load_by_fk_user($ATMdb, $this->fk_user);
+				$this->load_by_fk_user($PDOdb, $this->fk_user);
 				$this->fk_usergroup = NULL;
 				break;
 			case 'group':$this->fk_user = NULL;break;
@@ -96,7 +96,7 @@ class TRH_Ressource_Regle  extends TObjetStd {
 				break;
 		}
 		
-		parent::save($ATMdb);
+		parent::save($PDOdb);
 	}
 	
 	

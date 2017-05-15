@@ -36,7 +36,7 @@ require('../class/contrat.class.php');*/
 
 
 $ress = new TRH_Ressource;
-$ATMdb = new TPDOdb;
+$PDOdb = new TPDOdb;
 
 
 /**
@@ -57,7 +57,7 @@ class RessourceTest extends PHPUnit_Framework_TestCase
  
     public static function tearDownAfterClass()
     {
-    	global $ATMdb;
+    	global $PDOdb;
 		print "\nFin du test de Ressource.\n";
     }
 	
@@ -70,72 +70,72 @@ class RessourceTest extends PHPUnit_Framework_TestCase
     }
 	
 	public function testLoad_liste_type_ressource(){
-		global $ress, $ATMdb;
-		$ress->load_liste_type_ressource($ATMdb);
+		global $ress, $PDOdb;
+		$ress->load_liste_type_ressource($PDOdb);
 		$this->assertNotEmpty($ress->TType);
 		print __METHOD__."\n";
 	}
 	
 	
 	public function testLoad_agence(){
-		global $ress, $ATMdb;
-		$ress->load_agence($ATMdb);
+		global $ress, $PDOdb;
+		$ress->load_agence($PDOdb);
 		$this->assertNotEmpty($ress->TAgence);
 		$this->assertNotEmpty($ress->TFournisseur);
 		print __METHOD__."\n";
 	}
 	
 	public function testLoad_liste_entity(){
-		global $ress, $ATMdb;
-		$ress->load_liste_entity($ATMdb);
+		global $ress, $PDOdb;
+		$ress->load_liste_entity($PDOdb);
 		$this->assertNotEmpty($ress->TEntity);
 		print __METHOD__."\n";
 	}
 	
 
 	public function testLoad_by_numId(){
-		global $ress, $ATMdb;
+		global $ress, $PDOdb;
 		
 		//test avec un numId qui n'existe pas.
-		$ret = $ress->load_by_numId($ATMdb, '0');
+		$ret = $ress->load_by_numId($PDOdb, '0');
 		$this->assertFalse($ret);
 		
 		//test avec un numId qui existe
 		$sqlReq="SELECT numId FROM ".MAIN_DB_PREFIX."rh_ressource LIMIT 0,1";
-		$ATMdb->Execute($sqlReq);
-		if ($row = $ATMdb->Get_line()) {$numId = $row->numId;}
-		$ress->load_by_numId($ATMdb, $numId);
+		$PDOdb->Execute($sqlReq);
+		if ($row = $PDOdb->Get_line()) {$numId = $row->numId;}
+		$ress->load_by_numId($PDOdb, $numId);
 		$this->assertEquals($ress->numId, $numId);
 
 		print __METHOD__."\n";
 	}
 	
 	public function testLoad(){
-		global $ress, $ATMdb;
+		global $ress, $PDOdb;
 		
 		//récupêrer un rowid qui existe
 		$sqlReq="SELECT rowid FROM ".MAIN_DB_PREFIX."rh_ressource LIMIT 0,1";
-		$ATMdb->Execute($sqlReq);
-		if ($row = $ATMdb->Get_line()) {$rowid = $row->rowid;}
+		$PDOdb->Execute($sqlReq);
+		if ($row = $PDOdb->Get_line()) {$rowid = $row->rowid;}
 		//test du load.
-		$ress->load_by_numId($ATMdb, $rowid);
+		$ress->load_by_numId($PDOdb, $rowid);
 		$this->assertEquals($ress->getId(), $rowid);
 		print __METHOD__."\n";
 	}
 
 	public function testLoad_evenement(){
-		global $ress, $ATMdb;
+		global $ress, $PDOdb;
 		
-		$ress->load_evenement($ATMdb);
+		$ress->load_evenement($PDOdb);
 		$this->assertNotEmpty($ress->TEvenement);
 		print __METHOD__."\n";
 	} 
    
 	public function testLoad_contrat(){
-		global $ress, $ATMdb;
+		global $ress, $PDOdb;
 		
 		$ress->TListeContrat = array(0=>1);
-		$ress->load_contrat($ATMdb);
+		$ress->load_contrat($PDOdb);
 		$this->assertNotEmpty($ress->TContratAssocies);
 		$this->assertNotEmpty($ress->TTVA);
 		$this->assertNotEmpty($ress->TListeContrat);
@@ -143,15 +143,15 @@ class RessourceTest extends PHPUnit_Framework_TestCase
 	}
 	
 	public function testListe_contrat(){
-		global $ress, $ATMdb;
+		global $ress, $PDOdb;
 		
-		$ret = $ress->liste_contrat($ATMdb);
+		$ret = $ress->liste_contrat($PDOdb);
 		$this->assertNotNull($ret);
 		print __METHOD__."\n";
 	}
 
 	public function testStrToTimestamp(){
-		global $ress, $ATMdb;
+		global $ress, $PDOdb;
 		
 		$ts = $ress->strToTimestamp("03/01/1970 00:00:00");
 		$this->assertEquals(2*24*3600-3600, $ts);
@@ -159,12 +159,12 @@ class RessourceTest extends PHPUnit_Framework_TestCase
 	}
 	
 	public function testNouvelEmpruntSeChevauche(){
-		global $ress, $ATMdb;
+		global $ress, $PDOdb;
 		
 		$sqlReq="SELECT rowid, date_debut,date_fin, fk_rh_ressource FROM ".MAIN_DB_PREFIX."rh_evenement
 		WHERE type='emprunt' LIMIT 0,1"; 
-		$ATMdb->Execute($sqlReq);
-		if($row = $ATMdb->Get_line()) {
+		$PDOdb->Execute($sqlReq);
+		if($row = $PDOdb->Get_line()) {
 				
 			//pour l'attribution qui sera acceptée
 			$newEmpruntFalse = array(
@@ -183,9 +183,9 @@ class RessourceTest extends PHPUnit_Framework_TestCase
 			$idRessourceTrue = $row->fk_rh_ressource;
 		}
 		print_r($newEmprunt);
-		$retFalse = $ress->nouvelEmpruntSeChevauche($ATMdb, $idRessourceFalse, $newEmpruntFalse);
+		$retFalse = $ress->nouvelEmpruntSeChevauche($PDOdb, $idRessourceFalse, $newEmpruntFalse);
 		$this->assertFalse($retFalse);
-		$retTrue = $ress->nouvelEmpruntSeChevauche($ATMdb, $idRessourceTrue, $newEmpruntTrue);
+		$retTrue = $ress->nouvelEmpruntSeChevauche($PDOdb, $idRessourceTrue, $newEmpruntTrue);
 		$this->assertTrue($retTrue);
 		print __METHOD__."\n";
 	}
@@ -210,20 +210,20 @@ class RessourceTest extends PHPUnit_Framework_TestCase
 	
 	
 	public function testLoad_ressource_type(){
-		global $ress, $ATMdb;
-		$ress->load_ressource_type($ATMdb);
+		global $ress, $PDOdb;
+		$ress->load_ressource_type($PDOdb);
 		$this->assertGreaterThan(0, $ress->fk_rh_ressource_type);
 	}
 	
 	public function testInit_variables(){
-		global $ress, $ATMdb;
-		$ress->init_variables($ATMdb);
+		global $ress, $PDOdb;
+		$ress->init_variables($PDOdb);
 	}
 	
 	public function testSave(){
-		global $ress, $ATMdb;
-		$ress->save($ATMdb);
-		$ress->delete($ATMdb);
+		global $ress, $PDOdb;
+		$ress->save($PDOdb);
+		$ress->delete($PDOdb);
 	}
 	
 	

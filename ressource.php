@@ -7,7 +7,7 @@
 	$langs->load('ressource@ressource');
 	
 	//if (!$user->rights->financement->affaire->read)	{ accessforbidden(); }
-	$ATMdb=new TPDOdb;
+	$PDOdb=new TPDOdb;
 	$emprunt=new TRH_Evenement;
 	$ressource=new TRH_ressource;
 	$contrat=new TRH_Contrat;
@@ -21,32 +21,32 @@
 			case 'add':
 			case 'new':
 				$ressource->set_values($_REQUEST);
-				_fiche($ATMdb, $emprunt, $ressource, $contrat,'new');
+				_fiche($PDOdb, $emprunt, $ressource, $contrat,'new');
 				break;	
 			case 'clone':
-				$ressource->load($ATMdb, $_REQUEST['id']);
-				$ressource->load_ressource_type($ATMdb);
+				$ressource->load($PDOdb, $_REQUEST['id']);
+				$ressource->load_ressource_type($PDOdb);
 				
 				$clone = $ressource->getClone();
 				//print_r($clone);exit;
-				_fiche($ATMdb, $emprunt, $clone, $contrat,'edit');
+				_fiche($PDOdb, $emprunt, $clone, $contrat,'edit');
 				
 				break;
 			case 'edit'	:
-				//$ATMdb->db->debug=true;
+				//$PDOdb->db->debug=true;
 				//print_r($_REQUEST);
 				
 				//$ressource->set_values($_REQUEST['fk_rh_ressource_type']);
 				$ressource->fk_rh_ressource_type = $_REQUEST['fk_rh_ressource_type'];
-				$ressource->load_ressource_type($ATMdb);
-				$ressource->load($ATMdb, $_REQUEST['id']);
-				_fiche($ATMdb, $emprunt, $ressource, $contrat,'edit');
+				$ressource->load_ressource_type($PDOdb);
+				$ressource->load($PDOdb, $_REQUEST['id']);
+				_fiche($PDOdb, $emprunt, $ressource, $contrat,'edit');
 				break;
 				
 			case 'save':
-			//	$ATMdb->db->debug=true;
+			//	$PDOdb->db->debug=true;
 				$ressource->fk_rh_ressource_type = $_REQUEST['fk_rh_ressource_type'];
-				$ressource->load($ATMdb, $_REQUEST['id']);
+				$ressource->load($PDOdb, $_REQUEST['id']);
 				//on vérifie que le libellé est renseigné
 				if  ( empty($_REQUEST['numId']) ){
 					$mesg .= '<div class="error">Le numéro Id doit être renseigné.</div>';
@@ -86,19 +86,19 @@
 				}
 				
 				$ressource->set_values($_REQUEST);
-				$ressource->save($ATMdb);
+				$ressource->save($PDOdb);
 				
 				////////
 				if($_REQUEST["fieldChoice"]=="O"){
 					//print_r($_REQUEST['evenement']);
-					if ($ressource->nouvelEmpruntSeChevauche($ATMdb, $_REQUEST['id'], $_REQUEST['evenement']) ){
+					if ($ressource->nouvelEmpruntSeChevauche($PDOdb, $_REQUEST['id'], $_REQUEST['evenement']) ){
 						$mesg = '<div class="error">Impossible d\'attributer la ressource. Les dates choisies se superposent avec d\'autres attributions.</div>';
 					}
 					else {
-						$emprunt->load($ATMdb, $_REQUEST['idEven']);
+						$emprunt->load($PDOdb, $_REQUEST['idEven']);
 						$emprunt->set_values($_REQUEST['evenement']);
 						$emprunt->fk_rh_ressource = $ressource->getId();
-						$emprunt->save($ATMdb);
+						$emprunt->save($PDOdb);
 					}
 				
 					
@@ -110,10 +110,10 @@
 					$contrat->set_values($_REQUEST['contrat']);
 					$contrat->fk_tier_fournisseur=$_REQUEST['fk_tier_fournisseur'];
 					$contrat->fk_rh_ressource_type=$_REQUEST['fk_rh_ressource_type'];
-					$contrat->save($ATMdb);
+					$contrat->save($PDOdb);
 					$contrat_ressource->fk_rh_ressource = $ressource->getId();
 					$contrat_ressource->fk_rh_contrat = $contrat->getId();
-					$contrat_ressource->save($ATMdb);
+					$contrat_ressource->save($PDOdb);
 				}
 				////////
 
@@ -126,21 +126,21 @@
 				}
 				else {$mode = 'edit';}
 				
-				$ressource->load($ATMdb, $_REQUEST['id']);
-				_fiche($ATMdb, $emprunt, $ressource, $contrat, $mode);
+				$ressource->load($PDOdb, $_REQUEST['id']);
+				_fiche($PDOdb, $emprunt, $ressource, $contrat, $mode);
 				break;
 			
 			case 'view':
-				//$ATMdb->db->debug=true;
-				$ressource->load($ATMdb, $_REQUEST['id']);
-				_fiche($ATMdb, $emprunt, $ressource, $contrat, 'view');
+				//$PDOdb->db->debug=true;
+				$ressource->load($PDOdb, $_REQUEST['id']);
+				_fiche($PDOdb, $emprunt, $ressource, $contrat, 'view');
 				break;
 			
 				
 			case 'delete':
-				$ressource->load($ATMdb, $_REQUEST['id']);
-				//$ATMdb->db->debug=true;
-				$ressource->delete($ATMdb);
+				$ressource->load($PDOdb, $_REQUEST['id']);
+				//$PDOdb->db->debug=true;
+				$ressource->delete($PDOdb);
 				
 				?>
 				<script language="javascript">
@@ -153,40 +153,40 @@
 		}
 	}
 	elseif(isset($_REQUEST['id'])) {
-		$ressource->load($ATMdb, $_REQUEST['id']);
-		_fiche($ATMdb, $emprunt, $ressource, $contrat, 'view');
+		$ressource->load($PDOdb, $_REQUEST['id']);
+		_fiche($PDOdb, $emprunt, $ressource, $contrat, 'view');
 	}
 	else {
 		/*
 		 * Liste
 		 */
-		 //$ATMdb->db->debug=true;
-		 _liste($ATMdb, $ressource);
+		 //$PDOdb->db->debug=true;
+		 _liste($PDOdb, $ressource);
 	}
 	
 	
-	$ATMdb->close();
+	$PDOdb->close();
 	llxFooter();
 	
 	
-function _liste(&$ATMdb, &$ressource) {
+function _liste(&$PDOdb, &$ressource) {
 	global $langs,$conf,$db,$user;	
 	llxHeader('','Liste des ressources');
 	print dol_get_fiche_head(array()  , '', 'Liste ressources');
 	
 	//récupération des champs spéciaux à afficher.
 	$sqlReq="SELECT code, libelle, type, options FROM ".MAIN_DB_PREFIX."rh_ressource_field WHERE inliste='oui' ";
-	$ATMdb->Execute($sqlReq);
+	$PDOdb->Execute($sqlReq);
 	$TSpeciaux = array();
 	
 	$TSearch=array();
-	while($ATMdb->Get_line()) {
-		$TSpeciaux[$ATMdb->Get_field('code')]= $ATMdb->Get_field('libelle');
-		if ($ATMdb->Get_field('type')=='liste'){
-			$TSearch[$ATMdb->Get_field('code')] = array_combine(explode(';', $ATMdb->Get_field('options')), explode(';', $ATMdb->Get_field('options')));
+	while($PDOdb->Get_line()) {
+		$TSpeciaux[$PDOdb->Get_field('code')]= $PDOdb->Get_field('libelle');
+		if ($PDOdb->Get_field('type')=='liste'){
+			$TSearch[$PDOdb->Get_field('code')] = array_combine(explode(';', $PDOdb->Get_field('options')), explode(';', $PDOdb->Get_field('options')));
 		}
 		else {
-			$TSearch[$ATMdb->Get_field('code')] = true;}
+			$TSearch[$PDOdb->Get_field('code')] = true;}
 	}
 	
 	$r = new TSSRenderControler($ressource);
@@ -218,15 +218,15 @@ function _liste(&$ATMdb, &$ressource) {
 		$sql.=" AND e.fk_user=".$user->id;
 	}
 	$sql.=" GROUP BY r.rowid ";
-	$ressource->load_liste_type_ressource($ATMdb);
+	$ressource->load_liste_type_ressource($PDOdb);
 	
 	$TOrder = array('ID'=>'ASC');
 	if(isset($_REQUEST['orderDown']))$TOrder = array($_REQUEST['orderDown']=>'DESC');
 	if(isset($_REQUEST['orderUp']))$TOrder = array($_REQUEST['orderUp']=>'ASC');
 				
 	$page = isset($_REQUEST['page']) ? $_REQUEST['page'] : 1;
-	$form=new TFormCore($_SERVER['PHP_SELF'],'formtranslateList','GET');	
-	$r->liste($ATMdb, $sql, array(
+	$formCore=new TFormCore($_SERVER['PHP_SELF'],'formtranslateList','GET');	
+	$r->liste($PDOdb, $sql, array(
 		'limit'=>array(
 			'page'=>$page
 			,'nbLine'=>'30'
@@ -296,9 +296,9 @@ function _liste(&$ATMdb, &$ressource) {
 		if(isset($_REQUEST['orderUp']))$TOrder = array($_REQUEST['orderUp']=>'ASC');
 					
 		$page = isset($_REQUEST['page']) ? $_REQUEST['page'] : 1;
-		$form=new TFormCore($_SERVER['PHP_SELF'].'','formtranslateList','GET');
+		$formCore=new TFormCore($_SERVER['PHP_SELF'].'','formtranslateList','GET');
 		
-		$r->liste($ATMdb, $sql, array(
+		$r->liste($PDOdb, $sql, array(
 			'link'=>array(
 				'ID'=>'<a href="typeRessourceRegle.php?id='.$idTelephone.'&idRegle=@ID@&action=view">@val@</a>'
 			)
@@ -335,7 +335,7 @@ function _liste(&$ATMdb, &$ressource) {
 		));
 	}
 	
-	$form->end();
+	$formCore->end();
 	llxFooter();
 }	
 
@@ -353,17 +353,17 @@ function getStatut($val){
 
 
 
-function _fiche(&$ATMdb, &$emprunt, &$ressource, &$contrat, $mode) {
+function _fiche(&$PDOdb, &$emprunt, &$ressource, &$contrat, $mode) {
 	global $db,$user;
 	llxHeader('', 'Ressource', '', '', 0, 0, array('/hierarchie/js/jquery.jOrgChart.js'));
 
-	$form=new TFormCore($_SERVER['PHP_SELF'],'form1','POST');
-	$form->Set_typeaff($mode);
-	echo $form->hidden('id', $ressource->getId());
+	$formCore=new TFormCore($_SERVER['PHP_SELF'],'form1','POST');
+	$formCore->Set_typeaff($mode);
+	echo $formCore->hidden('id', $ressource->getId());
 	if ($mode=='new'){
-		echo $form->hidden('action', 'edit');
+		echo $formCore->hidden('action', 'edit');
 	}
-	else {echo $form->hidden('action', 'save');}
+	else {echo $formCore->hidden('action', 'save');}
 	//Ressources
 	$TFields=array();
 	
@@ -375,16 +375,16 @@ function _fiche(&$ATMdb, &$emprunt, &$ressource, &$contrat, $mode) {
 		foreach($ressource->ressourceType->TField as $k=>$field) {
 			switch($field->type){
 				case 'liste':
-					$temp = $form->combo('',$field->code,$field->TListe,$ressource->{$field->code});
+					$temp = $formCore->combo('',$field->code,$field->TListe,$ressource->{$field->code});
 					break;
 				case 'checkbox':
-					$temp = $form->combo('',$field->code,array('oui'=>'Oui', 'non'=>'Non'),$ressource->{$field->code});
+					$temp = $formCore->combo('',$field->code,array('oui'=>'Oui', 'non'=>'Non'),$ressource->{$field->code});
 					break;
 				case 'date':
-					$temp = $form->calendrier('', $field->code, $ressource->{$field->code});
+					$temp = $formCore->calendrier('', $field->code, $ressource->{$field->code});
 					break;
 				default:
-					$temp = $form->texte('', $field->code, $ressource->{$field->code}, 50,255,'','','-');
+					$temp = $formCore->texte('', $field->code, $ressource->{$field->code}, 50,255,'','','-');
 					break;
 			}
 			
@@ -429,26 +429,27 @@ function _fiche(&$ATMdb, &$emprunt, &$ressource, &$contrat, $mode) {
 	//requete pour avoir toutes les ressources associées à la ressource concernées
 	$k=0;
 	$sqlReq="SELECT rowid, libelle FROM ".MAIN_DB_PREFIX."rh_ressource WHERE fk_rh_ressource=".$ressource->rowid;
-	$ATMdb->Execute($sqlReq);
+	$PDOdb->Execute($sqlReq);
 	$Tab=array();
 	$Tab_sous_ressource=array();
 	$reqVide=0;	//variable permettant de savoir si la requete existe, et donc au final si on affichera l'organigramme
-	while($ATMdb->Get_line()) {
+	while($PDOdb->Get_line()) {
 		//récupère les id des différents nom des  groupes de l'utilisateur
-		$Tab_sous_ressource[$k]=array('libelle'=>'<a href="?id='.$ATMdb->Get_field('rowid').'">'.$ATMdb->Get_field('libelle').'</a>');
+		$Tab_sous_ressource[$k]=array('libelle'=>'<a href="?id='.$PDOdb->Get_field('rowid').'">'.$PDOdb->Get_field('libelle').'</a>');
 		$k++;
 		$reqVide=1;
 	}
 
-	$contrat->load_liste($ATMdb);
-	$emprunt->load_liste($ATMdb);
-	$ressource->load_liste_entity($ATMdb);
-	$ressource->load_agence($ATMdb);
-	$ressource->load_liste_type_ressource($ATMdb);
-	$listeContrat = $ressource->liste_contrat($ATMdb);
+	$contrat->load_liste($PDOdb);
+	$emprunt->load_liste($PDOdb);
+	$ressource->load_liste_entity($PDOdb);
+	$ressource->load_agence($PDOdb);
+	$ressource->load_liste_type_ressource($PDOdb);
+	$listeContrat = $ressource->liste_contrat($PDOdb);
 	
-	$combo_entite_utilisatrice = (defined('AUTOMATIC_ATTRIBUTION_USER_ENTITY_ON_RESSOURCE') && AUTOMATIC_ATTRIBUTION_USER_ENTITY_ON_RESSOURCE ) ? $ressource->TEntity[$ressource->fk_entity_utilisatrice] : $form->combo('','fk_entity_utilisatrice', $ressource->TEntity, $ressource->fk_entity_utilisatrice );
+	$combo_entite_utilisatrice = (defined('AUTOMATIC_ATTRIBUTION_USER_ENTITY_ON_RESSOURCE') && AUTOMATIC_ATTRIBUTION_USER_ENTITY_ON_RESSOURCE ) ? $ressource->TEntity[$ressource->fk_entity_utilisatrice] : $formCore->combo('','fk_entity_utilisatrice', $ressource->TEntity, $ressource->fk_entity_utilisatrice );
 		
+	$form=new Form($db);
 	
 	$TBS=new TTemplateTBS();
 	print $TBS->render('./tpl/ressource.tpl.php'
@@ -459,8 +460,8 @@ function _fiche(&$ATMdb, &$emprunt, &$ressource, &$contrat, $mode) {
 		,array(
 			'ressource'=>array(
 				'id'=>$ressource->getId()
-				,'numId'=>$form->texte('', 'numId', $ressource->numId, 50,255,'','','-')
-				,'libelle'=>$form->texte('', 'libelle', $ressource->libelle, 50,255,'','','-')
+				,'numId'=>$formCore->texte('', 'numId', $ressource->numId, 50,255,'','','-')
+				,'libelle'=>$formCore->texte('', 'libelle', $ressource->libelle, 50,255,'','','-')
 
 				,'titreChamps'=>load_fiche_titre("Champs",'', 'title.png', 0, '')
 				,'titreOrganigramme'=>load_fiche_titre("Organigramme des ressources associées",'', 'title.png', 0, '')
@@ -468,57 +469,57 @@ function _fiche(&$ATMdb, &$emprunt, &$ressource, &$contrat, $mode) {
 				,'titreAttribution'=>load_fiche_titre("Attribution de la ressource",'', 'title.png', 0, '')
 				,'titreContrat'=>load_fiche_titre("Création d'un contrat directement lié",'', 'title.png', 0, '')
 				
-				,'typehidden'=>$form->hidden('fk_rh_ressource_type', $ressource->fk_rh_ressource_type) 
+				,'typehidden'=>$formCore->hidden('fk_rh_ressource_type', $ressource->fk_rh_ressource_type) 
 				,'type'=>$ressource->TType[$ressource->fk_rh_ressource_type]
 				,'bailvoit_value'=>$ressource->bailvoit
-				,'bailvoit'=>$form->combo('','bailvoit',$ressource->TBail,$ressource->bailvoit)
-				,'date_achat'=>$form->calendrier('', 'date_achat', $ressource->date_achat,12, 12)
-				,'date_vente'=>(empty($ressource->date_vente) || ($ressource->date_vente<=0) || ($mode=='new')) ? $form->calendrier('', 'date_vente', '' ,12, 12) : $form->calendrier('', 'date_vente', $ressource->date_vente,12 , 12)
-				//,'date_garantie'=>(empty($ressource->date_garantie) || ($ressource->date_garantie<=0) || ($mode=='new')) ? $form->calendrier('', 'date_garantie', '' , 10) : $form->calendrier('', 'date_garantie', $ressource->date_garantie, 12)
-				,'fk_proprietaire'=>$form->combo('','fk_proprietaire',$ressource->TEntity,$ressource->fk_proprietaire)
-				,'fk_utilisatrice'=>$form->combo('','fk_utilisatrice',$ressource->TAgence,$ressource->fk_utilisatrice)
+				,'bailvoit'=>$formCore->combo('','bailvoit',$ressource->TBail,$ressource->bailvoit)
+				,'date_achat'=>$formCore->calendrier('', 'date_achat', $ressource->date_achat,12, 12)
+				,'date_vente'=>(empty($ressource->date_vente) || ($ressource->date_vente<=0) || ($mode=='new')) ? $formCore->calendrier('', 'date_vente', '' ,12, 12) : $formCore->calendrier('', 'date_vente', $ressource->date_vente,12 , 12)
+				//,'date_garantie'=>(empty($ressource->date_garantie) || ($ressource->date_garantie<=0) || ($mode=='new')) ? $formCore->calendrier('', 'date_garantie', '' , 10) : $formCore->calendrier('', 'date_garantie', $ressource->date_garantie, 12)
+				,'fk_proprietaire'=>$formCore->combo('','fk_proprietaire',$ressource->TEntity,$ressource->fk_proprietaire)
+				,'fk_utilisatrice'=>$formCore->combo('','fk_utilisatrice',$ressource->TAgence,$ressource->fk_utilisatrice)
 				,'fk_entity_utilisatrice'=>$combo_entite_utilisatrice
-				,'fk_loueur'=>$form->combo('','fk_loueur',$ressource->TFournisseur,$ressource->fk_loueur)
+				,'fk_loueur'=>$form->select_company($ressource->fk_loueur, 'fk_loueur' ,'fournisseur=1')//$formCore->combo('','fk_loueur',$ressource->TFournisseur,$ressource->fk_loueur)
 			)
 			,'ressourceNew' =>array(
-				'typeCombo'=> count($ressource->TType) ? $form->combo('','fk_rh_ressource_type',$ressource->TType,$ressource->fk_rh_ressource_type): "Aucun type"
-				,'validerType'=>$form->btsubmit('Valider', 'validerType')
+				'typeCombo'=> count($ressource->TType) ? $formCore->combo('','fk_rh_ressource_type',$ressource->TType,$ressource->fk_rh_ressource_type): "Aucun type"
+				,'validerType'=>$formCore->btsubmit('Valider', 'validerType')
 				
 			)
 			,'fk_ressource'=>array(
-				'liste_fk_rh_ressource'=>$form->combo('','fk_rh_ressource',$ressource->TRessource,$ressource->fk_rh_ressource)
+				'liste_fk_rh_ressource'=>$formCore->combo('','fk_rh_ressource',$ressource->TRessource,$ressource->fk_rh_ressource)
 				,'fk_rh_ressource'=>$ressource->fk_rh_ressource ? $ressource->TRessource[$ressource->fk_rh_ressource] : "aucune ressource"
 				,'id'=>$ressource->fk_rh_ressource
 				,'reqExiste'=>$reqVide
 			)
 			,'NEmprunt'=>array(
 				'id'=>$emprunt->getId()
-				,'type'=>$form->hidden('evenement[type]', 'emprunt')
-				,'idEven'=>$form->hidden('evenement[idEven]', $emprunt->getId())
-				,'fk_user'=>$form->combo('','evenement[fk_user]',$emprunt->TUser,$emprunt->fk_user)
-				,'fk_rh_ressource'=> $form->hidden('evenement[fk_rh_ressource]', $ressource->getId())
-				,'commentaire'=>$form->texte('','evenement[commentaire]',$emprunt->commentaire, 30,100,'','','-')
-				,'date_debut'=> $form->calendrier('', 'evenement[date_debut]', $emprunt->date_debut, 12)
-				,'date_fin'=> $form->calendrier('', 'evenement[date_fin]', $emprunt->date_fin, 12)
+				,'type'=>$formCore->hidden('evenement[type]', 'emprunt')
+				,'idEven'=>$formCore->hidden('evenement[idEven]', $emprunt->getId())
+				,'fk_user'=> $form->select_dolusers($emprunt->fk_user,'evenement[fk_user]') //$formCore->combo('','evenement[fk_user]',$emprunt->TUser,$emprunt->fk_user)
+				,'fk_rh_ressource'=> $formCore->hidden('evenement[fk_rh_ressource]', $ressource->getId())
+				,'commentaire'=>$formCore->texte('','evenement[commentaire]',$emprunt->commentaire, 30,100,'','','-')
+				,'date_debut'=> $formCore->calendrier('', 'evenement[date_debut]', $emprunt->date_debut, 12)
+				,'date_fin'=> $formCore->calendrier('', 'evenement[date_fin]', $emprunt->date_fin, 12)
 			)
 			,'listeContrat'=>array(
 				'liste' => $listeContrat	
 			)
 			,'contrat'=>array(
 				'id'=>$contrat->getId()
-				,'libelle'=>$form->texte('', 'contrat[libelle]', $contrat->libelle, 50,255,'','','-')
-				,'numContrat'=>$form->texte('', 'contrat[numContrat]', $contrat->numContrat, 50,255,'','','-')
-				,'fk_rh_ressource'=> $form->hidden('contrat[fk_rh_ressource]', $ressource->getId())
-				,'tiersFournisseur'=> $form->combo('','fk_tier_fournisseur',$contrat->TFournisseur,$contrat->fk_tier_fournisseur)
-				,'tiersAgence'=> $form->combo('','contrat[fk_tier_utilisateur]',$contrat->TAgence,$contrat->fk_tier_utilisateur)
-				,'date_debut'=> $form->calendrier('', 'contrat[date_debut]', $contrat->date_debut, 12)
-				,'date_fin'=> $form->calendrier('', 'contrat[date_fin]', $contrat->date_fin, 12)
-				,'entretien'=>$form->texte('', 'contrat[entretien]', $contrat->entretien, 10,20,'','','')
-				,'assurance'=>$form->texte('', 'contrat[assurance]', $contrat->assurance, 10,20,'','','')
-				,'kilometre'=>$form->texte('', 'contrat[kilometre]', $contrat->kilometre, 8,8,'','','')
-				,'dureemois'=>$form->texte('', 'dureemois', $contrat->dureeMois, 8,8,'','','')
-				,'loyer_TTC'=>$form->texte('', 'contrat[loyer_TTC]', $contrat->loyer_TTC, 10,20,'','','')
-				,'TVA'=>$form->combo('','contrat[TVA]',$contrat->TTVA,$contrat->TVA)
+				,'libelle'=>$formCore->texte('', 'contrat[libelle]', $contrat->libelle, 50,255,'','','-')
+				,'numContrat'=>$formCore->texte('', 'contrat[numContrat]', $contrat->numContrat, 50,255,'','','-')
+				,'fk_rh_ressource'=> $formCore->hidden('contrat[fk_rh_ressource]', $ressource->getId())
+				,'tiersFournisseur'=> $form->select_company($contrat->fk_tier_fournisseur, 'fk_tier_fournisseur' ,'fournisseur=1') //  $formCore->combo('','fk_tier_fournisseur',$contrat->TFournisseur,)
+				,'tiersAgence'=> $formCore->combo('','contrat[fk_tier_utilisateur]',$contrat->TAgence,$contrat->fk_tier_utilisateur)
+				,'date_debut'=> $formCore->calendrier('', 'contrat[date_debut]', $contrat->date_debut, 12)
+				,'date_fin'=> $formCore->calendrier('', 'contrat[date_fin]', $contrat->date_fin, 12)
+				,'entretien'=>$formCore->texte('', 'contrat[entretien]', $contrat->entretien, 10,20,'','','')
+				,'assurance'=>$formCore->texte('', 'contrat[assurance]', $contrat->assurance, 10,20,'','','')
+				,'kilometre'=>$formCore->texte('', 'contrat[kilometre]', $contrat->kilometre, 8,8,'','','')
+				,'dureemois'=>$formCore->texte('', 'dureemois', $contrat->dureeMois, 8,8,'','','')
+				,'loyer_TTC'=>$formCore->texte('', 'contrat[loyer_TTC]', $contrat->loyer_TTC, 10,20,'','','')
+				,'TVA'=>$formCore->combo('','contrat[TVA]',$contrat->TTVA,$contrat->TVA)
 				,'loyer_HT'=>($contrat->loyer_TTC)*(1-(0.01*$contrat->TTVA[$contrat->TVA]))
 				
 			)
@@ -534,7 +535,7 @@ function _fiche(&$ATMdb, &$emprunt, &$ressource, &$contrat, $mode) {
 		
 	);
 	
-	echo $form->end_form();
+	echo $formCore->end_form();
 	// End of page
 	
 	global $mesg, $error;

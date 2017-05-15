@@ -6,7 +6,7 @@
 require('./config.php');
 require('./lib/ressource.lib.php');
 global $conf;
-$ATMdb=new TPDOdb;
+$PDOdb=new TPDOdb;
 
 llxHeader('','Vérification des concordances entre contrats et factures des véhicules');
 
@@ -21,7 +21,7 @@ $date_fin = dateToInt($plagefin);
 
 $incoherance = isset($_REQUEST['incoherance']) ? $_REQUEST['incoherance'] : 1 ;
 
-$TRessource = getTab($ATMdb, $date_debut, $date_fin,$incoherance);
+$TRessource = getTab($PDOdb, $date_debut, $date_fin,$incoherance);
 
 $form=new TFormCore($_SERVER['PHP_SELF'],'form1','POST');
 $form->Set_typeaff('edit');
@@ -46,7 +46,7 @@ $form->end();
 llxFooter();
 
 
-function getTab(&$ATMdb, $deb, $fin,$incoherance){
+function getTab(&$PDOdb, $deb, $fin,$incoherance){
 	
 
 	
@@ -58,8 +58,8 @@ function getTab(&$ATMdb, $deb, $fin,$incoherance){
 	$sql = "SELECT rowid, fk_utilisatrice,  immatriculation , marquevoit, modlevoit
 		FROM ".MAIN_DB_PREFIX."rh_ressource 
 		WHERE fk_rh_ressource_type =".$idVoiture;
-	$ATMdb->Execute($sql);
-	while($row = $ATMdb->Get_line()) {
+	$PDOdb->Execute($sql);
+	while($row = $PDOdb->Get_line()) {
 		$TVoitures[$row->rowid] = array(
 			'societe'=>$row->fk_utilisatrice
 			,'immatriculation'=>$row->immatriculation
@@ -73,8 +73,8 @@ function getTab(&$ATMdb, $deb, $fin,$incoherance){
 	$TContrats = array();
 	$sql="SELECT rowid, loyer_TTC, fk_tier_fournisseur
 		FROM ".MAIN_DB_PREFIX."rh_contrat` ";
-	$ATMdb->Execute($sql);
-	while($row = $ATMdb->Get_line()) {
+	$PDOdb->Execute($sql);
+	while($row = $PDOdb->Get_line()) {
 		$TContrats[$row->rowid] = array(
 			'loyer'=>$row->loyer_TTC
 			,'fk_soc'=>$row->fk_tier_fournisseur
@@ -86,8 +86,8 @@ function getTab(&$ATMdb, $deb, $fin,$incoherance){
 	$TAssociations = array();
 	$sql="SELECT rowid, fk_rh_ressource, fk_rh_contrat 
 		FROM ".MAIN_DB_PREFIX."rh_contrat_ressource ";
-	$ATMdb->Execute($sql);
-	while($row = $ATMdb->Get_line()) {
+	$PDOdb->Execute($sql);
+	while($row = $PDOdb->Get_line()) {
 		$TAssociations[$row->fk_rh_ressource] = $row->fk_rh_contrat;
 	}
 	//print_r($TAssociations);exit();
@@ -99,8 +99,8 @@ function getTab(&$ATMdb, $deb, $fin,$incoherance){
 	//chargement des fournisseurs
 	$TFournisseurs = array();
 	$sqlReq="SELECT rowid, nom FROM ".MAIN_DB_PREFIX."societe";
-	$ATMdb->Execute($sqlReq);
-	while($row = $ATMdb->Get_line()) {
+	$PDOdb->Execute($sqlReq);
+	while($row = $PDOdb->Get_line()) {
 		$TFournisseurs[$row->rowid] = htmlentities($row->nom, ENT_COMPAT , 'ISO8859-1'); 
 		}
 	//print_r($TFournisseurs);exit();
@@ -112,8 +112,8 @@ function getTab(&$ATMdb, $deb, $fin,$incoherance){
 		WHERE type='factureloyer'
 		AND date_debut>= '".date("Y-m-d",$deb)." 00:00:00' AND date_debut<='".date("Y-m-d",$fin)." 00:00:00' ";
 	//ECHO $sql.'<br>';
-	$ATMdb->Execute($sql);
-	while($row = $ATMdb->Get_line()) {
+	$PDOdb->Execute($sql);
+	while($row = $PDOdb->Get_line()) {
 		$TFactures[] = array(
 		'cout'=>$row->coutEntrepriseTTC
 		,'date'=>date("d/m/Y",date2ToInt($row->date_debut))

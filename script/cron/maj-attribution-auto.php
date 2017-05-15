@@ -11,16 +11,16 @@
 		
 		$date=date('Y-m-d');
 		
-		$ATMdb=new TPDOdb;
-		$ATMdb->Execute("SELECT rowid FROM ".MAIN_DB_PREFIX."rh_evenement WHERE date_debut<='$date' && date_fin>='$date'");
-		$Tab = $ATMdb->Get_All();
+		$PDOdb=new TPDOdb;
+		$PDOdb->Execute("SELECT rowid FROM ".MAIN_DB_PREFIX."rh_evenement WHERE date_debut<='$date' && date_fin>='$date'");
+		$Tab = $PDOdb->Get_All();
 		
 		foreach($Tab as $row) {
 			
 			$e=new TRH_Evenement;
-			$e->load($ATMdb, $row->rowid);
+			$e->load($PDOdb, $row->rowid);
 			
-			$e->save($ATMdb);
+			$e->save($PDOdb);
 			
 		}
 		

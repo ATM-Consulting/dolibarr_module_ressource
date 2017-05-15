@@ -5,7 +5,7 @@
 	$langs->load('ressource@ressource');
 	
 	//if (!$user->rights->financement->affaire->read)	{ accessforbidden(); }
-	$ATMdb=new TPDOdb;
+	$PDOdb=new TPDOdb;
 	$emprunt=new TRH_Evenement;
 	$ressource=new TRH_ressource;
 	
@@ -16,16 +16,16 @@
 	/*
 	 * Liste
 	 */
-	 //$ATMdb->db->debug=true;
-	 _liste($ATMdb, $ressource);
+	 //$PDOdb->db->debug=true;
+	 _liste($PDOdb, $ressource);
 
 	
 	
-	$ATMdb->close();
+	$PDOdb->close();
 	llxFooter();
 	
 	
-function _liste(&$ATMdb, &$ressource) {
+function _liste(&$PDOdb, &$ressource) {
 	global $langs,$conf,$db,$user;	
 	llxHeader('','Liste des ressources');
 	print dol_get_fiche_head(array()  , '', 'Liste ressources');
@@ -33,17 +33,17 @@ function _liste(&$ATMdb, &$ressource) {
 	
 	//récupération des champs spéciaux à afficher.
 	$sqlReq="SELECT code, libelle, type, options FROM ".MAIN_DB_PREFIX."rh_ressource_field WHERE inliste='oui' ";
-	$ATMdb->Execute($sqlReq);
+	$PDOdb->Execute($sqlReq);
 	$TSpeciaux = array();
 	
 	$TSearch=array();
-	while($ATMdb->Get_line()) {
-		$TSpeciaux[$ATMdb->Get_field('code')]= $ATMdb->Get_field('libelle');
-		if ($ATMdb->Get_field('type')=='liste'){
-			$TSearch[$ATMdb->Get_field('code')] = array_combine(explode(';', $ATMdb->Get_field('options')), explode(';', $ATMdb->Get_field('options')));
+	while($PDOdb->Get_line()) {
+		$TSpeciaux[$PDOdb->Get_field('code')]= $PDOdb->Get_field('libelle');
+		if ($PDOdb->Get_field('type')=='liste'){
+			$TSearch[$PDOdb->Get_field('code')] = array_combine(explode(';', $PDOdb->Get_field('options')), explode(';', $PDOdb->Get_field('options')));
 		}
 		else {
-			$TSearch[$ATMdb->Get_field('code')] = true;}
+			$TSearch[$PDOdb->Get_field('code')] = true;}
 	}
 	
 	
@@ -68,7 +68,7 @@ function _liste(&$ATMdb, &$ressource) {
 	if(!$user->rights->ressource->ressource->viewRessource){
 		$sql.=" AND e.fk_user=".$user->id;
 	}
-	$ressource->load_liste_type_ressource($ATMdb);
+	$ressource->load_liste_type_ressource($PDOdb);
 
 	$TOrder = array('r.fk_rh_ressource_type'=>'ASC',  'r.numId'=>'ASC');
 	if(isset($_REQUEST['orderDown']))$TOrder = array($_REQUEST['orderDown']=>'DESC');
@@ -76,7 +76,7 @@ function _liste(&$ATMdb, &$ressource) {
 				
 	$page = isset($_REQUEST['page']) ? $_REQUEST['page'] : 1;
 	$form=new TFormCore($_SERVER['PHP_SELF'],'formtranslateList','GET');	
-	$r->liste($ATMdb, $sql, array(
+	$r->liste($PDOdb, $sql, array(
 		'limit'=>array(
 			'page'=>$page
 			,'nbLine'=>'30'

@@ -17,15 +17,15 @@
 	$langs->load('main');
 	$langs->load('other');
 	
-	$ATMdb=new TPDOdb;
+	$PDOdb=new TPDOdb;
 	$ressource = new TRH_Ressource;
 	
-	_fiche($ATMdb, $ressource);
+	_fiche($PDOdb, $ressource);
 	
-	$ATMdb->close();
+	$PDOdb->close();
 	llxFooter();
 	
-	function _fiche(&$ATMdb, &$ressource) {
+	function _fiche(&$PDOdb, &$ressource) {
 		global $db,$user,$conf,$langs,$mysoc;
 		llxHeader('','Fichiers joints');
 		$dir_base = DOL_DATA_ROOT.'/ressource/';
@@ -94,7 +94,7 @@ if($resupload<=0) var_dump( $resupload,  $upload_dir . "/" . $_FILES['userfile']
 		//Suppression d'un import
 		if($action == 'delimport'){
 			if(!empty($_REQUEST['idImport'])){
-				$ATMdb->Execute('DELETE FROM '.MAIN_DB_PREFIX.'rh_evenement WHERE idImport = "'.$_REQUEST['idImport'].'" AND idImport != "" AND idImport IS NOT NULL');
+				$PDOdb->Execute('DELETE FROM '.MAIN_DB_PREFIX.'rh_evenement WHERE idImport = "'.$_REQUEST['idImport'].'" AND idImport != "" AND idImport IS NOT NULL');
 			}
 		}
 		
@@ -141,9 +141,9 @@ if($resupload<=0) var_dump( $resupload,  $upload_dir . "/" . $_FILES['userfile']
 		//listes des entités
 		$liste_entities = array();
 		$sql="SELECT rowid,label FROM ".MAIN_DB_PREFIX."entity WHERE 1";
-		$ATMdb->Execute($sql);
-		while($ATMdb->Get_line()) {
-			$liste_entities[$ATMdb->Get_field('rowid')] = htmlentities($ATMdb->Get_field('label'), ENT_COMPAT , 'ISO8859-1');
+		$PDOdb->Execute($sql);
+		while($PDOdb->Get_line()) {
+			$liste_entities[$PDOdb->Get_field('rowid')] = htmlentities($PDOdb->Get_field('label'), ENT_COMPAT , 'ISO8859-1');
 
 		}
 		
@@ -203,7 +203,7 @@ if($resupload<=0) var_dump( $resupload,  $upload_dir . "/" . $_FILES['userfile']
 		
 		$l=new TListviewTBS('listImports');
 		
-		print $l->render($ATMdb, $sql, array(
+		print $l->render($PDOdb, $sql, array(
 			'limit'=>array(
 				'page'=>$page
 				,'nbLine'=>'15'

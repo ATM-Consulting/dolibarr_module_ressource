@@ -17,22 +17,22 @@ require('../class/contrat.class.php');
 global $conf;
 $entity = (isset($_REQUEST['entity'])) ? $_REQUEST['entity'] : $conf->entity;
 
-$ATMdb=new TPDOdb;
+$PDOdb=new TPDOdb;
 
 // relever le point de départ
 $timestart=microtime(true);
 
 $idVoiture = getIdType('voiture');
-$idParcours = getIdSociete($ATMdb, 'parcours');
+$idParcours = getIdSociete($PDOdb, 'parcours');
 if (!$idParcours){echo 'Pas de fournisseur (tiers) du nom de Parcours !';exit();}
 
 if ($idParcours == 0){echo 'Aucun fournisseur du nom de "Parcours" ! ';exit;}
 
 $TUser = array();// TODO mais à quoi ça sert ?!
 $sql="SELECT rowid, lastname, firstname FROM ".MAIN_DB_PREFIX."user WHERE entity=".$conf->entity;
-$ATMdb->Execute($sql);
-while($ATMdb->Get_line()) {
-	$TUser[strtolower($ATMdb->Get_field('firstname').' '.$ATMdb->Get_field('lastname'))] = $ATMdb->Get_field('rowid');
+$PDOdb->Execute($sql);
+while($PDOdb->Get_line()) {
+	$TUser[strtolower($PDOdb->Get_field('firstname').' '.$PDOdb->Get_field('lastname'))] = $PDOdb->Get_field('rowid');
 }
 
 //chargement d'une liste :  plaque => typeVehicule (vu ou vp) 
@@ -40,8 +40,8 @@ $TVuVp = array();
 $sql="SELECT rowid,  numId, typeVehicule FROM ".MAIN_DB_PREFIX."rh_ressource 
 		WHERE entity=".$conf->entity." 
 		AND fk_rh_ressource_type=".$idVoiture;
-$ATMdb->Execute($sql);
-while($row = $ATMdb->Get_line()) {
+$PDOdb->Execute($sql);
+while($row = $PDOdb->Get_line()) {
 	$TVuVp[strtolower($row->numId)] = $row->typeVehicule;
 }
 //pre($conf->global->MAIN_INFO_SOCIETE_COUNTRY,1);exit;
@@ -50,9 +50,9 @@ list($fk_pays) = explode(':',$conf->global->MAIN_INFO_SOCIETE_COUNTRY);
 //chargement des TVA.
 $TTVA = array();
 $sqlReq="SELECT rowid, taux FROM ".MAIN_DB_PREFIX."c_tva WHERE fk_pays=".$fk_pays;
-$ATMdb->Execute($sqlReq);
-while($ATMdb->Get_line()) {
-	$TTVA[$ATMdb->Get_field('taux')] = $ATMdb->Get_field('rowid');
+$PDOdb->Execute($sqlReq);
+while($PDOdb->Get_line()) {
+	$TTVA[$PDOdb->Get_field('taux')] = $PDOdb->Get_field('rowid');
 }
 
 
@@ -61,16 +61,16 @@ $message = 'Traitement du fichier '.$nomFichier.' : <br><br>';
 
 $idImport = Tools::url_format(basename($nomFichier), false, true);
 
-$ATMdb->Execute("DELETE FROM ".MAIN_DB_PREFIX."rh_evenement WHERE idImport='$idImport'");
+$PDOdb->Execute("DELETE FROM ".MAIN_DB_PREFIX."rh_evenement WHERE idImport='$idImport'");
 
 
-$idRessFactice = createRessourceFactice($ATMdb, $idVoiture, $idImport, $entity, $idParcours);
-$idSuperAdmin = getIdSuperAdmin($ATMdb);
+$idRessFactice = createRessourceFactice($PDOdb, $idVoiture, $idImport, $entity, $idParcours);
+$idSuperAdmin = getIdSuperAdmin($PDOdb);
 
 $cptFactureLoyer = 0;
 $cptFactureGestEntre = 0;
 $cptNoAttribution = 0;
-$TRessource = chargeVoiture($ATMdb);
+$TRessource = chargeVoiture($PDOdb);
 
 //début du parsing
 $numLigne = 0;
@@ -120,7 +120,7 @@ if (($handle = fopen($nomFichier, "r")) !== FALSE) {
 			}
 			
 			if (!empty($TRessource[strtoupper($plaque)])){
-				$idUser = ressourceIsEmpruntee($ATMdb, $TRessource[$plaque], $date);
+				$idUser = ressourceIsEmpruntee($PDOdb, $TRessource[$plaque], $date);
 				if ($idUser==0){ //si il trouve, on l'affecte à l'utilisateur 
 					$idUser = $idSuperAdmin;
 					$cptNoAttribution++;
@@ -133,7 +133,7 @@ if (($handle = fopen($nomFichier, "r")) !== FALSE) {
 				$id_ressource = $TRessource[$plaque];
 				
 				$ressource = new TRH_Ressource();
-				$ressource->load($ATMdb, $id_ressource);
+				$ressource->load($PDOdb, $id_ressource);
 				$typeVehicule = $ressource->typevehicule;
 			}
 			else {
@@ -149,7 +149,7 @@ if (($handle = fopen($nomFichier, "r")) !== FALSE) {
 			
 				//echo $idUser.'<br>';
 				
-			$ATMdb=new TPDOdb;
+			$PDOdb=new TPDOdb;
 			
 			/*
 				 * Correction des taux d'import pour traitement retour
@@ -186,7 +186,7 @@ if (($handle = fopen($nomFichier, "r")) !== FALSE) {
 			$fact->fk_fournisseur = $idParcours;
 			$fact->idImport = $idImport;
 			$fact->date_facture = dateToInt($infos[3]);
-			$fact->save($ATMdb);
+			$fact->save($PDOdb);
 			$cptFactureLoyer++;
 				
 				
@@ -223,7 +223,7 @@ if (($handle = fopen($nomFichier, "r")) !== FALSE) {
 			$factEnt->idImport = $idImport;
 			$factEnt->date_facture = dateToInt($infos[3]);
 			$factEnt->entity =$entity;
-			$factEnt->save($ATMdb);
+			$factEnt->save($PDOdb);
 			$cptFactureGestEntre++;
 				
 			$totalHT+=	$fact->coutEntrepriseHT + $factEnt->coutEntrepriseHT;
@@ -252,16 +252,16 @@ if (($handle = fopen($nomFichier, "r")) !== FALSE) {
 	send_mail_resources('Import - Factures Parcours',$message);
 }
 
-function chargeVoiture(&$ATMdb){
+function chargeVoiture(&$PDOdb){
 	global $conf;
 	$TRessource = array();
 	$sql="SELECT r.rowid as 'ID', t.rowid as 'IdType', r.numId FROM ".MAIN_DB_PREFIX."rh_ressource as r 
 	LEFT JOIN ".MAIN_DB_PREFIX."rh_ressource_type as t on (r.fk_rh_ressource_type = t.rowid)
 	WHERE (t.code='voiture' OR t.code='carte') ";
-	$ATMdb->Execute($sql);
-	while($ATMdb->Get_line()) {
-		//$idVoiture = $ATMdb->Get_field('IdType');
-		$TRessource[$ATMdb->Get_field('numId')] = $ATMdb->Get_field('ID');
+	$PDOdb->Execute($sql);
+	while($PDOdb->Get_line()) {
+		//$idVoiture = $PDOdb->Get_field('IdType');
+		$TRessource[$PDOdb->Get_field('numId')] = $PDOdb->Get_field('ID');
 		}
 	return $TRessource;
 }

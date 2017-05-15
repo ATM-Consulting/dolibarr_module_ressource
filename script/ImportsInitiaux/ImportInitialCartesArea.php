@@ -9,7 +9,7 @@ require('../../class/ressource.class.php');
 require('../../lib/ressource.lib.php');
 
 global $conf;
-$ATMdb=new TPDOdb;
+$PDOdb=new TPDOdb;
 // relever le point de départ
 $timestart=microtime(true);
 
@@ -18,25 +18,25 @@ $idVoiture=  getIdType('voiture');
 //on charge quelques listes pour avoir les clés externes.
 $TTrigramme = array();
 $sql="SELECT rowid, lastname, firstname,login FROM ".MAIN_DB_PREFIX."user WHERE entity IN (0, ".$conf->entity.")";
-$ATMdb->Execute($sql);
-while($ATMdb->Get_line()) {
-	 /*strtoupper($ATMdb->Get_field('firstname')).' '.strtoupper($ATMdb->Get_field('lastname'))*/
-	$TTrigramme[strtolower($ATMdb->Get_field('login'))] = $ATMdb->Get_field('rowid');
+$PDOdb->Execute($sql);
+while($PDOdb->Get_line()) {
+	 /*strtoupper($PDOdb->Get_field('firstname')).' '.strtoupper($PDOdb->Get_field('lastname'))*/
+	$TTrigramme[strtolower($PDOdb->Get_field('login'))] = $PDOdb->Get_field('rowid');
 	}
 
 $TVoiture = array();
 $sql="SELECT rowid, numId FROM ".MAIN_DB_PREFIX."rh_ressource 
 	WHERE fk_rh_ressource_type=".$idVoiture." AND entity IN (0, ".$conf->entity.")";
-$ATMdb->Execute($sql);
-while($ATMdb->Get_line()) {
-	$TVoiture[$ATMdb->Get_field('numId')] = $ATMdb->Get_field('rowid');
+$PDOdb->Execute($sql);
+while($PDOdb->Get_line()) {
+	$TVoiture[$PDOdb->Get_field('numId')] = $PDOdb->Get_field('rowid');
 	}
 
 $TGroups = array();
 $sql="SELECT rowid, nom FROM ".MAIN_DB_PREFIX."usergroup WHERE entity IN (0, ".$conf->entity.")";
-$ATMdb->Execute($sql);
-while($ATMdb->Get_line()) {
-	$TGroups[$ATMdb->Get_field('nom')] = $ATMdb->Get_field('rowid');
+$PDOdb->Execute($sql);
+while($PDOdb->Get_line()) {
+	$TGroups[$PDOdb->Get_field('nom')] = $PDOdb->Get_field('rowid');
 }
 
 
@@ -49,7 +49,7 @@ $idCarteArea = getIdType('badgearea');
 
 
 
-$TRessource = getIDRessource($ATMdb, $idCarteArea);
+$TRessource = getIDRessource($PDOdb, $idCarteArea);
 
 	$nomFichier = "fichier facture area.CSV";
 	echo 'Traitement du fichier '.$nomFichier.' : <br>';
@@ -85,13 +85,13 @@ $TRessource = getIDRessource($ATMdb, $idCarteArea);
 					$temp->entity = $conf->entity;
 					//$temp->fk_rh_ressource
 					
-					$temp->load_ressource_type($ATMdb);
+					$temp->load_ressource_type($PDOdb);
 					$temp->numcarte = $numId;	
 					$temp->immcarte	= $numId;
 					$temp->comptesupport = '';
 					
 					$cptCarteArea ++;
-					$temp->save($ATMdb);
+					$temp->save($PDOdb);
 					$TRessource[$numId] = $temp->getId();
 					
 					$trigramme = explode('-', $infos[7]);
@@ -104,7 +104,7 @@ $TRessource = getIDRessource($ATMdb, $idCarteArea);
 						$emprunt->fk_rh_ressource = $temp->getId();
 						$emprunt->set_date('date_debut', '01/01/2013');
 						$emprunt->set_date('date_fin', '31/12/2013');
-						$emprunt->save($ATMdb);
+						$emprunt->save($PDOdb);
 					}
 					else {
 						echo 'Trigramme inexistant : '.$trigramme.'<br>';
@@ -127,6 +127,6 @@ $TRessource = getIDRessource($ATMdb, $idCarteArea);
 $timeend=microtime(true);
 $page_load_time = number_format($timeend-$timestart, 3);
 echo 'Fin du traitement. Durée : '.$page_load_time . " sec<br><br>";
-$ATMdb->close();
+$PDOdb->close();
 
 	

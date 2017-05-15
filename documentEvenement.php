@@ -13,20 +13,20 @@
 	$langs->load('main');
 	$langs->load('other');
 	
-	$ATMdb=new TPDOdb;
+	$PDOdb=new TPDOdb;
 	$evenement=new TRH_Evenement;
 	$ressource = new TRH_Ressource;
 	
 	if(isset($_REQUEST['idEven'])) {
-		$ressource->load($ATMdb, $_REQUEST['id']);
-		$evenement->load($ATMdb, $_REQUEST['idEven']);
-		_fiche($ATMdb, $evenement, $ressource);
+		$ressource->load($PDOdb, $_REQUEST['id']);
+		$evenement->load($PDOdb, $_REQUEST['idEven']);
+		_fiche($PDOdb, $evenement, $ressource);
 	}
 	
-	$ATMdb->close();
+	$PDOdb->close();
 	llxFooter();
 	
-	function _fiche(&$ATMdb, &$evenement, &$ressource) {
+	function _fiche(&$PDOdb, &$evenement, &$ressource) {
 		global $db,$user,$conf,$langs;
 		llxHeader('','Fichiers joints');
 		$dir_base = DOL_DATA_ROOT.'/ressource/';

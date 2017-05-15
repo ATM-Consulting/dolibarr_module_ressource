@@ -11,7 +11,7 @@ ini_set('memory_limit','512M'); //taille mémoire limitée
 set_time_limit(0); //durée d'execution illimitée.
 global $conf;
 $entity = (isset($_REQUEST['entity'])) ? $_REQUEST['entity'] : $conf->entity;
-$ATMdb=new TPDOdb;
+$PDOdb=new TPDOdb;
 // relever le point de départ
 $timestart=microtime(true);
 
@@ -20,7 +20,7 @@ $message = '';
 
 //on charge quelques listes pour avoir les clés externes.
 $idCarteSim = getIdType('cartesim');
-$idOrange = getIdSociete($ATMdb, 'orange');
+$idOrange = getIdSociete($PDOdb, 'orange');
 if (!$idOrange){echo 'Pas de fournisseur (tiers) du nom de Orange !';exit();}
 $TNumeroInexistants = array();
 $TCompteurs = array();
@@ -31,46 +31,46 @@ $TCoutMinute = array();
 $sql="SELECT rowid, numId, coutminuteint, coutminuteext FROM ".MAIN_DB_PREFIX."rh_ressource 
 	WHERE fk_rh_ressource_type=".$idCarteSim." 
 	AND entity IN (0,".$conf->entity.")";
-$ATMdb->Execute($sql);
+$PDOdb->Execute($sql);
 
-while($ATMdb->Get_line()) 
+while($PDOdb->Get_line()) 
 {
-	$numIdTrimed = trim($ATMdb->Get_field('numId'));
-	$TNumero[$numIdTrimed] = $ATMdb->Get_field('rowid');
-	$TCoutMinuteInt[$numIdTrimed] = $ATMdb->Get_field('coutminuteint');
-	$TCoutMinuteExt[$numIdTrimed] = $ATMdb->Get_field('coutminuteext');
+	$numIdTrimed = trim($PDOdb->Get_field('numId'));
+	$TNumero[$numIdTrimed] = $PDOdb->Get_field('rowid');
+	$TCoutMinuteInt[$numIdTrimed] = $PDOdb->Get_field('coutminuteint');
+	$TCoutMinuteExt[$numIdTrimed] = $PDOdb->Get_field('coutminuteext');
 }
 
 
 // Pour trouver les utilisateurs, on ne regarde pas la colonne du fichier, mais qui utilise la ressource au moment de la facture
 $TAttribution = array();
 foreach ($TNumero as $numId => $rowid) {
-	$TAttribution[$numId] = ressourceIsEmpruntee($ATMdb, $rowid, date("Y-m-d", time()) );
+	$TAttribution[$numId] = ressourceIsEmpruntee($PDOdb, $rowid, date("Y-m-d", time()) );
 }
 
 $TUser = array();
 $TRowidUser = array();
 $sql="SELECT rowid, lastname, firstname, login FROM ".MAIN_DB_PREFIX."user";
-$ATMdb->Execute($sql);
-while($ATMdb->Get_line()) {
-	$TUser[strtolower($ATMdb->Get_field('firstname').' '.$ATMdb->Get_field('lastname'))] = $ATMdb->Get_field('rowid');
-	$TRowidUser[] = $ATMdb->Get_field('rowid');
+$PDOdb->Execute($sql);
+while($PDOdb->Get_line()) {
+	$TUser[strtolower($PDOdb->Get_field('firstname').' '.$PDOdb->Get_field('lastname'))] = $PDOdb->Get_field('rowid');
+	$TRowidUser[] = $PDOdb->Get_field('rowid');
 	
 }
 
 $TGroups= array();
 $sql="SELECT fk_user, fk_usergroup
 	FROM ".MAIN_DB_PREFIX."usergroup_user";
-$ATMdb->Execute($sql);
-while($ATMdb->Get_line()) {
-	$TGroups[$ATMdb->Get_field('fk_usergroup')][] = $ATMdb->Get_field('fk_user');
+$PDOdb->Execute($sql);
+while($PDOdb->Get_line()) {
+	$TGroups[$PDOdb->Get_field('fk_usergroup')][] = $PDOdb->Get_field('fk_user');
 }
 
 $TTVA = array();
 $sqlReq="SELECT rowid, taux FROM ".MAIN_DB_PREFIX."c_tva WHERE fk_pays=".$conf->global->MAIN_INFO_SOCIETE_COUNTRY[0];
-$ATMdb->Execute($sqlReq);
-while($ATMdb->Get_line()) {
-	$TTVA[$ATMdb->Get_field('rowid')] = $ATMdb->Get_field('taux');}
+$PDOdb->Execute($sqlReq);
+while($PDOdb->Get_line()) {
+	$TTVA[$PDOdb->Get_field('rowid')] = $PDOdb->Get_field('taux');}
 $ttva = array_keys ($TTVA, '19.6');
 $tva = $ttva[0];
 
@@ -83,7 +83,7 @@ $tva = $ttva[0];
 //chargement des limites de conso pour chaque user, selon les règles
 $TLimites = array();
 
-$TLimites = load_limites_telephone($ATMdb, $TGroups, $TRowidUser);
+$TLimites = load_limites_telephone($PDOdb, $TGroups, $TRowidUser);
 
 /*echo '<br><br><br>';
 foreach ($TLimites as $key => $value) {
@@ -100,8 +100,8 @@ if (empty($nomFichier)){$nomFichier = "./fichierImports/detail_appels10.csv";}
 $message .= 'Traitement du fichier '.$nomFichier.' : <br><br>';
 
 $idImport = Tools::url_format(basename($nomFichier));
-$ATMdb->Execute("DELETE FROM ".MAIN_DB_PREFIX."rh_evenement WHERE idImport='$idImport'");
-$ATMdb->Execute("DELETE FROM ".MAIN_DB_PREFIX."rh_evenement_appel WHERE idImport='$idImport'");
+$PDOdb->Execute("DELETE FROM ".MAIN_DB_PREFIX."rh_evenement WHERE idImport='$idImport'");
+$PDOdb->Execute("DELETE FROM ".MAIN_DB_PREFIX."rh_evenement_appel WHERE idImport='$idImport'");
 
 $TDonnees = array();
 
@@ -277,19 +277,19 @@ foreach ($TUser as $nom => $id) {
 		
 		$fact->idImport = $idImport;
 		
-		$fact->save($ATMdb);		
+		$fact->save($PDOdb);		
 		$cptFacture++;
 		
 		//$num_import = _getNextNumeroImport();
-		//_saveFactureIntoTable($ATMdb, $TDonnees, $TCompteurs[$id]['num'], $idImport);
+		//_saveFactureIntoTable($PDOdb, $TDonnees, $TCompteurs[$id]['num'], $idImport);
 		
 	}
 	
 }
 
-_saveFactureIntoTable($ATMdb, $TDonnees, $idImport);
+_saveFactureIntoTable($PDOdb, $TDonnees, $idImport);
 
-function _saveFactureIntoTable(&$ATMdb, &$TDonnees, $idImport) {
+function _saveFactureIntoTable(&$PDOdb, &$TDonnees, $idImport) {
 	//var_dump($TDonnees);exit;
 	
 	foreach($TDonnees as $TArrayLine){
@@ -320,7 +320,7 @@ function _saveFactureIntoTable(&$ATMdb, &$TDonnees, $idImport) {
 			$TRH_event_appel->montant_euros_ht = price2num($TArrayLine[12]);
 			
 			
-			$TRH_event_appel->save($ATMdb);
+			$TRH_event_appel->save($PDOdb);
 		
 		//}
 	}
@@ -355,7 +355,7 @@ foreach ($TNumeroInexistants as $num => $rien) {
 }
 
 
-$ATMdb->close();
+$PDOdb->close();
 
 
 

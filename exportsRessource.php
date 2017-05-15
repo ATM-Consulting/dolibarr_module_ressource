@@ -8,7 +8,7 @@
 		
 	$langs->load('report@report');
 	
-	$ATMdb=new TPDOdb;
+	$PDOdb=new TPDOdb;
 	
 	$mesg = '';
 	$error=false;
@@ -18,22 +18,22 @@
 		
 			case 'sendByMail':
 				
-				_send_by_mail($ATMdb, unserialize(base64_decode( $_POST['serialData'] )));
+				_send_by_mail($PDOdb, unserialize(base64_decode( $_POST['serialData'] )));
 				
 				break;
 		
 			case 'save':
-				_genererRapport($ATMdb, $_REQUEST['date_debut'], $_REQUEST['date_fin'], $_REQUEST['type'], $_REQUEST['idImport'], 'view', true);
+				_genererRapport($PDOdb, $_REQUEST['date_debut'], $_REQUEST['date_fin'], $_REQUEST['type'], $_REQUEST['idImport'], 'view', true);
 				break;
 			default:
-				_genererRapport($ATMdb, $_REQUEST['date_debut'], $_REQUEST['date_fin'], $_REQUEST['type'],$_REQUEST['idImport'], 'view');
+				_genererRapport($PDOdb, $_REQUEST['date_debut'], $_REQUEST['date_fin'], $_REQUEST['type'],$_REQUEST['idImport'], 'view');
 
 	}
 	
-	$ATMdb->close();
+	$PDOdb->close();
 	llxFooter();
 
-function _send_by_mail(&$ATMdb, $TLigne) {
+function _send_by_mail(&$PDOdb, $TLigne) {
 global $user,$db;	
 	
 	llxHeader('', 'Exports Ressources');
@@ -63,10 +63,10 @@ global $user,$db;
 			
 			$TLine=array();
 			
-			$r1->load_by_numId($ATMdb, $ligne['numero']);		
-			$r2->load($ATMdb, $r1->fk_rh_ressource);
+			$r1->load_by_numId($PDOdb, $ligne['numero']);		
+			$r2->load($PDOdb, $r1->fk_rh_ressource);
 			
-			$ATMdb->Execute("SET NAMES 'utf8'");
+			$PDOdb->Execute("SET NAMES 'utf8'");
 			
 			$total = $duree_total_externe = $duree_total_interne = 0;
 			$mail='';
@@ -75,7 +75,7 @@ global $user,$db;
 			WHERE idImport='".$_POST['idImport']."' AND num_gsm='".$ligne['numero']."' AND date_appel BETWEEN '".date('Y-m-d 00:00:00',$t_debut)."' AND '".date('Y-m-d 23:59:59',$t_fin)."'
 			ORDER BY date_appel";
 			//print $sql;
-			$Tab = $ATMdb->ExecuteAsArray($sql);
+			$Tab = $PDOdb->ExecuteAsArray($sql);
 			foreach($Tab as $row) {
 				
 				$t_facture = strtotime($row->date_facture);
@@ -181,7 +181,7 @@ global $user,$db;
 	llxFooter();
 }
 
-function _genererRapport(&$ATMdb, $date_debut, $date_fin, $type, $idImport , $mode, $boutonGenerer = false) {
+function _genererRapport(&$PDOdb, $date_debut, $date_fin, $type, $idImport , $mode, $boutonGenerer = false) {
 	global $db, $user, $langs, $conf;
 	llxHeader('', 'Exports Ressources');
 	
@@ -194,8 +194,8 @@ function _genererRapport(&$ATMdb, $date_debut, $date_fin, $type, $idImport , $mo
 	
 	$TType = array();
 	$sql="SELECT rowid, nom FROM ".MAIN_DB_PREFIX."societe";
-	$ATMdb->Execute($sql);
-	while($row = $ATMdb->Get_line()) {
+	$PDOdb->Execute($sql);
+	while($row = $PDOdb->Get_line()) {
 		$TType[$row->rowid] = $row->nom;
 		if (strtolower($row->nom)=='parcours')
 			{$TIdRessource[$row->rowid] = $idVoiture;}
@@ -209,7 +209,7 @@ function _genererRapport(&$ATMdb, $date_debut, $date_fin, $type, $idImport , $mo
 	}
 	
     dol_include_once('/ressource/lib/ressource.lib.php');
-    $TIdFacture = getFactures($ATMdb, $type);
+    $TIdFacture = getFactures($PDOdb, $type);
 	
 	print dol_get_fiche_head(array()  , '', 'Export Ressources');
 	
@@ -221,8 +221,8 @@ function _genererRapport(&$ATMdb, $date_debut, $date_fin, $type, $idImport , $mo
 	
 	if($boutonGenerer){
 
-        if(stripos($TType[$type],'orange')!==false) $TLignes = _exportOrange2($ATMdb, $date_debut, $date_fin, $conf->entity, $idImport);
-        else $TLignes = _exportVoiture($ATMdb, $date_debut, $date_fin, $conf->entity, $type, $TIdRessource[$type], $idImport);
+        if(stripos($TType[$type],'orange')!==false) $TLignes = _exportOrange2($PDOdb, $date_debut, $date_fin, $conf->entity, $idImport);
+        else $TLignes = _exportVoiture($PDOdb, $date_debut, $date_fin, $conf->entity, $type, $TIdRessource[$type], $idImport);
         
 		
 		if(isset($_REQUEST['DEBUG']))var_dump($TLignes);

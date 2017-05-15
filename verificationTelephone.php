@@ -8,7 +8,7 @@
 	require('./lib/ressource.lib.php');
 	
 	global $conf;
-	$ATMdb=new TPDOdb;
+	$PDOdb=new TPDOdb;
 	
 	$mesg = '';
 	$error=false;
@@ -17,10 +17,10 @@
 		switch($_REQUEST['action']) {
 			case 'add':
 			case 'new':
-				_fiche($ATMdb,  'new');
+				_fiche($PDOdb,  'new');
 				break;
 			case 'view':
-				_fiche($ATMdb, 'view');
+				_fiche($PDOdb, 'view');
 				break;
 			case 'save':
 				//$date_debut=$_REQUEST['date_debut'];
@@ -29,18 +29,18 @@
 				$date_debut = mktime(0,0,0,substr($date_debut, 3,2),substr($date_debut, 0,2), substr($date_debut, 6,4));
 				$date_fin = $_REQUEST['date_fin'];
 				$date_fin = mktime(0,0,0,substr($date_fin, 3,2),substr($date_fin, 0,2), substr($date_fin, 6,4));
-				_genererRapport($ATMdb, $date_debut, $date_fin, 'view');
+				_genererRapport($PDOdb, $date_debut, $date_fin, 'view');
 				break;
 		}
 	}else{
-		 _fiche($ATMdb, 'view');
+		 _fiche($PDOdb, 'view');
 	}
 	
-	$ATMdb->close();
+	$PDOdb->close();
 	llxFooter();
 	
 	
-function _fiche(&$ATMdb, $mode) {
+function _fiche(&$PDOdb, $mode) {
 	global $db, $user, $langs, $conf;
 	
 	llxHeader('','Vérification des consommations téléphonique');
@@ -72,7 +72,7 @@ function _fiche(&$ATMdb, $mode) {
 	llxFooter();
 }
 
-function _genererRapport(&$ATMdb, $date_debut, $date_fin, $mode) {
+function _genererRapport(&$PDOdb, $date_debut, $date_fin, $mode) {
 	global $db, $user, $langs, $conf;
 	
 	llxHeader('','Vérification des consommations téléphonique');
@@ -85,17 +85,17 @@ function _genererRapport(&$ATMdb, $date_debut, $date_fin, $mode) {
 	$TUser = array();
 	$TRowidUser = array();
 	$sql="SELECT rowid, lastname, firstname, login FROM ".MAIN_DB_PREFIX."user WHERE entity IN (0,".$conf->entity.")";
-	$ATMdb->Execute($sql);
-	while($ATMdb->Get_line()) {
-		$TUser[strtolower($ATMdb->Get_field('firstname').' '.$ATMdb->Get_field('name'))] = $ATMdb->Get_field('rowid');
-		$TRowidUser[] = $ATMdb->Get_field('rowid');		
+	$PDOdb->Execute($sql);
+	while($PDOdb->Get_line()) {
+		$TUser[strtolower($PDOdb->Get_field('firstname').' '.$PDOdb->Get_field('name'))] = $PDOdb->Get_field('rowid');
+		$TRowidUser[] = $PDOdb->Get_field('rowid');		
 	}
 	
 	$TGroups= array();
 	$sql="SELECT fk_user, fk_usergroup FROM ".MAIN_DB_PREFIX."usergroup_user WHERE entity IN (0,".$conf->entity.")";
-	$ATMdb->Execute($sql);
-	while($ATMdb->Get_line()) {
-		$TGroups[$ATMdb->Get_field('fk_usergroup')][] = $ATMdb->Get_field('fk_user');
+	$PDOdb->Execute($sql);
+	while($PDOdb->Get_line()) {
+		$TGroups[$PDOdb->Get_field('fk_usergroup')][] = $PDOdb->Get_field('fk_user');
 	}
 	
 	$TSim= array();
@@ -103,21 +103,21 @@ function _genererRapport(&$ATMdb, $date_debut, $date_fin, $mode) {
 	$idTel = getIdType('telephone');
 	$sql="SELECT rowid, fk_rh_ressource, numId FROM ".MAIN_DB_PREFIX."rh_ressource 
 	WHERE fk_rh_ressource_type=".$idSim;
-	$ATMdb->Execute($sql);
-	while($row = $ATMdb->Get_line()) {
+	$PDOdb->Execute($sql);
+	while($row = $PDOdb->Get_line()) {
 		$TSim[$row->rowid] = array('tel'=>$row->fk_rh_ressource
 										,'numId'=>$row->numId);}
 	
 	$TTel = array();
 	$sql="SELECT rowid, libelle FROM ".MAIN_DB_PREFIX."rh_ressource 
 	WHERE fk_rh_ressource_type=".$idTel;
-	$ATMdb->Execute($sql);
-	while($row = $ATMdb->Get_line()) {
+	$PDOdb->Execute($sql);
+	while($row = $PDOdb->Get_line()) {
 		$TTel[$row->rowid] = $row->libelle;}
 	
 	//print_r($TRessource);exit();
 	
-	$TLimites = load_limites_telephone($ATMdb, $TGroups, $TRowidUser);
+	$TLimites = load_limites_telephone($PDOdb, $TGroups, $TRowidUser);
 	
 	//echo '<br><br><br>';
 	/*foreach ($TLimites as $key => $value) {
@@ -137,11 +137,11 @@ function _genererRapport(&$ATMdb, $date_debut, $date_fin, $mode) {
 	
 	
 	$TTelephone = array();
-	$ATMdb->Execute($sql);
+	$PDOdb->Execute($sql);
 	$k=0;
 
 	
-	while($row = $ATMdb->Get_line()) {
+	while($row = $PDOdb->Get_line()) {
 		$lim = $TLimites[$row->idUser]['lim']/60;
 		$dep = $row->duree;
 		$choix = ($lim != 0) ? 'gen' : 'extint';

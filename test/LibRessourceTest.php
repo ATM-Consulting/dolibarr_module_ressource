@@ -36,7 +36,7 @@ require('../class/contrat.class.php');*/
 
 
 $ress = new TRH_Ressource;
-$ATMdb = new TPDOdb;
+$PDOdb = new TPDOdb;
 
 
 /**
@@ -52,14 +52,14 @@ class LibRessourceTest extends PHPUnit_Framework_TestCase
 		
 	public static function setUpBeforeClass()
     {
-        global $ATMdb;	
+        global $PDOdb;	
         print "Début du test de Ressource.\n";
 		
     }
  
     public static function tearDownAfterClass()
     {
-    	global $ATMdb;
+    	global $PDOdb;
 		print "\nFin du test de Ressource.\n";
     }
 	
@@ -70,7 +70,7 @@ class LibRessourceTest extends PHPUnit_Framework_TestCase
 	
 	public function testRessourcePrepareHead()
     {
-    	global $ress, $ATMdb;
+    	global $ress, $PDOdb;
 		$ress->code = 'voiture';
 		$ret = ressourcePrepareHead($ress, 'type-ressource');
 		$this->assertCount(4, $ret);
@@ -98,7 +98,7 @@ class LibRessourceTest extends PHPUnit_Framework_TestCase
 	
 	public function testGetLibelle()
     {
-    	global $ress, $ATMdb;
+    	global $ress, $PDOdb;
 		$ret = getLibelle($ress);
 		$this->assertNotNull($ret);
 		print __METHOD__."\n";
@@ -115,20 +115,20 @@ class LibRessourceTest extends PHPUnit_Framework_TestCase
 	
 	public function testgetRessource()
     {
-    	global $ress, $ATMdb, $conf ;
+    	global $ress, $PDOdb, $conf ;
 		$idVoit = getIdType('voiture');
 		
     	$sqlReq="SELECT COUNT(rowid) AS 'nb' FROM ".MAIN_DB_PREFIX."rh_ressource 
     	WHERE entity IN (0,".$conf->entity.")";
-		$ATMdb->Execute($sqlReq);
-		if ($row = $ATMdb->Get_line()) {$nb = intval($row->nb);}
+		$PDOdb->Execute($sqlReq);
+		if ($row = $PDOdb->Get_line()) {$nb = intval($row->nb);}
 		$Tab = getRessource();
 		$this->assertCount($nb+1 , $Tab);
 		
 		$sqlReq="SELECT COUNT(rowid) AS 'nb' FROM ".MAIN_DB_PREFIX."rh_ressource 
     	WHERE entity IN (0,".$conf->entity.") AND fk_rh_ressource_type=".$idVoit;
-		$ATMdb->Execute($sqlReq);
-		if ($row = $ATMdb->Get_line()) {$nb = intval($row->nb);}
+		$PDOdb->Execute($sqlReq);
+		if ($row = $PDOdb->Get_line()) {$nb = intval($row->nb);}
 		
 		$Tab = getRessource($idVoit);
 		$this->assertCount($nb+1 , $Tab);
@@ -149,13 +149,13 @@ class LibRessourceTest extends PHPUnit_Framework_TestCase
 	
 	public function testgetIDRessource()
     {
-    	global $ress, $ATMdb, $conf ;
+    	global $ress, $PDOdb, $conf ;
 		$idVoit = getIdType('voiture');	
 		$sqlReq="SELECT COUNT(rowid) AS 'nb' FROM ".MAIN_DB_PREFIX."rh_ressource 
     	WHERE entity IN (0,".$conf->entity.") AND fk_rh_ressource_type=".$idVoit;
-		$ATMdb->Execute($sqlReq);
-		if ($row = $ATMdb->Get_line()) {$nb = intval($row->nb);}
-		$Tab = getIDRessource($ATMdb, $idVoit);
+		$PDOdb->Execute($sqlReq);
+		if ($row = $PDOdb->Get_line()) {$nb = intval($row->nb);}
+		$Tab = getIDRessource($PDOdb, $idVoit);
 		$this->assertCount($nb , $Tab);
 		
 		print __METHOD__."\n";
@@ -235,7 +235,7 @@ class LibRessourceTest extends PHPUnit_Framework_TestCase
 
 	public function testintToMinute()
     {
-    	global $ress, $ATMdb, $conf ;
+    	global $ress, $PDOdb, $conf ;
 		
 		$ret = intToMinute(65);
 		$this->assertEquals('05', $ret);
@@ -260,22 +260,22 @@ class LibRessourceTest extends PHPUnit_Framework_TestCase
 	
 	public function testLoad_limites_telephone()
     {
-    	global $ress, $ATMdb, $conf ;
+    	global $ress, $PDOdb, $conf ;
 		$TGroups = getGroups();
 		$TRowidUser = array();
 		$sql="SELECT rowid, lastname, firstname, login FROM ".MAIN_DB_PREFIX."user WHERE entity IN (0,".$conf->entity.")";
-		$ATMdb->Execute($sql);
-		while($ATMdb->Get_line()) {
-			$TRowidUser[] = $ATMdb->Get_field('rowid');
+		$PDOdb->Execute($sql);
+		while($PDOdb->Get_line()) {
+			$TRowidUser[] = $PDOdb->Get_field('rowid');
 		}
-		$ret = load_limites_telephone($ATMdb, $TGroups, $TRowidUser);
+		$ret = load_limites_telephone($PDOdb, $TGroups, $TRowidUser);
 		
 		print __METHOD__."\n";
 	}
 	
 	public function testsend_mail_resources()
     {
-    	global $ress, $ATMdb, $conf ;
+    	global $ress, $PDOdb, $conf ;
 		
 		$ret = send_mail_resources('titre', 'message');
 		$this->assertEquals(1, $ret);
@@ -286,20 +286,20 @@ class LibRessourceTest extends PHPUnit_Framework_TestCase
 	
 	public function testressourceIsEmpruntee()
     {
-    	global $ress, $ATMdb, $conf ;
+    	global $ress, $PDOdb, $conf ;
 		$jour = date("Y-m-d", time() );
 		$sql="SELECT rowid, fk_user, fk_rh_ressource FROM ".MAIN_DB_PREFIX."rh_evenement 
 		WHERE type='emprunt' 
 		AND date_debut<='".$jour."' AND date_fin >= '".$jour."' ";
-		$ATMdb->Execute($sql);
-		while($ATMdb->Get_line()) {
-			$idRessource = $ATMdb->Get_field('fk_rh_ressource');
-			$expectedUser = $ATMdb->Get_field('fk_user');
+		$PDOdb->Execute($sql);
+		while($PDOdb->Get_line()) {
+			$idRessource = $PDOdb->Get_field('fk_rh_ressource');
+			$expectedUser = $PDOdb->Get_field('fk_user');
 		}
-		$ret = ressourceIsEmpruntee($ATMdb, $idRessource, $jour);
+		$ret = ressourceIsEmpruntee($PDOdb, $idRessource, $jour);
 		$this->assertEquals($expectedUser, $ret);
 		
-		$ret = ressourceIsEmpruntee($ATMdb, 0, 0);
+		$ret = ressourceIsEmpruntee($PDOdb, 0, 0);
 		$this->assertEquals(0, $ret);
 		
 		print __METHOD__."\n";

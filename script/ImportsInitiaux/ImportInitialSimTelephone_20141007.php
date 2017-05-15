@@ -6,7 +6,7 @@
 	
 	$nomFichier = "affectation_sim_telephones_3.csv";
 	
-	$ATMdb = new TPDOdb;
+	$PDOdb = new TPDOdb;
 	
 	if (($handle = fopen($nomFichier, "r")) !== false) {
 		
@@ -18,9 +18,9 @@
 			
 			if($id_user > 0) {
 				
-				$id_tel = _add_tel($data, $ATMdb);
-				_add_carte_sim($data, $ATMdb, $id_tel);
-				_add_affectation_user_tel($ATMdb, $id_tel, $id_user, $data);
+				$id_tel = _add_tel($data, $PDOdb);
+				_add_carte_sim($data, $PDOdb, $id_tel);
+				_add_affectation_user_tel($PDOdb, $id_tel, $id_user, $data);
 				
 			}
 			
@@ -51,11 +51,11 @@
 		
 	}
 
-	function _add_carte_sim($data, &$ATMdb, $id_tel) {
+	function _add_carte_sim($data, &$PDOdb, $id_tel) {
 		
 		$sim = new TRH_Ressource;
 		$sim->fk_rh_ressource_type = 5; // SIM
-		$sim->load_ressource_type($ATMdb);
+		$sim->load_ressource_type($PDOdb);
 		$sim->numId = "33".$data[3];
 		$sim->libelle = "Carte SIM 33".$data[3];
 		$sim->numerotel = "33".$data[3];
@@ -63,25 +63,25 @@
 		$sim->numerosim = $data[5];
 		$sim->forfait = $data[18];
 		$sim->fk_rh_ressource = $id_tel;
-		$sim->save($ATMdb);
+		$sim->save($PDOdb);
 		
 	}
 
-	function _add_tel($data, &$ATMdb) {
+	function _add_tel($data, &$PDOdb) {
 		
 		$phone = new TRH_Ressource;
 		$phone->fk_rh_ressource_type = 4; // Tél
-		$phone->load_ressource_type($ATMdb);
+		$phone->load_ressource_type($PDOdb);
 		$phone->libelle = $data[11];
 		$phone->imei = $data[6];
 		$phone->numerotel = "33".$data[3];
-		$phone->save($ATMdb);
+		$phone->save($PDOdb);
 		
 		return $phone->rowid;
 		
 	}
 	
-	function _add_affectation_user_tel(&$ATMdb, $id_tel, $id_user, $data) {
+	function _add_affectation_user_tel(&$PDOdb, $id_tel, $id_user, $data) {
 		
 		$emprunt = new TRH_Evenement;
 		$emprunt->type = "emprunt";
@@ -91,6 +91,6 @@
 		$emprunt->date_debut = strtotime(implode("/", array_reverse(explode("/", $data[14]))));
 		$emprunt->date_fin = strtotime(implode("/", array_reverse(explode("/", $data[15]))));
 		
-		$emprunt->save($ATMdb);
+		$emprunt->save($PDOdb);
 		
 	}
