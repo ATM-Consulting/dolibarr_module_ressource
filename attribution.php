@@ -103,7 +103,7 @@ function _liste(&$PDOdb, &$emprunt, &$ressource) {
 	
 	printLibelle($ressource);
 	
-	$r = new TSSRenderControler($emprunt);
+	$r = new TSSRenderControler($emprunt); //TODO name user from object
 	$sql="SELECT DISTINCT e.rowid as 'ID', CONCAT(u.firstname,' ',u.lastname) as 'Utilisateur', 
 		DATE(e.date_debut) as 'Date début', DATE(e.date_fin) as 'Date fin', e.commentaire as 'Commentaire'";
 	if($user->rights->ressource->ressource->manageAttribution){
