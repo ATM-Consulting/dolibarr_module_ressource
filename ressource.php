@@ -354,7 +354,7 @@ function getStatut($val){
 
 
 function _fiche(&$PDOdb, &$emprunt, &$ressource, &$contrat, $mode) {
-	global $db,$user;
+	global $db,$user,$conf,$mc,$mysoc;
 	llxHeader('', 'Ressource', '', '', 0, 0, array('/hierarchie/js/jquery.jOrgChart.js'));
 
 	$formCore=new TFormCore($_SERVER['PHP_SELF'],'form1','POST');
@@ -447,7 +447,9 @@ function _fiche(&$PDOdb, &$emprunt, &$ressource, &$contrat, $mode) {
 	$ressource->load_liste_type_ressource($PDOdb);
 	$listeContrat = $ressource->liste_contrat($PDOdb);
 	
-	$combo_entite_utilisatrice = (defined('AUTOMATIC_ATTRIBUTION_USER_ENTITY_ON_RESSOURCE') && AUTOMATIC_ATTRIBUTION_USER_ENTITY_ON_RESSOURCE ) ? $ressource->TEntity[$ressource->fk_entity_utilisatrice] : $formCore->combo('','fk_entity_utilisatrice', $ressource->TEntity, $ressource->fk_entity_utilisatrice );
+	$combo_entite_utilisatrice = ( !empty($conf->multicompany->enabled) ? $mc->select_entities($ressource->fk_entity_utilisatrice,'fk_entity_utilisatrice', $mode != 'edit' ? 'disabled="true"' : ''  ) : $mysoc->name ) ;
+	
+	if(defined('AUTOMATIC_ATTRIBUTION_USER_ENTITY_ON_RESSOURCE') && AUTOMATIC_ATTRIBUTION_USER_ENTITY_ON_RESSOURCE ) $combo_entite_utilisatrice = $ressource->TEntity[$ressource->fk_entity_utilisatrice];
 		
 	$form=new Form($db);
 	
@@ -476,10 +478,10 @@ function _fiche(&$PDOdb, &$emprunt, &$ressource, &$contrat, $mode) {
 				,'date_achat'=>$formCore->calendrier('', 'date_achat', $ressource->date_achat,12, 12)
 				,'date_vente'=>(empty($ressource->date_vente) || ($ressource->date_vente<=0) || ($mode=='new')) ? $formCore->calendrier('', 'date_vente', '' ,12, 12) : $formCore->calendrier('', 'date_vente', $ressource->date_vente,12 , 12)
 				//,'date_garantie'=>(empty($ressource->date_garantie) || ($ressource->date_garantie<=0) || ($mode=='new')) ? $formCore->calendrier('', 'date_garantie', '' , 10) : $formCore->calendrier('', 'date_garantie', $ressource->date_garantie, 12)
-				,'fk_proprietaire'=>$formCore->combo('','fk_proprietaire',$ressource->TEntity,$ressource->fk_proprietaire)
-				,'fk_utilisatrice'=>$formCore->combo('','fk_utilisatrice',$ressource->TAgence,$ressource->fk_utilisatrice)
+					,'fk_proprietaire'=>( !empty($conf->multicompany->enabled) ? $mc->select_entities($ressource->fk_proprietaire,'fk_proprietaire', $mode != 'edit' ? 'disabled="true"' : '' ) : $mysoc->name )   //$formCore->combo('','fk_proprietaire',$ressource->TEntity,$ressource->fk_proprietaire)
+				,'fk_utilisatrice'=>$form->select_dolgroups($ressource->fk_utilisatrice,'fk_utilisatrice',0,'', $mode!='edit')  //$formCore->combo('','fk_utilisatrice',$ressource->TAgence,$ressource->fk_utilisatrice)
 				,'fk_entity_utilisatrice'=>$combo_entite_utilisatrice
-				,'fk_loueur'=>$form->select_company($ressource->fk_loueur, 'fk_loueur' ,'fournisseur=1')//$formCore->combo('','fk_loueur',$ressource->TFournisseur,$ressource->fk_loueur)
+				,'fk_loueur'=> ($mode != 'edit' ?_getNomUrl($ressource->fk_loueur) : $form->select_company($ressource->fk_loueur, 'fk_loueur' ,'fournisseur=1'))//$formCore->combo('','fk_loueur',$ressource->TFournisseur,$ressource->fk_loueur)
 			)
 			,'ressourceNew' =>array(
 				'typeCombo'=> count($ressource->TType) ? $formCore->combo('','fk_rh_ressource_type',$ressource->TType,$ressource->fk_rh_ressource_type): "Aucun type"
@@ -542,6 +544,14 @@ function _fiche(&$PDOdb, &$emprunt, &$ressource, &$contrat, $mode) {
 	dol_htmloutput_mesg($mesg, '', ($error ? 'error' : 'ok'));
 	llxFooter();
 }
-
+function _getNomUrl($fk_soc) {
+	global $db, $conf,$langs;
+	
+	$o=new Societe($db);
+	$o->fetch($fk_soc);
+	
+	return $o->getNomUrl(1);
+	
+}
 	
 	
