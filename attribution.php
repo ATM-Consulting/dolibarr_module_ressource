@@ -5,7 +5,10 @@
 	require('./lib/ressource.lib.php');
 	$langs->load('ressource@ressource');
 	
-	//if (!$user->rights->financement->affaire->read)	{ accessforbidden(); }
+	if (empty($user->rights->ressource->ressource->manageAttribution))	{ accessforbidden(); }
+
+	
+
 	$PDOdb=new TPDOdb;
 	$emprunt=new TRH_Evenement;
 	$ressource=new TRH_Ressource;
@@ -225,7 +228,7 @@ function _liste(&$PDOdb, &$emprunt, &$ressource) {
 	
 function _fiche(&$PDOdb, &$emprunt,&$ressource,  $mode) {
 	global $db,$user;
-	llxHeader('', 'Attibution');
+	llxHeader('', 'Attribution');
 
 	$formCore=new TFormCore($_SERVER['PHP_SELF'],'form1','POST');
 	$formCore->Set_typeaff($mode);
@@ -237,7 +240,7 @@ function _fiche(&$PDOdb, &$emprunt,&$ressource,  $mode) {
 	$emprunt->load_liste($PDOdb);
 	
 	$form=new Form($db);
-	
+//	var_dump($mode);
 	$TBS=new TTemplateTBS();
 	print $TBS->render('./tpl/attribution.tpl.php'
 		,array()
@@ -251,7 +254,7 @@ function _fiche(&$PDOdb, &$emprunt,&$ressource,  $mode) {
 			,'NEmprunt'=>array(
 				'id'=>$emprunt->getId() //$formCore->hidden('idEven', $emprunt->getId())
 				,'type'=>$formCore->hidden('type', 'emprunt')
-				,'fk_user'=>$form->select_dolusers($emprunt->fk_user,'fk_user',0,'', $mode!='edit') //$formCore->combo('','fk_user',$emprunt->TUser,$emprunt->fk_user)
+				,'fk_user'=>$form->select_dolusers($emprunt->fk_user,'fk_user',0,'', $mode =='view' ) //$formCore->combo('','fk_user',$emprunt->TUser,$emprunt->fk_user)
 				,'fk_rh_ressource'=> $formCore->hidden('fk_rh_ressource', $ressource->getId())
 				,'commentaire'=>$formCore->zonetexte('','commentaire',$emprunt->commentaire, 80,3)
 				,'date_debut'=> $formCore->calendrier('', 'date_debut', $emprunt->date_debut, 12, 10)
