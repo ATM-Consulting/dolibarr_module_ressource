@@ -71,7 +71,7 @@ class TRH_Ressource extends TObjetStd {
 		$sqlReq="SELECT rowid, nom FROM ".MAIN_DB_PREFIX."usergroup WHERE entity IN (0,".$conf->entity.")";
 		$PDOdb->Execute($sqlReq);
 		while($PDOdb->Get_line()) {
-			$this->TAgence[$PDOdb->Get_field('rowid')] = htmlentities($PDOdb->Get_field('nom'), ENT_COMPAT , 'ISO8859-1');
+			$this->TAgence[$PDOdb->Get_field('rowid')] = $PDOdb->Get_field('nom');
 			}
 		
 		$this->TFournisseur = array('');
@@ -90,7 +90,7 @@ class TRH_Ressource extends TObjetStd {
 		$sql="SELECT rowid,label FROM ".MAIN_DB_PREFIX."entity WHERE 1";
 		$PDOdb->Execute($sql);
 		while($PDOdb->Get_line()) {
-			$this->TEntity[$PDOdb->Get_field('rowid')] = htmlentities($PDOdb->Get_field('label'), ENT_COMPAT , 'ISO8859-1');
+			$this->TEntity[$PDOdb->Get_field('rowid')] = $PDOdb->Get_field('label');
 			}
 		
 		
@@ -357,7 +357,7 @@ class TRH_Ressource extends TObjetStd {
 	
 	function init_variables(&$PDOdb) {
 		foreach($this->ressourceType->TField as $field) {
-			$this->add_champs($field->code, 'type=chaine;');
+			$this->add_champs($field->code, array('type'=>'string'));
 		}
 		$this->init_db_by_vars($PDOdb);
 		parent::load($PDOdb, $this->getId());
@@ -367,12 +367,13 @@ class TRH_Ressource extends TObjetStd {
 		global $conf;
 		$this->entity = $conf->entity;
 		//$this->setStatut($db, date("Y-m-d"));
-		if($this->bailvoit == 'Immo')
+		if($this->bailvoit == 'Immo') //TODO remove custom customer
 		{
 			$this->date_vente = null;
 		}
 		//on transforme les champs sensés être entier en int
 		foreach($this->ressourceType->TField as $k=>$field) {
+			//var_dump($field->code,$field->type);
 			if ($field->type=='entier'){
 				$this->{$field->code} = (int) ($this->{$field->code});
 			}
