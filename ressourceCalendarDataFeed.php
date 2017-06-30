@@ -4,7 +4,7 @@
 //TODO bullshit code, need rewrite !
 require('config.php');
 require('./lib/ressource.lib.php');
-include_once("../rhlibrary/wdCalendar/php/functions.php");
+dol_include_once("/ressource/lib/wdCalendar/php/functions.php");
 $PDOdb=new TPDOdb;
 
 $method = $_GET["method"];
