@@ -109,8 +109,10 @@ function _liste(&$PDOdb, &$emprunt, &$ressource) {
 	$r = new TSSRenderControler($emprunt); //TODO name user from object
 	$sql="SELECT DISTINCT e.rowid as 'ID', CONCAT(u.firstname,' ',u.lastname) as 'Utilisateur', 
 		DATE(e.date_debut) as 'Date début', DATE(e.date_fin) as 'Date fin', e.commentaire as 'Commentaire'";
-	if($user->rights->ressource->ressource->manageAttribution){
-		$sql.=",GROUP_CONCAT(CONCAT(' ',code)) as 'Codes analytiques' ,'' as 'Supprimer'";
+	if(!empty($user->rights->ressource->ressource->manageAttribution)){
+		if(!empty($conf->valideur->enabled)) $sql.=",GROUP_CONCAT(CONCAT(' ',code)) as 'Codes analytiques' ";
+		
+		$sql.= " ,'' as 'Supprimer'";
 	}
 	$sql.=" FROM ".MAIN_DB_PREFIX."rh_evenement as e
 		LEFT JOIN ".MAIN_DB_PREFIX."user as u ON (e.fk_user = u.rowid)
