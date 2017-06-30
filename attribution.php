@@ -115,16 +115,21 @@ function _liste(&$PDOdb, &$emprunt, &$ressource) {
 		$sql.= " ,'' as 'Supprimer'";
 	}
 	$sql.=" FROM ".MAIN_DB_PREFIX."rh_evenement as e
-		LEFT JOIN ".MAIN_DB_PREFIX."user as u ON (e.fk_user = u.rowid)
-		LEFT JOIN ".MAIN_DB_PREFIX."rh_analytique_user as ua ON (e.fk_user = ua.fk_user)
-		LEFT JOIN ".MAIN_DB_PREFIX."rh_ressource as r ON (e.fk_rh_ressource = r.rowid)";
+		LEFT JOIN ".MAIN_DB_PREFIX."user as u ON (e.fk_user = u.rowid) ";
+
+	if(!empty($conf->valideur->enabled)) $sql.=" LEFT JOIN ".MAIN_DB_PREFIX."rh_analytique_user as ua ON (e.fk_user = ua.fk_user) ";
+
+	$sql.="	LEFT JOIN ".MAIN_DB_PREFIX."rh_ressource as r ON (e.fk_rh_ressource = r.rowid)";
 	$sql.=" WHERE e.type='emprunt'
 		AND e.fk_rh_ressource=".$ressource->getId();
 	if(!$user->rights->ressource->ressource->manageAttribution){
 		$sql.=" AND e.fk_user=".$user->id;
 		
 	}
-	$sql.=" GROUP BY ua.fk_user ";
+
+	if(!empty($conf->valideur->enabled)) {
+		$sql.=" GROUP BY ua.fk_user ";
+	}
 	
 	$TOrder = array('Date fin'=>'ASC');
 	if(isset($_REQUEST['orderDown']))$TOrder = array($_REQUEST['orderDown']=>'DESC');
