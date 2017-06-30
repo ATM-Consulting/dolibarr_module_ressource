@@ -8,20 +8,20 @@
 	
 	llxHeader('','Calendrier des ressources', '', '', 0,0,
 		array(
-			"/rhlibrary/wdCalendar/src/Plugins/Common.js"    
-			,"/rhlibrary/wdCalendar/src/Plugins/datepicker_lang_FR.js" 
-			,"/rhlibrary/wdCalendar/src/Plugins/jquery.datepicker.js" 
-			,"/rhlibrary/wdCalendar/src/Plugins/jquery.alert.js"   
-			,"/rhlibrary/wdCalendar/src/Plugins/jquery.ifrmdailog.js" 
-			,"/rhlibrary/wdCalendar/src/Plugins/wdCalendar_lang_FR.js" 
-			,"/rhlibrary/wdCalendar/src/Plugins/jquery.calendar.js" )
+			"/ressource/lib/wdCalendar/src/Plugins/Common.js"    
+			,"/ressource/lib/wdCalendar/src/Plugins/datepicker_lang_FR.js" 
+			,"/ressource/lib/wdCalendar/src/Plugins/jquery.datepicker.js" 
+			,"/ressource/lib/wdCalendar/src/Plugins/jquery.alert.js"   
+			,"/ressource/lib/wdCalendar/src/Plugins/jquery.ifrmdailog.js" 
+			,"/ressource/lib/wdCalendar/src/Plugins/wdCalendar_lang_FR.js" 
+			,"/ressource/lib/wdCalendar/src/Plugins/jquery.calendar.js" )
 	
 	
-		,array("/rhlibrary/wdCalendar/css/dailog.css" 
-			,"/rhlibrary/wdCalendar/css/calendar.css"
-			,"/rhlibrary/wdCalendar/css/dp.css" 
-			,"/rhlibrary/wdCalendar/css/alert.css" 
-			,"/rhlibrary/wdCalendar/css/main.css")
+		,array("/ressource/lib/wdCalendar/css/dailog.css" 
+			,"/ressource/lib/wdCalendar/css/calendar.css"
+			,"/ressource/lib/wdCalendar/css/dp.css" 
+			,"/ressource/lib/wdCalendar/css/alert.css" 
+			,"/ressource/lib/wdCalendar/css/main.css")
 	);
 	
 		
