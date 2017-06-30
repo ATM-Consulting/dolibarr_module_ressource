@@ -181,7 +181,9 @@ class TRH_Evenement  extends TObjetStd {
 	}
 	
 	function get_AAGroupe(&$PDOdb, $TGroupeAutomaticAttributionByAnalytique) {
-		global $db;
+		global $db,$conf;
+		
+		if(!empty($conf->valideur->enabled)) {
 		
 				dol_include_once('/valideur/class/analytique_user.class.php');
 				dol_include_once('/user/class/usergroup.class.php');
@@ -205,7 +207,10 @@ class TRH_Evenement  extends TObjetStd {
 					}
 					
 				}
-			return false;
+				
+		}
+		
+		return false;
 	}
 	
 	static function listTypeEvent(&$PDOdb, $id_ressource) {
