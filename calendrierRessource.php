@@ -5,25 +5,10 @@
 	require('./class/ressource.class.php');
 	require('./lib/ressource.lib.php');
 	
-	
-	llxHeader('','Calendrier des ressources', '', '', 0,0,
-		array(
-			"/ressource/lib/wdCalendar/src/Plugins/Common.js"    
-			,"/ressource/lib/wdCalendar/src/Plugins/datepicker_lang_FR.js" 
-			,"/ressource/lib/wdCalendar/src/Plugins/jquery.datepicker.js" 
-			,"/ressource/lib/wdCalendar/src/Plugins/jquery.alert.js"   
-			,"/ressource/lib/wdCalendar/src/Plugins/jquery.ifrmdailog.js" 
-			,"/ressource/lib/wdCalendar/src/Plugins/wdCalendar_lang_FR.js" 
-			,"/ressource/lib/wdCalendar/src/Plugins/jquery.calendar.js" )
-	
-	
-		,array("/ressource/lib/wdCalendar/css/dailog.css" 
-			,"/ressource/lib/wdCalendar/css/calendar.css"
-			,"/ressource/lib/wdCalendar/css/dp.css" 
-			,"/ressource/lib/wdCalendar/css/alert.css" 
-			,"/ressource/lib/wdCalendar/css/main.css")
+	llxHeader('', $langs->trans('RessourceCalendar'), '', '', 0,0,
+			array('/fullcalendar/lib/moment/min/moment.min.js', '/fullcalendar/lib/fullcalendar/dist/fullcalendar.min.js','/fullcalendar/lib/fullcalendar/dist/lang/'.$langjs.'.js')
+			,array('/fullcalendar/lib/fullcalendar/dist/fullcalendar.min.css','/fullcalendar/css/fullcalendar.css')
 	);
-	
 		
 	$PDOdb=new TPDOdb;
 	$ressource=new TRH_ressource;

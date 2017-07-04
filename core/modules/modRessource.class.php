@@ -92,9 +92,9 @@ class modRessource extends DolibarrModules
 
 		// Config pages. Put here list of php page, stored into mymodule/admin directory, to use to setup module.
 		$this->config_page_url = array("admin_ressource.php@ressource");
-
+		
 		// Dependencies
-		$this->depends = array('modRHHierarchie');		// List of modules id that must be enabled if this module is enabled
+		$this->depends = array('modRHHierarchie','modfullcalendar');		// List of modules id that must be enabled if this module is enabled
 		$this->requiredby = array();	// List of modules id to disable if this one is disabled
 		$this->phpmin = array(5,0);					// Minimum version of PHP required by module
 		$this->need_dolibarr_version = array(3,0);	// Minimum version of Dolibarr required by module
