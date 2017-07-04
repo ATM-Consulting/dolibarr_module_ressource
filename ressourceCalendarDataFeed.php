@@ -7,10 +7,9 @@ require('./lib/ressource.lib.php');
 dol_include_once("/ressource/lib/wdCalendar/php/functions.php");
 $PDOdb=new TPDOdb;
 
-$method = $_GET["method"];
-switch ($method) {
-    case "list": 
-		if (isset($_REQUEST['id'])){
+    	$idRessourceSup = 0;
+    	
+    	if (isset($_REQUEST['id'])){
 			//on regarde si la ressource courante est une sous-ressource
 			$sql = "SELECT fk_rh_ressource FROM ".MAIN_DB_PREFIX."rh_ressource 
 			WHERE rowid=".$_REQUEST['id']."
@@ -20,30 +19,21 @@ switch ($method) {
 				$idRessourceSup = $row->fk_rh_ressource ;
 			}
 		}
-		else {$idRessourceSup = 0;}
 		
 		if ($idRessourceSup!= 0){$type = 0;}
 		else {$type = $_REQUEST['type'];}
 		//echo $sql.' '.$id;
-		$ret = listCalendar($PDOdb, $_POST["showdate"], $_POST["viewtype"], 
+		$ret = listCalendarByRange($PDOdb,  GETPOST('start'), GETPOST('end'), 
 					$type, $_REQUEST['id'], $_REQUEST['fk_user'], $_REQUEST['typeEven'],$idRessourceSup);
         
-        break;   
 
-}
-$PDOdb->close();
-echo json_encode($ret); 
+		echo json_encode($ret); 
 
-function listCalendarByRange(&$PDOdb, $sd, $ed, $idTypeRessource=0, $idRessource = 0,$fk_user = 0, $typeEven = 'all', $idRessourceSup = 0){
+function listCalendarByRange(&$PDOdb, $date_start, $date_end, $idTypeRessource=0, $idRessource = 0,$fk_user = 0, $typeEven = 'all', $idRessourceSup = 0){
   global $user;
-  $ret = array();
-  $ret['events'] = array();
-  $ret["issort"] =true;
-  $ret["start"] = php2JsTime($sd);
-  $ret["end"] = php2JsTime($ed);
-  $ret['error'] = null;
+  $TEvent = array();
   
-  $TEvent = getTypeEvent($idTypeRessource);
+  $TTypeEvent = getTypeEvent($idTypeRessource);
   $TRessource = getRessource(0);
   $TUser = getUsers();
  
@@ -54,6 +44,9 @@ function listCalendarByRange(&$PDOdb, $sd, $ed, $idTypeRessource=0, $idRessource
 	WHERE ";
 	
 	$sql .= " 1 ";
+	
+	$sql.= " AND e.date_debut<='".$date_end."' AND e.date_fin>='".$date_start."'"; 
+
 	//$sql .= " AND date_debut<='".php2MySqlTime($ed)."' AND date_fin >= '". php2MySqlTime($sd)."' ";
 	//$sql .= " `date_debut` between '"
     //  .php2MySqlTime($sd)."' and '". php2MySqlTime($ed)."'";
@@ -93,57 +86,48 @@ function listCalendarByRange(&$PDOdb, $sd, $ed, $idTypeRessource=0, $idRessource
 	  //on écrit l'intitulé du calendrier en fonction des données de la fonction
 	  $sujet = '';
 	  $sujet .= (empty($idRessource) || ($idRessource==0)) ? html_entity_decode($TRessource[$row->fk_rh_ressource], ENT_COMPAT , "ISO8859-1").', ' : '';
-	  $sujet .=  ($typeEven=='all') ? $TEvent[$row->type] : '' ;
+	  $sujet .=  ($typeEven=='all') ? $TTypeEvent[$row->type] : '' ;
 	  $sujet .= ($fk_user==0) ? ', '.$TUser[$row->fk_user] : ''; 
 	 
 //var_dump($row);exit;
-	 if (empty($sujet)){$sujet=' Emprunt ';}
-      $ret['events'][] = array(
-       $row->rowid,
-        $sujet,
-        php2JsTime(mySql2PhpTime($row->date_debut)),
-        php2JsTime(mySql2PhpTime($row->date_fin)),
-        $row->isAllDayEvent,
-        $moreOneDay, //more than one day event
-        //$row->InstanceType,
-        $row->fk_user,//Recurring event,
-        $row->color,
-        0,//editable
-        $lien,//$row->location,
-        '',//$attends
-        $row->fk_user
-		
-      );
+
+	  $timeDebut = strtotime($row->date_debut);
+	  $timeFin= strtotime($row->date_fin);
+	  
+	  $userRess=new User($db);
+	  $userRess->fetch($row->fk_user);
+	  
+	  if (empty($sujet)){$sujet=' Emprunt ';}
+		 $TEvent[]=array(
+		 		'id'=>$row->rowid
+		 		,'title'=>$label
+		 		,'allDay'=>(int)$row->isAllDayEvent
+		 		,'start'=>(empty($timeDebut) ? '' : date('Y-m-d H:i:s',(int)$timeDebut))
+		 		,'end'=>(empty($timeFin) ? '' : date('Y-m-d H:i:s',(int)$timeFin))
+		 		,'url'=>$url
+		 		,'editable'=>0
+		 		,'color'=>'#66ff66'
+		 		,'isDarkColor'=>0
+		 		,'colors'=>''
+		 		,'note'=>''
+		 		,'statut'=>''
+		 		,'fk_soc'=>0
+		 		,'fk_contact'=>0
+		 		,'fk_user'=>$row->fk_user
+		 		,'fk_project'=>0
+		 		,'societe'=>''
+		 		,'contact'=>''
+		 		,'user'=>$userRess->getFullName($langs)
+		 		,'project'=>''
+		 		,'more'=>''
+		 );
+	 
+      
     }
 	}catch(Exception $e){
-     $ret['error'] = $e->getMessage();
+     echo $e->getMessage();
   }
-  return $ret;
+  return $TEvent;
 }
 
-function listCalendar(&$PDOdb, $day, $type, $idTypeRessource=0, $idRessource = 0,$fk_user = 0, $typeEven = 'all', $idRessourceSup = 0){
-  $phpTime = js2PhpTime($day);
-  //echo $phpTime . "+" . $type;
-  switch($type){
-    case "month":
-      $st = mktime(0, 0, 0, date("m", $phpTime), 1, date("Y", $phpTime));
-      $et = mktime(0, 0, -1, date("m", $phpTime)+1, 1, date("Y", $phpTime));
-      break;
-    case "week":
-      //suppose first day of a week is monday 
-      $monday  =  date("d", $phpTime) - date('N', $phpTime) + 1;
-      //echo date('N', $phpTime);
-      $st = mktime(0,0,0,date("m", $phpTime), $monday, date("Y", $phpTime));
-      $et = mktime(0,0,-1,date("m", $phpTime), $monday+7, date("Y", $phpTime));
-      break;
-    case "day":
-      $st = mktime(0, 0, 0, date("m", $phpTime), date("d", $phpTime), date("Y", $phpTime));
-      $et = mktime(0, 0, -1, date("m", $phpTime), date("d", $phpTime)+1, date("Y", $phpTime));
-      break;
-  }
- 
-	return listCalendarByRange($PDOdb, $st, $et, $idTypeRessource, $idRessource ,$fk_user , $typeEven, $idRessourceSup );
-  
-
-}
 
