@@ -4,7 +4,9 @@
 //TODO bullshit code, need rewrite !
 require('config.php');
 require('./lib/ressource.lib.php');
-dol_include_once("/ressource/lib/wdCalendar/php/functions.php");
+
+dol_include_once('/ressource/class/ressource.class.php');
+
 $PDOdb=new TPDOdb;
 
     	$idRessourceSup = 0;
@@ -30,14 +32,14 @@ $PDOdb=new TPDOdb;
 		echo json_encode($ret); 
 
 function listCalendarByRange(&$PDOdb, $date_start, $date_end, $idTypeRessource=0, $idRessource = 0,$fk_user = 0, $typeEven = 'all', $idRessourceSup = 0){
-  global $user;
+	global $user,$conf,$langs,$db;
   $TEvent = array();
   
   $TTypeEvent = getTypeEvent($idTypeRessource);
-  $TRessource = getRessource(0);
-  $TUser = getUsers();
+ // $TRessource = getRessource(0);
+ // $TUser = getUsers();
  
-  try{
+  
 	$sql = "SELECT e.rowid,  e.date_debut, e.date_fin, e.isAllDayEvent, e.fk_user, e.color, e.type, e.fk_rh_ressource 
 	FROM ".MAIN_DB_PREFIX."rh_evenement as e 
 	LEFT JOIN ".MAIN_DB_PREFIX."rh_ressource as r ON (e.fk_rh_ressource = r.rowid)
@@ -58,8 +60,12 @@ function listCalendarByRange(&$PDOdb, $date_start, $date_end, $idTypeRessource=0
 			$sql .= " AND (e.fk_rh_ressource=".$idRessource." OR e.fk_rh_ressource=".$idRessourceSup.") ";}
 		else {$sql .= " AND e.fk_rh_ressource=".$idRessource;}
 	}
-	if ($fk_user!=0) {$sql .= " AND e.fk_user=".$fk_user;}
-	if ($typeEven && $typeEven!='all') {$sql .= " AND e.type='".$typeEven."'";}
+	if ($fk_user!=0) {
+		$sql .= " AND e.fk_user=".$fk_user;
+	}
+	if ($typeEven && $typeEven!='all') {
+		$sql .= " AND e.type='".$typeEven."'";
+	}
 	//echo $sql;
 	/*else{
     	$sql.=" AND e.fk_rh_ressource=".$idRessource;
@@ -69,25 +75,28 @@ function listCalendarByRange(&$PDOdb, $date_start, $date_end, $idTypeRessource=0
     	$sql.=" AND e.fk_user=".$user->id;
 	}
 //	echo '     '.$sql.'      ';exit;
-   $PDOdb->Execute($sql);
+    $Tab = $PDOdb->ExecuteAsArray($sql);
 //	var_dump($PDOdb);exit;
-    while ($row=$PDOdb->Get_line()) {
+    foreach($Tab as &$row) {
 
       if ($row->type == 'emprunt'){
-      	$lien = 'attribution.php?id='.$row->fk_rh_ressource.'&idEven='.$row->rowid.'&action=view';
+      	$url= 'attribution.php?id='.$row->fk_rh_ressource.'&idEven='.$row->rowid.'&action=view';
       }
 	  else {
-	  	$lien = 'evenement.php?id='.$row->fk_rh_ressource.'&idEven='.$row->rowid.'&action=view';
+	  	$url= 'evenement.php?id='.$row->fk_rh_ressource.'&idEven='.$row->rowid.'&action=view';
 	  }
 	 
 	  $moreOneDay=(int)( strtotime($row->date_debut) < strtotime($row->date_fin) );
 		
 	 
 	  //on écrit l'intitulé du calendrier en fonction des données de la fonction
-	  $sujet = '';
-	  $sujet .= (empty($idRessource) || ($idRessource==0)) ? html_entity_decode($TRessource[$row->fk_rh_ressource], ENT_COMPAT , "ISO8859-1").', ' : '';
-	  $sujet .=  ($typeEven=='all') ? $TTypeEvent[$row->type] : '' ;
-	  $sujet .= ($fk_user==0) ? ', '.$TUser[$row->fk_user] : ''; 
+	  $label= '';
+	
+	  $ressource = new TRH_Ressource();
+	  $ressource->load($PDOdb, $row->fk_rh_ressource);
+	  $label.=(String) $ressource;
+	  $label.=' [ '.dol_print_date(strtotime($row->date_debut)).' - '.dol_print_date(strtotime($row->date_fin)).' ]';
+	  $label.=  ($typeEven=='all') ? $TTypeEvent[$row->type] : '' ;
 	 
 //var_dump($row);exit;
 
@@ -97,7 +106,10 @@ function listCalendarByRange(&$PDOdb, $date_start, $date_end, $idTypeRessource=0
 	  $userRess=new User($db);
 	  $userRess->fetch($row->fk_user);
 	  
-	  if (empty($sujet)){$sujet=' Emprunt ';}
+	  if (empty($label)){
+	  	$label=' Emprunt ';
+	  }
+	  
 		 $TEvent[]=array(
 		 		'id'=>$row->rowid
 		 		,'title'=>$label
@@ -124,9 +136,7 @@ function listCalendarByRange(&$PDOdb, $date_start, $date_end, $idTypeRessource=0
 	 
       
     }
-	}catch(Exception $e){
-     echo $e->getMessage();
-  }
+	
   return $TEvent;
 }
 

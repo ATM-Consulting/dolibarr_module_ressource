@@ -20,14 +20,8 @@
 	[ressource.btValider;strconv=no;protect=no]
 	<br><br>
 [onshow;block=end]
-<div id="fullcalendar"></div>
-<style style="text/css">
-a.fc-day-grid-event,a.fc-time-grid-event  {
-	color:#000;
-	font-weight:normal;
-}
-</style>
-		
+
+
 [onshow;block=begin;when [ressource.fiche]!=true] 
 [onshow;block=begin;when [view.userDroitAgenda]==1] 
 
@@ -54,7 +48,16 @@ a.fc-day-grid-event,a.fc-time-grid-event  {
 [onshow;block=end]
 [onshow;block=end] 	
 
-<script>
+<div id="fullcalendar"></div>
+<style style="text/css">
+a.fc-day-grid-event,a.fc-time-grid-event  {
+	color:#000;
+	font-weight:normal;
+}
+</style>
+		
+
+<script type="text/javascript">
 ajaxLoadType = function(){
 	$.ajax({
 			url: 'script/loadTypeEvent.php?type='+$('#type option:selected').val()

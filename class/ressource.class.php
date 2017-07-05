@@ -43,6 +43,14 @@ class TRH_Ressource extends TObjetStd {
 		$this->TListeContrat = array(); 	//liste des id et libellés de tout les contrats
 		$this->TEntity = array();
 	}
+	
+	function __toString() {
+		global $langs;
+		
+		return $this->libelle;
+		
+	}
+	
 	function getClone() {
 		
 		$clone = clone $this;
