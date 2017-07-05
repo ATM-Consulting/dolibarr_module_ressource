@@ -191,9 +191,13 @@ function _liste(&$PDOdb, &$ressource) {
 	
 	$r = new TSSRenderControler($ressource);
 	$sql="SELECT r.rowid as 'ID', r.date_cre as 'DateCre', r.libelle, r.fk_rh_ressource_type,
-		r.numId , u.rowid as 'Statut', firstname, lastname 
-		,GROUP_CONCAT(CONCAT(ua.code,'(',ua.pourcentage,'%)') SEPARATOR ', ' ) as 'Codes analytiques' ";
+		r.numId , u.rowid as 'Statut', firstname, lastname ";
+
+	if(!empty($conf->valideur->enabled)) {
+		$sql.=" ,GROUP_CONCAT(CONCAT(ua.code,'(',ua.pourcentage,'%)') SEPARATOR ', ' ) as 'Codes analytiques' ";
 	
+	}
+
 	if(!empty($_REQUEST['TListTBS']['list_llx_rh_ressource']['search'])) {
 		$sql.=", CONCAT(DATE_FORMAT(e.date_debut,'%d/%m/%Y') ,' ', DATE_FORMAT(e.date_fin,'%d/%m/%Y')) as 'dates'";
 	}
@@ -208,10 +212,11 @@ function _liste(&$PDOdb, &$ressource) {
 	$sql.=" FROM ".MAIN_DB_PREFIX."rh_ressource as r
 			LEFT JOIN (SELECT fk_rh_ressource, date_debut,date_fin,fk_user FROM ".MAIN_DB_PREFIX."rh_evenement WHERE type='emprunt' AND date_fin>=NOW() AND date_debut<=NOW()) as e ON ( e.fk_rh_ressource=r.rowid OR e.fk_rh_ressource=r.fk_rh_ressource)
 	
-	 LEFT JOIN ".MAIN_DB_PREFIX."user as u ON (e.fk_user = u.rowid )
-	 LEFT JOIN ".MAIN_DB_PREFIX."rh_analytique_user as ua ON (e.fk_user = ua.fk_user)	
+	 LEFT JOIN ".MAIN_DB_PREFIX."user as u ON (e.fk_user = u.rowid ) ";
+
+	if(!empty($conf->valideur->enabled)) $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."rh_analytique_user as ua ON (e.fk_user = ua.fk_user) ";
 	
-	WHERE 1 ";
+	$sql.= " WHERE 1 ";
 	
 	
 	if(!$user->rights->ressource->ressource->viewRessource){

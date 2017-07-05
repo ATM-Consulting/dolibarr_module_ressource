@@ -897,7 +897,9 @@ function _exportOrange2($PDOdb, $date_debut, $date_fin, $entity, $idImport){
             if($user_ressource->id!=$id_user) {
                     $user_ressource->fetch($id_user);
                     $user_ressource->fetch_optionals($user_ressource->id, array('COMPTE_TIERS' => ""));
-                    $TAnal = TRH_analytique_user::getUserAnalytique($PDOdb, $id_user);  
+                    if(!empty($conf->valideur->enabled)) {
+                    	$TAnal = TRH_analytique_user::getUserAnalytique($PDOdb, $id_user);
+                    }
             } 
             
             foreach($TAnal as $anal) {
