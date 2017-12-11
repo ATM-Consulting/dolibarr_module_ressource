@@ -3,15 +3,15 @@
 	require('./class/ressource.class.php');
 	require('./class/evenement.class.php');
 	$langs->load('ressource@ressource');
-	
+
 	//if (!$user->rights->financement->affaire->read)	{ accessforbidden(); }
 	$PDOdb=new TPDOdb;
 	$emprunt=new TRH_Evenement;
 	$ressource=new TRH_ressource;
-	
+
 	$mesg = '';
 	$error=false;
-	
+
 
 	/*
 	 * Liste
@@ -19,23 +19,23 @@
 	 //$PDOdb->db->debug=true;
 	 _liste($PDOdb, $ressource);
 
-	
-	
+
+
 	$PDOdb->close();
 	llxFooter();
-	
-	
+
+
 function _liste(&$PDOdb, &$ressource) {
-	global $langs,$conf,$db,$user;	
+	global $langs,$conf,$db,$user;
 	llxHeader('','Liste des ressources');
 	print dol_get_fiche_head(array()  , '', 'Liste ressources');
-	
-	
+
+
 	//récupération des champs spéciaux à afficher.
 	$sqlReq="SELECT code, libelle, type, options FROM ".MAIN_DB_PREFIX."rh_ressource_field WHERE inliste='oui' ";
 	$PDOdb->Execute($sqlReq);
 	$TSpeciaux = array();
-	
+
 	$TSearch=array();
 	while($PDOdb->Get_line()) {
 		$TSpeciaux[$PDOdb->Get_field('code')]= $PDOdb->Get_field('libelle');
@@ -45,12 +45,12 @@ function _liste(&$PDOdb, &$ressource) {
 		else {
 			$TSearch[$PDOdb->Get_field('code')] = true;}
 	}
-	
-	
-	
-	
+
+
+
+
 	$r = new TSSRenderControler($ressource);
-	$sql="SELECT r.rowid as 'ID', r.date_cre as 'DateCre', r.libelle, r.fk_rh_ressource_type, 
+	$sql="SELECT r.rowid as 'ID', r.date_cre as 'DateCre', r.libelle, r.fk_rh_ressource_type,
 		r.numId ";
 	foreach ($TSpeciaux as $key=>$value) {
 		$sql .= ','.$key.' ';
@@ -60,11 +60,11 @@ function _liste(&$PDOdb, &$ressource) {
 	}
 	$sql.=" FROM ".MAIN_DB_PREFIX."rh_ressource as r
 		LEFT JOIN ".MAIN_DB_PREFIX."rh_evenement as e ON ( (e.fk_rh_ressource=r.rowid OR e.fk_rh_ressource=r.fk_rh_ressource) AND e.type='emprunt')
-		AND e.date_debut<='".date("Y-m-d")."' AND e.date_fin >= '". date("Y-m-d")."' 
-	 LEFT JOIN ".MAIN_DB_PREFIX."user as u ON (e.fk_user = u.rowid )";	
+		AND e.date_debut<='".date("Y-m-d")."' AND e.date_fin >= '". date("Y-m-d")."'
+	 LEFT JOIN ".MAIN_DB_PREFIX."user as u ON (e.fk_user = u.rowid )";
 	$sql.=" WHERE  (e.fk_rh_ressource IS NULL) ";
-	
-	
+
+
 	if(!$user->rights->ressource->ressource->viewRessource){
 		$sql.=" AND e.fk_user=".$user->id;
 	}
@@ -73,13 +73,14 @@ function _liste(&$PDOdb, &$ressource) {
 	$TOrder = array('r.fk_rh_ressource_type'=>'ASC',  'r.numId'=>'ASC');
 	if(isset($_REQUEST['orderDown']))$TOrder = array($_REQUEST['orderDown']=>'DESC');
 	if(isset($_REQUEST['orderUp']))$TOrder = array($_REQUEST['orderUp']=>'ASC');
-				
+
 	$page = isset($_REQUEST['page']) ? $_REQUEST['page'] : 1;
-	$form=new TFormCore($_SERVER['PHP_SELF'],'formtranslateList','GET');	
+	$form=new TFormCore($_SERVER['PHP_SELF'],'formtranslateList','GET');
+	$nbLine = ! empty($user->conf->MAIN_SIZE_LISTE_LIMIT) ? $user->conf->MAIN_SIZE_LISTE_LIMIT : $conf->global->MAIN_SIZE_LISTE_LIMIT;
 	$r->liste($PDOdb, $sql, array(
 		'limit'=>array(
 			'page'=>$page
-			,'nbLine'=>'30'
+			,'nbLine'=>$nbLine
 		)
 		,'link'=>array(
 			'libelle'=>'<a href="ressource.php?id=@ID@&action=view">@val@</a>'
@@ -106,7 +107,7 @@ function _liste(&$PDOdb, &$ressource) {
 			,'numId'=>'Numéro Id'
 			,'fk_rh_ressource_type'=> 'Type'), $TSpeciaux
 		)
-		,'search'=>($user->rights->ressource->ressource->searchRessource) ? 		
+		,'search'=>($user->rights->ressource->ressource->searchRessource) ?
 			array_merge(array(
 				'fk_rh_ressource_type'=>array('recherche'=>$ressource->TType)
 				,'numId'=>true
@@ -114,14 +115,14 @@ function _liste(&$PDOdb, &$ressource) {
 			), $TSearch)
 			: array()
 		,'orderBy'=>$TOrder
-		
+
 	));
-	
+
 	$form->end();
 	llxFooter();
-}	
+}
 
 
 
-	
-	
+
+
