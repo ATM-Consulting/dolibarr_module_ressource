@@ -5,44 +5,44 @@
 	require('./class/evenement.class.php');
 	require('./lib/ressource.lib.php');
 	$langs->load('ressource@ressource');
-	
+
 	//if (!$user->rights->financement->affaire->read)	{ accessforbidden(); }
 	$PDOdb=new TPDOdb;
 	$emprunt=new TRH_Evenement;
 	$ressource=new TRH_ressource;
 	$contrat=new TRH_Contrat;
 	$contrat_ressource=new TRH_Contrat_Ressource;
-	
+
 	$mesg = '';
 	$error=false;
-	
+
 	if(isset($_REQUEST['action'])) {
 		switch($_REQUEST['action']) {
 			case 'add':
 			case 'new':
 				$ressource->set_values($_REQUEST);
 				_fiche($PDOdb, $emprunt, $ressource, $contrat,'new');
-				break;	
+				break;
 			case 'clone':
 				$ressource->load($PDOdb, $_REQUEST['id']);
 				$ressource->load_ressource_type($PDOdb);
-				
+
 				$clone = $ressource->getClone();
 				//print_r($clone);exit;
 				_fiche($PDOdb, $emprunt, $clone, $contrat,'edit');
-				
+
 				break;
 			case 'edit'	:
 				//$PDOdb->db->debug=true;
 				//print_r($_REQUEST);
-				
+
 				//$ressource->set_values($_REQUEST['fk_rh_ressource_type']);
 				$ressource->fk_rh_ressource_type = $_REQUEST['fk_rh_ressource_type'];
 				$ressource->load_ressource_type($PDOdb);
 				$ressource->load($PDOdb, $_REQUEST['id']);
 				_fiche($PDOdb, $emprunt, $ressource, $contrat,'edit');
 				break;
-				
+
 			case 'save':
 			//	$PDOdb->db->debug=true;
 				$ressource->fk_rh_ressource_type = $_REQUEST['fk_rh_ressource_type'];
@@ -51,12 +51,12 @@
 				if  ( empty($_REQUEST['numId']) ){
 					$mesg .= '<div class="error">Le numéro Id doit être renseigné.</div>';
 				}
-				
+
 				if  ( empty($_REQUEST['libelle']) ){
 					$mesg .= '<div class="error">Le libellé doit être renseigné.</div>';
 				}
-				
-				
+
+
 				//on vérifie que les champs obligatoires sont renseignés
 				foreach($ressource->ressourceType->TField as $k=>$field) {
 					if (! $field->obligatoire){
@@ -65,7 +65,7 @@
 						}
 					}
 				}
-				
+
 				//ensuite on vérifie ici que les champs (OBLIGATOIRE OU REMPLIS) sont bien du type attendu
 				if ($mesg == ''){
 					foreach($ressource->ressourceType->TField as $k=>$field) {
@@ -84,10 +84,10 @@
 						}
 					}
 				}
-				
+
 				$ressource->set_values($_REQUEST);
 				$ressource->save($PDOdb);
-				
+
 				////////
 				if($_REQUEST["fieldChoice"]=="O"){
 					//print_r($_REQUEST['evenement']);
@@ -100,11 +100,11 @@
 						$emprunt->fk_rh_ressource = $ressource->getId();
 						$emprunt->save($PDOdb);
 					}
-				
-					
+
+
 				}
 				////////
-				
+
 				////////
 				if($_REQUEST["fieldChoiceContrat"]=="O"){
 					$contrat->set_values($_REQUEST['contrat']);
@@ -125,30 +125,30 @@
 					}
 				}
 				else {$mode = 'edit';}
-				
+
 				$ressource->load($PDOdb, $_REQUEST['id']);
 				_fiche($PDOdb, $emprunt, $ressource, $contrat, $mode);
 				break;
-			
+
 			case 'view':
 				//$PDOdb->db->debug=true;
 				$ressource->load($PDOdb, $_REQUEST['id']);
 				_fiche($PDOdb, $emprunt, $ressource, $contrat, 'view');
 				break;
-			
-				
+
+
 			case 'delete':
 				$ressource->load($PDOdb, $_REQUEST['id']);
 				//$PDOdb->db->debug=true;
 				$ressource->delete($PDOdb);
-				
+
 				?>
 				<script language="javascript">
-					document.location.href="?delete_ok=1";					
+					document.location.href="?delete_ok=1";
 				</script>
 				<?php
-				
-				
+
+
 				break;
 		}
 	}
@@ -163,22 +163,22 @@
 		 //$PDOdb->db->debug=true;
 		 _liste($PDOdb, $ressource);
 	}
-	
-	
+
+
 	$PDOdb->close();
 	llxFooter();
-	
-	
+
+
 function _liste(&$PDOdb, &$ressource) {
-	global $langs,$conf,$db,$user;	
+	global $langs,$conf,$db,$user;
 	llxHeader('','Liste des ressources');
 	print dol_get_fiche_head(array()  , '', 'Liste ressources');
-	
+
 	//récupération des champs spéciaux à afficher.
 	$sqlReq="SELECT code, libelle, type, options FROM ".MAIN_DB_PREFIX."rh_ressource_field WHERE inliste='oui' ";
 	$PDOdb->Execute($sqlReq);
 	$TSpeciaux = array();
-	
+
 	$TSearch=array();
 	while($PDOdb->Get_line()) {
 		$TSpeciaux[$PDOdb->Get_field('code')]= $PDOdb->Get_field('libelle');
@@ -188,20 +188,20 @@ function _liste(&$PDOdb, &$ressource) {
 		else {
 			$TSearch[$PDOdb->Get_field('code')] = true;}
 	}
-	
+
 	$r = new TSSRenderControler($ressource);
 	$sql="SELECT r.rowid as 'ID', r.date_cre as 'DateCre', r.libelle, r.fk_rh_ressource_type,
 		r.numId , u.rowid as 'Statut', firstname, lastname ";
 
 	if(!empty($conf->valideur->enabled)) {
 		$sql.=" ,GROUP_CONCAT(CONCAT(ua.code,'(',ua.pourcentage,'%)') SEPARATOR ', ' ) as 'Codes analytiques' ";
-	
+
 	}
 
 	if(!empty($_REQUEST['TListTBS']['list_llx_rh_ressource']['search'])) {
 		$sql.=", CONCAT(DATE_FORMAT(e.date_debut,'%d/%m/%Y') ,' ', DATE_FORMAT(e.date_fin,'%d/%m/%Y')) as 'dates'";
 	}
-	
+
 	//rajout des champs spéciaux parametré par les types de ressources
 	foreach ($TSpeciaux as $key=>$value) {
 		$sql .= ','.$key.' ';
@@ -211,30 +211,31 @@ function _liste(&$PDOdb, &$ressource) {
 	}
 	$sql.=" FROM ".MAIN_DB_PREFIX."rh_ressource as r
 			LEFT JOIN (SELECT fk_rh_ressource, date_debut,date_fin,fk_user FROM ".MAIN_DB_PREFIX."rh_evenement WHERE type='emprunt' AND date_fin>=NOW() AND date_debut<=NOW()) as e ON ( e.fk_rh_ressource=r.rowid OR e.fk_rh_ressource=r.fk_rh_ressource)
-	
+
 	 LEFT JOIN ".MAIN_DB_PREFIX."user as u ON (e.fk_user = u.rowid ) ";
 
 	if(!empty($conf->valideur->enabled)) $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."rh_analytique_user as ua ON (e.fk_user = ua.fk_user) ";
-	
+
 	$sql.= " WHERE 1 ";
-	
-	
+
+
 	if(!$user->rights->ressource->ressource->viewRessource){
 		$sql.=" AND e.fk_user=".$user->id;
 	}
 	$sql.=" GROUP BY r.rowid ";
 	$ressource->load_liste_type_ressource($PDOdb);
-	
+
 	$TOrder = array('ID'=>'ASC');
 	if(isset($_REQUEST['orderDown']))$TOrder = array($_REQUEST['orderDown']=>'DESC');
 	if(isset($_REQUEST['orderUp']))$TOrder = array($_REQUEST['orderUp']=>'ASC');
-				
+
 	$page = isset($_REQUEST['page']) ? $_REQUEST['page'] : 1;
-	$formCore=new TFormCore($_SERVER['PHP_SELF'],'formtranslateList','GET');	
+	$formCore=new TFormCore($_SERVER['PHP_SELF'],'formtranslateList','GET');
+	$nbLine = ! empty($user->conf->MAIN_SIZE_LISTE_LIMIT) ? $user->conf->MAIN_SIZE_LISTE_LIMIT : $conf->global->MAIN_SIZE_LISTE_LIMIT;
 	$r->liste($PDOdb, $sql, array(
 		'limit'=>array(
 			'page'=>$page
-			,'nbLine'=>'30'
+			,'nbLine'=>$nbLine
 		)
 		,'link'=>array(
 			'libelle'=>'<a href="?id=@ID@&action=view">@val@</a>'
@@ -268,19 +269,19 @@ function _liste(&$PDOdb, &$ressource) {
 			,'lastname'=>'Nom'
 			,'firstname'=>'Prénom'), $TSpeciaux
 		)
-		,'search'=>($user->rights->ressource->ressource->searchRessource) ? 		
+		,'search'=>($user->rights->ressource->ressource->searchRessource) ?
 			array_merge(array(
 				'fk_rh_ressource_type'=>array('recherche'=>$ressource->TType)
 				,'numId'=>true
 				,'libelle'=>true
 				,'lastname'=>true
-				,'firstname'=>true	
+				,'firstname'=>true
 			), $TSearch)
 			: array()
 		,'orderBy'=>$TOrder
-		
+
 	));
-	
+
 	//si on est en mode utilisateur : on voit la liste des règles le concernant
 	if(! $user->rights->ressource->ressource->hideRegle){
 		echo '<br>';
@@ -290,19 +291,19 @@ function _liste(&$PDOdb, &$ressource) {
 		FROM ".MAIN_DB_PREFIX."rh_ressource_regle as r
 		LEFT OUTER JOIN ".MAIN_DB_PREFIX."user as u ON (r.fk_user = u.rowid)
 		LEFT OUTER JOIN ".MAIN_DB_PREFIX."usergroup as g ON (r.fk_usergroup = g.rowid)
-		WHERE 1 
-		AND (r.fk_user=".$user->id." 
-			OR r.choixApplication = 'all' 
+		WHERE 1
+		AND (r.fk_user=".$user->id."
+			OR r.choixApplication = 'all'
 			OR g.rowid IS NOT NULL)";
-		
+
 		$idTelephone=getIdType('telephone');
 		$TOrder = array('ID'=>'ASC');
 		if(isset($_REQUEST['orderDown']))$TOrder = array($_REQUEST['orderDown']=>'DESC');
 		if(isset($_REQUEST['orderUp']))$TOrder = array($_REQUEST['orderUp']=>'ASC');
-					
+
 		$page = isset($_REQUEST['page']) ? $_REQUEST['page'] : 1;
 		$formCore=new TFormCore($_SERVER['PHP_SELF'].'','formtranslateList','GET');
-		
+
 		$r->liste($PDOdb, $sql, array(
 			'link'=>array(
 				'ID'=>'<a href="typeRessourceRegle.php?id='.$idTelephone.'&idRegle=@ID@&action=view">@val@</a>'
@@ -339,10 +340,10 @@ function _liste(&$PDOdb, &$ressource) {
 			,'orderBy'=>$TOrder
 		));
 	}
-	
+
 	$formCore->end();
 	llxFooter();
-}	
+}
 
 function TousOuPas($choix, $val){
 	if ($choix=='all'){
@@ -371,11 +372,11 @@ function _fiche(&$PDOdb, &$emprunt, &$ressource, &$contrat, $mode) {
 	else {echo $formCore->hidden('action', 'save');}
 	//Ressources
 	$TFields=array();
-	
+
 	?>
 	<script type="text/javascript">
 		$(document).ready(function(){
-			
+
 		<?php
 		foreach($ressource->ressourceType->TField as $k=>$field) {
 			switch($field->type){
@@ -392,14 +393,14 @@ function _fiche(&$PDOdb, &$emprunt, &$ressource, &$contrat, $mode) {
 					$temp = $formCore->texte('', $field->code, $ressource->{$field->code}, 50,255,'','','-');
 					break;
 			}
-			
+
 			$TFields[$k]=array(
 					'libelle'=>$field->libelle
 					,'valeur'=>$temp
 					//champs obligatoire : 0 = obligatoire ; 1 = non obligatoire
-					,'obligatoire'=>$field->obligatoire ? 'class="field"': 'class="fieldrequired"' 
+					,'obligatoire'=>$field->obligatoire ? 'class="field"': 'class="fieldrequired"'
 				);
-			
+
 			//Autocompletion
 			if($field->type != combo && $field->type != liste){
 				?>
@@ -407,19 +408,19 @@ function _fiche(&$PDOdb, &$emprunt, &$ressource, &$contrat, $mode) {
 					source: "script/interface.php?get=autocomplete&json=1&fieldcode=<?php echo $field->code; ?>",
 					minLength : 1
 				});
-				
+
 				<?php
 			}
 		}
 
 		//Concaténation des champs dans le libelle ressource
 		foreach($ressource->ressourceType->TField as $k=>$field) {
-			
+
 			if($field->inlibelle == "oui"){
 				$chaineid .= "#".$field->code.", ";
 				$chaineval .= "$('#".$field->code."').val().toUpperCase()+' '+";
 			}
-			
+
 		}
 		$chaineval = substr($chaineval, 0,-5);
 		$chaineid = substr($chaineid, 0,-2);
@@ -430,7 +431,7 @@ function _fiche(&$PDOdb, &$emprunt, &$ressource, &$contrat, $mode) {
 		});
 	</script>
 	<?php
-	
+
 	//requete pour avoir toutes les ressources associées à la ressource concernées
 	$k=0;
 	$sqlReq="SELECT rowid, libelle FROM ".MAIN_DB_PREFIX."rh_ressource WHERE fk_rh_ressource=".$ressource->rowid;
@@ -451,13 +452,13 @@ function _fiche(&$PDOdb, &$emprunt, &$ressource, &$contrat, $mode) {
 	$ressource->load_agence($PDOdb);
 	$ressource->load_liste_type_ressource($PDOdb);
 	$listeContrat = $ressource->liste_contrat($PDOdb);
-	
+
 	$combo_entite_utilisatrice = ( !empty($conf->multicompany->enabled) ? $mc->select_entities($ressource->fk_entity_utilisatrice,'fk_entity_utilisatrice', $mode != 'edit' ? 'disabled="true"' : ''  ) : $mysoc->name ) ;
-	
+
 	if(defined('AUTOMATIC_ATTRIBUTION_USER_ENTITY_ON_RESSOURCE') && AUTOMATIC_ATTRIBUTION_USER_ENTITY_ON_RESSOURCE ) $combo_entite_utilisatrice = $ressource->TEntity[$ressource->fk_entity_utilisatrice];
-		
+
 	$form=new Form($db);
-	
+
 	$TBS=new TTemplateTBS();
 	print $TBS->render('./tpl/ressource.tpl.php'
 		,array(
@@ -475,8 +476,8 @@ function _fiche(&$PDOdb, &$emprunt, &$ressource, &$contrat, $mode) {
 				,'titreRessourceAssocie'=>load_fiche_titre("Organigramme des ressources associées",'', 'title.png', 0, '')
 				,'titreAttribution'=>load_fiche_titre("Attribution de la ressource",'', 'title.png', 0, '')
 				,'titreContrat'=>load_fiche_titre("Création d'un contrat directement lié",'', 'title.png', 0, '')
-				
-				,'typehidden'=>$formCore->hidden('fk_rh_ressource_type', $ressource->fk_rh_ressource_type) 
+
+				,'typehidden'=>$formCore->hidden('fk_rh_ressource_type', $ressource->fk_rh_ressource_type)
 				,'type'=>$ressource->TType[$ressource->fk_rh_ressource_type]
 				,'bailvoit_value'=>$ressource->bailvoit
 				,'bailvoit'=>$formCore->combo('','bailvoit',$ressource->TBail,$ressource->bailvoit)
@@ -491,7 +492,7 @@ function _fiche(&$PDOdb, &$emprunt, &$ressource, &$contrat, $mode) {
 			,'ressourceNew' =>array(
 				'typeCombo'=> count($ressource->TType) ? $formCore->combo('','fk_rh_ressource_type',$ressource->TType,$ressource->fk_rh_ressource_type): "Aucun type"
 				,'validerType'=>$formCore->btsubmit('Valider', 'validerType')
-				
+
 			)
 			,'fk_ressource'=>array(
 				'liste_fk_rh_ressource'=>$formCore->combo('','fk_rh_ressource',$ressource->TRessource,$ressource->fk_rh_ressource)
@@ -510,7 +511,7 @@ function _fiche(&$PDOdb, &$emprunt, &$ressource, &$contrat, $mode) {
 				,'date_fin'=> $formCore->calendrier('', 'evenement[date_fin]', $emprunt->date_fin, 12)
 			)
 			,'listeContrat'=>array(
-				'liste' => $listeContrat	
+				'liste' => $listeContrat
 			)
 			,'contrat'=>array(
 				'id'=>$contrat->getId()
@@ -528,7 +529,7 @@ function _fiche(&$PDOdb, &$emprunt, &$ressource, &$contrat, $mode) {
 				,'loyer_TTC'=>$formCore->texte('', 'contrat[loyer_TTC]', $contrat->loyer_TTC, 10,20,'','','')
 				,'TVA'=>$formCore->combo('','contrat[TVA]',$contrat->TTVA,$contrat->TVA)
 				,'loyer_HT'=>($contrat->loyer_TTC)*(1-(0.01*$contrat->TTVA[$contrat->TVA]))
-				
+
 			)
 			,'view'=>array(
 				'mode'=>$mode
@@ -536,27 +537,27 @@ function _fiche(&$PDOdb, &$emprunt, &$ressource, &$contrat, $mode) {
 				,'head'=>dol_get_fiche_head(ressourcePrepareHead($ressource, 'ressource')  , 'fiche', 'Ressource')
 				,'onglet'=>dol_get_fiche_head(array()  , '', 'Création ressource')
 			)
-			
-			
-		)	
-		
+
+
+		)
+
 	);
-	
+
 	echo $formCore->end_form();
 	// End of page
-	
+
 	global $mesg, $error;
 	dol_htmloutput_mesg($mesg, '', ($error ? 'error' : 'ok'));
 	llxFooter();
 }
 function _getNomUrl($fk_soc) {
 	global $db, $conf,$langs;
-	
+
 	$o=new Societe($db);
 	$o->fetch($fk_soc);
-	
+
 	return $o->getNomUrl(1);
-	
+
 }
-	
-	
+
+
