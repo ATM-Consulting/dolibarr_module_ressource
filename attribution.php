@@ -128,13 +128,13 @@ function _liste(&$PDOdb, &$emprunt, &$ressource) {
 	}
 
 	if(!empty($conf->valideur->enabled)) {
-		$sql.=" GROUP BY ua.fk_user ";
+		$sql.=" GROUP BY e.fk_user ";
 	}
 	
 	$TOrder = array('Date fin'=>'ASC');
 	if(isset($_REQUEST['orderDown']))$TOrder = array($_REQUEST['orderDown']=>'DESC');
 	if(isset($_REQUEST['orderUp']))$TOrder = array($_REQUEST['orderUp']=>'ASC');
-				
+			
 	$page = isset($_REQUEST['page']) ? $_REQUEST['page'] : 1;			
 	$r->liste($PDOdb, $sql, array(
 		'limit'=>array(
