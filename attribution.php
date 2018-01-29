@@ -128,7 +128,7 @@ function _liste(&$PDOdb, &$emprunt, &$ressource) {
 	}
 
 	if(!empty($conf->valideur->enabled)) {
-		$sql.=" GROUP BY ua.fk_user ";
+		$sql.=" GROUP BY e.fk_user ";
 	}
 	
 	$TOrder = array('Date fin'=>'ASC');
