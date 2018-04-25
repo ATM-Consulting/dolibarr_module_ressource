@@ -134,9 +134,10 @@ function _liste(&$PDOdb, &$association, &$ressource,  $mode) {
 	if($user->rights->ressource->contrat->createContract){
 	?></div><a class="butAction" href="?id=<?=$ressource->getId()?>&action=new">Nouveau</a><?
 	}
-	?><div style="clear:both"></div></div><?
+	?><div style="clear:both"></div></div><?php
 	llxFooter();
-}	
+}
+}
 	
 function _fiche(&$PDOdb,  &$association, &$ressource,  $mode) {
 	global $db,$user;

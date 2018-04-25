@@ -131,7 +131,7 @@
 			$formfile->list_of_documents($filearray, $contrat, 'ressource', '&id='.$contrat->getId(),0,'contrat/'.$contrat->getId().'/',0);
 		}
 		
-		?><div style="clear:both"></div><?
+		?><div style="clear:both"></div><?php
 		
 		dol_fiche_end();
 		llxFooter();
