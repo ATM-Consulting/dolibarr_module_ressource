@@ -49,7 +49,7 @@
 			if (dol_mkdir($upload_dir) >= 0)
 			{
 				
-				$resupload = dol_move_uploaded_file($_FILES['userfile']['tmp_name'], $upload_dir . "/" . $_FILES['userfile']['name'],0,0,$_FILES['userfile']['error']);
+				$resupload = dol_move_uploaded_file($_FILES['userfile']['tmp_name'][0], $upload_dir . "/" . $_FILES['userfile']['name'][0],0,0,$_FILES['userfile']['error']);
 				
 		        if (is_numeric($resupload) && $resupload > 0)
 				{
@@ -135,7 +135,7 @@
 			$formfile->list_of_documents($filearray, $evenement, 'ressource', '&id='.$ressource->getId().'&idEven='.$evenement->getId(),0,'evenement/'.$evenement->getId().'/',0);
 		}
 		
-		?><div style="clear:both"></div><?
+		?><div style="clear:both"></div><?php
 		
 		dol_fiche_end();
 		llxFooter();
