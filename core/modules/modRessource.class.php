@@ -673,7 +673,7 @@ class modRessource extends DolibarrModules
 			file_put_contents( dol_buildpath("/ressource/config.php" ) , $data);
 		}
 
-		$url =dol_buildpath("/ressource/script/create-maj-base.php",2);
+		$url =dol_buildpath("/ressource/script/create-maj-base.php",1);
 		echo $url;
 		file_get_contents($url);
 		
