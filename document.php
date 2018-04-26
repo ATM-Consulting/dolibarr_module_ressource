@@ -26,7 +26,7 @@
 	
 	function _fiche(&$PDOdb, &$object) {
 		global $db,$user,$conf,$langs;
-		llxHeader('','Fichiers joints');
+		
 		$dir_base = DOL_DATA_ROOT.'/ressource/';
 		$upload_dir_base = $dir_base.'ressource/';
 		
@@ -46,7 +46,7 @@
 		 * Actions
 		 */
 		include_once DOL_DOCUMENT_ROOT . '/core/actions_linkedfiles.inc.php';
-	
+	llxHeader('','Fichiers joints');
 	
 		// Get all files
 		$sortfield  = GETPOST("sortfield", 'alpha');
