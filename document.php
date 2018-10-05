@@ -45,7 +45,8 @@
 		/*
 		 * Actions
 		 */
-		include_once DOL_DOCUMENT_ROOT . '/core/actions_linkedfiles.inc.php';
+		if(is_file(DOL_DOCUMENT_ROOT . '/core/actions_linkedfiles.inc.php')) include_once DOL_DOCUMENT_ROOT . '/core/actions_linkedfiles.inc.php';
+		else include_once DOL_DOCUMENT_ROOT . '/core/tpl/document_actions_pre_headers.tpl.php';
 	llxHeader('','Fichiers joints');
 	
 		// Get all files

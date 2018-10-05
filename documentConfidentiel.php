@@ -26,7 +26,6 @@
 	
 	function _fiche(&$PDOdb, &$object) {
 		global $db,$user,$conf,$langs;
-		llxHeader('','Fichiers confidentiels');
 		$dir_base = DOL_DATA_ROOT.'/ressource/';
 		$upload_dir_base = $dir_base.'ressource_restricted/';
 		
@@ -45,7 +44,9 @@
 		/*
 		 * Actions
 		 */
-		include_once DOL_DOCUMENT_ROOT . '/core/actions_linkedfiles.inc.php';
+                if(is_file(DOL_DOCUMENT_ROOT . '/core/actions_linkedfiles.inc.php')) include_once DOL_DOCUMENT_ROOT . '/core/actions_linkedfiles.inc.php';
+                else include_once DOL_DOCUMENT_ROOT . '/core/tpl/document_actions_pre_headers.tpl.php';
+		llxHeader('','Fichiers confidentiels');
 		
 		
 		// Get all files
