@@ -189,50 +189,108 @@ function _liste(&$PDOdb, &$ressource) {
 			$TSearch[$PDOdb->Get_field('code')] = true;}
 	}
 
-	$r = new TSSRenderControler($ressource);
-	$sql="SELECT r.rowid as 'ID', r.date_cre as 'DateCre', r.libelle, r.fk_rh_ressource_type,
+	$listname = 'list_'.$ressource->get_table();
+	$render = new TListviewTBS($listname);
+
+	$sql_select="SELECT r.rowid as 'ID', r.date_cre as 'DateCre', r.libelle, r.fk_rh_ressource_type,
 		r.numId , u.rowid as 'Statut', firstname, lastname ";
 
 	if(!empty($conf->valideur->enabled)) {
-		$sql.=" ,GROUP_CONCAT(CONCAT(ua.code,'(',ua.pourcentage,'%)') SEPARATOR ', ' ) as 'Codes analytiques' ";
-
+		$sql_select.=" ,GROUP_CONCAT(CONCAT(ua.code,'(',ua.pourcentage,'%)') SEPARATOR ', ' ) as 'Codes analytiques' ";
 	}
 
 	if(!empty($_REQUEST['TListTBS']['list_llx_rh_ressource']['search'])) {
-		$sql.=", CONCAT(DATE_FORMAT(e.date_debut,'%d/%m/%Y') ,' ', DATE_FORMAT(e.date_fin,'%d/%m/%Y')) as 'dates'";
+		$sql_select.=", CONCAT(DATE_FORMAT(e.date_debut,'%d/%m/%Y') ,' ', DATE_FORMAT(e.date_fin,'%d/%m/%Y')) as 'dates'";
 	}
 
 	//rajout des champs spéciaux parametré par les types de ressources
 	foreach ($TSpeciaux as $key=>$value) {
-		$sql .= ','.$key.' ';
+		$sql_select .= ','.$key.' ';
 	}
 	if($user->rights->ressource->ressource->createRessource){
-		$sql.=", '' as 'Supprimer'";
+		$sql_select.=", '' as 'Supprimer'";
 	}
-	$sql.=" FROM ".MAIN_DB_PREFIX."rh_ressource as r
-			LEFT JOIN (SELECT fk_rh_ressource, date_debut,date_fin,fk_user FROM ".MAIN_DB_PREFIX."rh_evenement WHERE type='emprunt' AND date_fin>=NOW() AND date_debut<=NOW()) as e ON ( e.fk_rh_ressource=r.rowid OR e.fk_rh_ressource=r.fk_rh_ressource)
 
+	$now = date('Y-m-d H:i:s');
+	$sql_left_1 = " FROM ".MAIN_DB_PREFIX."rh_ressource as r
+			LEFT JOIN (SELECT fk_rh_ressource, date_debut,date_fin,fk_user FROM ".MAIN_DB_PREFIX."rh_evenement WHERE type='emprunt' AND date_fin>='".$now."' AND date_debut<='".$now."') as e ON (e.fk_rh_ressource=r.rowid)
 	 LEFT JOIN ".MAIN_DB_PREFIX."user as u ON (e.fk_user = u.rowid ) ";
 
-	if(!empty($conf->valideur->enabled)) $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."rh_analytique_user as ua ON (e.fk_user = ua.fk_user) ";
+	$sql_left_2 = " FROM ".MAIN_DB_PREFIX."rh_ressource as r
+			LEFT JOIN (SELECT fk_rh_ressource, date_debut,date_fin,fk_user FROM ".MAIN_DB_PREFIX."rh_evenement WHERE type='emprunt' AND date_fin>='".$now."' AND date_debut<='".$now."') as e ON (e.fk_rh_ressource=r.fk_rh_ressource)
+	 LEFT JOIN ".MAIN_DB_PREFIX."user as u ON (e.fk_user = u.rowid ) ";
 
-	$sql.= " WHERE 1 ";
+
+	if(!empty($conf->valideur->enabled)) {
+	    $sql_left_1.= " LEFT JOIN ".MAIN_DB_PREFIX."rh_analytique_user as ua ON (e.fk_user = ua.fk_user) ";
+		$sql_left_2.= " LEFT JOIN ".MAIN_DB_PREFIX."rh_analytique_user as ua ON (e.fk_user = ua.fk_user) ";
+	}
+
+	$sql_where = " WHERE 1 ";
 
 
 	if(!$user->rights->ressource->ressource->viewRessource){
-		$sql.=" AND e.fk_user=".$user->id;
+		$sql_where.=" AND e.fk_user=".$user->id;
 	}
-	$sql.=" GROUP BY r.rowid ";
+
+
+	$TListTBS = GETPOST('TListTBS');
+	if (empty($TListTBS)) $TListTBS = array();
+	if (!empty($TListTBS['list_llx_rh_ressource']['search']['libelle'])) $sql_where.= ' AND r.libelle LIKE "%'.$db->escape($TListTBS['list_llx_rh_ressource']['search']['libelle']).'%"';
+	if (!empty($TListTBS['list_llx_rh_ressource']['search']['fk_rh_ressource_type'])) $sql_where.= ' AND r.fk_rh_ressource_type = '.$db->escape($TListTBS['list_llx_rh_ressource']['search']['fk_rh_ressource_type']);
+	if (!empty($TListTBS['list_llx_rh_ressource']['search']['numId'])) $sql_where.= ' AND r.numId LIKE "%'.$db->escape($TListTBS['list_llx_rh_ressource']['search']['numId']).'%"';
+	if (!empty($TListTBS['list_llx_rh_ressource']['search']['firstname'])) $sql_where.= ' AND u.firstname LIKE "%'.$db->escape($TListTBS['list_llx_rh_ressource']['search']['firstname']).'%"';
+	if (!empty($TListTBS['list_llx_rh_ressource']['search']['lastname'])) $sql_where.= ' AND u.lastname LIKE "%'.$db->escape($TListTBS['list_llx_rh_ressource']['search']['lastname']).'%"';
+	foreach ($TSpeciaux as $key=>$value) {
+		if (!empty($TListTBS['list_llx_rh_ressource']['search'][$key]))
+        {
+            if (is_array($TSearch[$key])) $sql_where.= ' AND '.$key.' = "'.$db->escape($TListTBS['list_llx_rh_ressource']['search'][$key]).'"';
+            else $sql_where.= ' AND '.$key.' LIKE "%'.$db->escape($TListTBS['list_llx_rh_ressource']['search'][$key]).'%"';
+		}
+	}
+
+
+	$sql_group = " GROUP BY r.rowid ";
 	$ressource->load_liste_type_ressource($PDOdb);
 
-	$TOrder = array('ID'=>'ASC');
-	if(isset($_REQUEST['orderDown']))$TOrder = array($_REQUEST['orderDown']=>'DESC');
-	if(isset($_REQUEST['orderUp']))$TOrder = array($_REQUEST['orderUp']=>'ASC');
+//	$TOrder = array('ID'=>'ASC');
+//	if(isset($_REQUEST['orderDown']))$TOrder = array($_REQUEST['orderDown']=>'DESC');
+//	if(isset($_REQUEST['orderUp']))$TOrder = array($_REQUEST['orderUp']=>'ASC');
+	$TOrder = array();
+	if (!empty($TListTBS['list_llx_rh_ressource']['orderBy']['ID'])) $TOrder[] = 'ID '.$TListTBS['list_llx_rh_ressource']['orderBy']['ID'];
+	if (!empty($TListTBS['list_llx_rh_ressource']['orderBy']['libelle'])) $TOrder[] = 'r.libelle '.$TListTBS['list_llx_rh_ressource']['orderBy']['libelle'];
+	if (!empty($TListTBS['list_llx_rh_ressource']['orderBy']['fk_rh_ressource_type'])) $TOrder[] = 'r.fk_rh_ressource_type '.$TListTBS['list_llx_rh_ressource']['orderBy']['fk_rh_ressource_type'];
+	if (!empty($TListTBS['list_llx_rh_ressource']['orderBy']['lastname'])) $TOrder[] = 'u.lastname '.$TListTBS['list_llx_rh_ressource']['orderBy']['lastname'];
+	if (!empty($TListTBS['list_llx_rh_ressource']['orderBy']['firstname'])) $TOrder[] = 'u.lastname '.$TListTBS['list_llx_rh_ressource']['orderBy']['firstname'];
+
+	$sql_order_by = '';
+	if (!empty($TOrder))
+	{
+		$sql_order_by.= ' ORDER BY '.implode(', ', $TOrder);
+	}
+
+	$TRessource = array();
+	$PDOdb->Execute($sql_select.$sql_left_1.$sql_where.$sql_group.$sql_order_by);
+	while ($line = $PDOdb->Get_line(PDO::FETCH_ASSOC))
+    {
+		$TRessource[$line['ID']] = $line;
+    }
+	$PDOdb->Execute($sql_select.$sql_left_2.$sql_where.$sql_order_by.$sql_group);
+	while ($line = $PDOdb->Get_line(PDO::FETCH_ASSOC))
+    {
+        if (!empty($TRessource[$line['ID']])) {
+            array_walk($TRessource[$line['ID']], function(&$item, $key) use (&$line) {
+                if (empty($item)) $item = $line[$key];
+			});
+		}
+        else $TRessource[$line['ID']] = $line;
+    }
 
 	$page = isset($_REQUEST['page']) ? $_REQUEST['page'] : 1;
 	$formCore=new TFormCore($_SERVER['PHP_SELF'],'formtranslateList','GET');
 	$nbLine = ! empty($user->conf->MAIN_SIZE_LISTE_LIMIT) ? $user->conf->MAIN_SIZE_LISTE_LIMIT : $conf->global->MAIN_SIZE_LISTE_LIMIT;
-	$r->liste($PDOdb, $sql, array(
+
+	print $render->renderArray($PDOdb, $TRessource, array(
 		'limit'=>array(
 			'page'=>$page
 			,'nbLine'=>$nbLine
@@ -243,8 +301,8 @@ function _liste(&$PDOdb, &$ressource) {
 		)
 		,'eval'=>array(
 			'Statut'=>'getStatut("@val@")'
-			,'name'=>'htmlentities("@val@", ENT_COMPAT , "ISO8859-1")'
-			,'firstname'=>'htmlentities("@val@", ENT_COMPAT , "ISO8859-1")'
+			,'lastname'=>'toUtf8("@val@")'
+			,'firstname'=>'toUtf8("@val@")'
 		)
 		,'translate'=>array(
 			'fk_rh_ressource_type'=>$ressource->TType
@@ -263,11 +321,14 @@ function _liste(&$PDOdb, &$ressource) {
 			,'picto_search'=>'<img src="../../theme/eldy/img/search.png">'
 		)
 		,'title'=>array_merge(array(
-			'libelle'=>'Libellé'
-			,'numId'=>'Numéro Id'
-			,'fk_rh_ressource_type'=> 'Type'
-			,'lastname'=>'Nom'
-			,'firstname'=>'Prénom'), $TSpeciaux
+		        'ID' => 'ID <span class="nowrap"><a href="javascript:TListTBS_OrderDown(\'list_llx_rh_ressource\',\'ID\')">'.img_down().'</a><a href="javascript:TListTBS_OrderUp(\'list_llx_rh_ressource\', \'ID\')">'.img_up().'</a></span>'
+                ,'libelle'=>'Libellé <span class="nowrap"><a href="javascript:TListTBS_OrderDown(\'list_llx_rh_ressource\',\'libelle\')">'.img_down().'</a><a href="javascript:TListTBS_OrderUp(\'list_llx_rh_ressource\', \'libelle\')">'.img_up().'</a></span>'
+                ,'numId'=>'Numéro Id <span class="nowrap"><a href="javascript:TListTBS_OrderDown(\'list_llx_rh_ressource\',\'numId\')">'.img_down().'</a><a href="javascript:TListTBS_OrderUp(\'list_llx_rh_ressource\', \'numId\')">'.img_up().'</a></span>'
+                ,'fk_rh_ressource_type'=> 'Type <span class="nowrap"><a href="javascript:TListTBS_OrderDown(\'list_llx_rh_ressource\',\'fk_rh_ressource_type\')">'.img_down().'</a><a href="javascript:TListTBS_OrderUp(\'list_llx_rh_ressource\', \'fk_rh_ressource_type\')">'.img_up().'</a></span>'
+                ,'lastname'=>'Nom <span class="nowrap"><a href="javascript:TListTBS_OrderDown(\'list_llx_rh_ressource\',\'lastname\')">'.img_down().'</a><a href="javascript:TListTBS_OrderUp(\'list_llx_rh_ressource\', \'lastname\')">'.img_up().'</a></span>'
+                ,'firstname'=>'Prénom <span class="nowrap"><a href="javascript:TListTBS_OrderDown(\'list_llx_rh_ressource\',\'firstname\')">'.img_down().'</a><a href="javascript:TListTBS_OrderUp(\'list_llx_rh_ressource\', \'firstname\')">'.img_up().'</a></span>'
+            )
+            , $TSpeciaux
 		)
 		,'search'=>($user->rights->ressource->ressource->searchRessource) ?
 			array_merge(array(
@@ -278,7 +339,7 @@ function _liste(&$PDOdb, &$ressource) {
 				,'firstname'=>true
 			), $TSearch)
 			: array()
-		,'orderBy'=>$TOrder
+//		,'orderBy'=>$TOrder
 
 	));
 
@@ -344,7 +405,9 @@ function _liste(&$PDOdb, &$ressource) {
 	$formCore->end();
 	llxFooter();
 }
-
+function toUtf8($val){
+	return iconv(mb_detect_encoding($val, "auto"), "UTF-8", $val);
+}
 function TousOuPas($choix, $val){
 	if ($choix=='all'){
 		return 'Tous';}
