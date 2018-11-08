@@ -260,6 +260,7 @@ function _liste(&$PDOdb, &$ressource) {
 	if (!empty($TListTBS['list_llx_rh_ressource']['orderBy']['ID'])) $TOrder[] = 'ID '.$TListTBS['list_llx_rh_ressource']['orderBy']['ID'];
 	if (!empty($TListTBS['list_llx_rh_ressource']['orderBy']['libelle'])) $TOrder[] = 'r.libelle '.$TListTBS['list_llx_rh_ressource']['orderBy']['libelle'];
 	if (!empty($TListTBS['list_llx_rh_ressource']['orderBy']['fk_rh_ressource_type'])) $TOrder[] = 'r.fk_rh_ressource_type '.$TListTBS['list_llx_rh_ressource']['orderBy']['fk_rh_ressource_type'];
+	if (!empty($TListTBS['list_llx_rh_ressource']['orderBy']['numId'])) $TOrder[] = 'r.numId '.$TListTBS['list_llx_rh_ressource']['orderBy']['numId'];
 	if (!empty($TListTBS['list_llx_rh_ressource']['orderBy']['lastname'])) $TOrder[] = 'u.lastname '.$TListTBS['list_llx_rh_ressource']['orderBy']['lastname'];
 	if (!empty($TListTBS['list_llx_rh_ressource']['orderBy']['firstname'])) $TOrder[] = 'u.lastname '.$TListTBS['list_llx_rh_ressource']['orderBy']['firstname'];
 
