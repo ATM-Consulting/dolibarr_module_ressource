@@ -425,7 +425,11 @@ function getStatut($val){
 
 function _fiche(&$PDOdb, &$emprunt, &$ressource, &$contrat, $mode) {
 	global $db,$user,$conf,$mc,$mysoc;
-	llxHeader('', 'Ressource', '', '', 0, 0, array('/hierarchie/js/jquery.jOrgChart.js'));
+
+	$arrayofjs = array();
+	if (!empty($conf->rhhierarchie->enabled)) $arrayofjs[] = '/hierarchie/js/jquery.jOrgChart.js';
+
+	llxHeader('', 'Ressource', '', '', 0, 0, $arrayofjs);
 
 	$formCore=new TFormCore($_SERVER['PHP_SELF'],'form1','POST');
 	$formCore->Set_typeaff($mode);
@@ -462,7 +466,7 @@ function _fiche(&$PDOdb, &$emprunt, &$ressource, &$contrat, $mode) {
 					'libelle'=>$field->libelle
 					,'valeur'=>$temp
 					//champs obligatoire : 0 = obligatoire ; 1 = non obligatoire
-					,'obligatoire'=>$field->obligatoire ? 'class="field"': 'class="fieldrequired"'
+					,'obligatoire'=>$field->obligatoire ? 'field': 'fieldrequired'
 				);
 
 			//Autocompletion
@@ -477,6 +481,7 @@ function _fiche(&$PDOdb, &$emprunt, &$ressource, &$contrat, $mode) {
 			}
 		}
 
+		$chaineid = $chaineval = '';
 		//Concaténation des champs dans le libelle ressource
 		foreach($ressource->ressourceType->TField as $k=>$field) {
 
@@ -551,7 +556,7 @@ function _fiche(&$PDOdb, &$emprunt, &$ressource, &$contrat, $mode) {
 					,'fk_proprietaire'=>( !empty($conf->multicompany->enabled) ? $mc->select_entities($ressource->fk_proprietaire,'fk_proprietaire', $mode != 'edit' ? 'disabled="true"' : '' ) : $mysoc->name )   //$formCore->combo('','fk_proprietaire',$ressource->TEntity,$ressource->fk_proprietaire)
 				,'fk_utilisatrice'=>$form->select_dolgroups($ressource->fk_utilisatrice,'fk_utilisatrice',0,'', $mode!='edit')  //$formCore->combo('','fk_utilisatrice',$ressource->TAgence,$ressource->fk_utilisatrice)
 				,'fk_entity_utilisatrice'=>$combo_entite_utilisatrice
-				,'fk_loueur'=> ($mode != 'edit' ?_getNomUrl($ressource->fk_loueur) : $form->select_company($ressource->fk_loueur, 'fk_loueur' ,'fournisseur=1'))//$formCore->combo('','fk_loueur',$ressource->TFournisseur,$ressource->fk_loueur)
+				,'fk_loueur'=> ($mode != 'edit' ? _getNomUrl($ressource->fk_loueur) : $form->select_company($ressource->fk_loueur, 'fk_loueur' ,'fournisseur=1', 1))//$formCore->combo('','fk_loueur',$ressource->TFournisseur,$ressource->fk_loueur)
 			)
 			,'ressourceNew' =>array(
 				'typeCombo'=> count($ressource->TType) ? $formCore->combo('','fk_rh_ressource_type',$ressource->TType,$ressource->fk_rh_ressource_type): "Aucun type"
@@ -598,7 +603,8 @@ function _fiche(&$PDOdb, &$emprunt, &$ressource, &$contrat, $mode) {
 			,'view'=>array(
 				'mode'=>$mode
 				,'userRight'=>((int)$user->rights->ressource->ressource->createRessource)
-				,'head'=>dol_get_fiche_head(ressourcePrepareHead($ressource, 'ressource')  , 'fiche', 'Ressource')
+				,'head'=>dol_get_fiche_head(ressourcePrepareHead($ressource, 'ressource')  , 'fiche', 'Ressource', -1)
+				,'end'=> dol_get_fiche_end(-1)
 				,'onglet'=>dol_get_fiche_head(array()  , '', 'Création ressource')
 			)
 
@@ -616,6 +622,8 @@ function _fiche(&$PDOdb, &$emprunt, &$ressource, &$contrat, $mode) {
 }
 function _getNomUrl($fk_soc) {
 	global $db, $conf,$langs;
+
+	if (empty($fk_soc) || $fk_soc <= 0) return '';
 
 	$o=new Societe($db);
 	$o->fetch($fk_soc);
