@@ -1,5 +1,7 @@
 <?php
 
+if (!defined('NOCSRFCHECK')) define('NOCSRFCHECK', 1);
+if (!defined('NOTOKENRENEWAL')) define('NOTOKENRENEWAL', 1);
 define('INC_FROM_CRON_SCRIPT', true);
 set_time_limit(0);
 ini_set('memory_limit','1024M');
