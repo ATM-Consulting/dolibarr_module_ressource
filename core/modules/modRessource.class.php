@@ -59,7 +59,7 @@ class modRessource extends DolibarrModules
 		// Module description, used if translation string 'ModuleXXXDesc' not found (where XXX is value of numeric property 'numero' of module)
 		$this->description = "Gestion des ressources";
 		// Possible values for version are: 'development', 'experimental', 'dolibarr' or version
-		$this->version = '1.1.3';
+		$this->version = '1.1.4';
 		// Key used in llx_const table to save module status enabled/disabled (where MYMODULE is value of property name of module in uppercase)
 		$this->const_name = 'MAIN_MODULE_'.strtoupper($this->name);
 		// Where to store the module in setup page (0=common,1=interface,2=others,3=very specific)
@@ -111,8 +111,8 @@ class modRessource extends DolibarrModules
 			,array('RH_USER_MAIL_RECEIVER','chaine','webmaster@atm-consulting.fr','Ajouté par RH',1)
 			,array('RH_DAYS_BEFORE_ALERT','chaine','30','Ajouté par RH',1)
 			,array('RH_AUTOMATIC_ATTRIBUTION_USER_ENTITY_ON_RESSOURCE','chaine','0','Ajouté par RH',1)
-					
-		); 
+
+		);
 
 		// Array to add new pages in new tabs
 		// Example: $this->tabs = array('objecttype:+tabname1:Title1:langfile@mymodule:$user->rights->mymodule->read:/mymodule/mynewtab1.php?id=__ID__',  // To add a new tab identified by code tabname1
@@ -321,7 +321,7 @@ class modRessource extends DolibarrModules
 		// Add here entries to declare new menus
 		//
 		// Example to declare a new Top Menu entry and its Left menu entry:
-		$this->menu[$r]=array(	
+		$this->menu[$r]=array(
 						'fk_menu'=>0,			                // Put 0 if this is a top menu
 						'type'=>'top',			                // This is a Top menu entry
 						'titre'=>$langs->trans('Ressource'),
@@ -335,7 +335,7 @@ class modRessource extends DolibarrModules
 						'target'=>'',
 						'user'=>0								// 0=Menu for internal users, 1=external users, 2=both
 		);
-		
+
 		//RESSOURCES
 		$r++;
         $this->menu[$r]=array(
@@ -368,7 +368,7 @@ class modRessource extends DolibarrModules
 					'target'=> '',
 					'user'=> 2
         );
-		
+
 		$r++;
         $this->menu[$r]=array(
 		            'fk_menu'=>'fk_mainmenu=ressource,fk_leftmenu=ressources',			// Put 0 if this is a top menu
@@ -384,7 +384,7 @@ class modRessource extends DolibarrModules
 					'target'=> '',
 					'user'=> 2
         );
-		
+
 		$r++;
         $this->menu[$r]=array(
 		            'fk_menu'=>'fk_mainmenu=ressource,fk_leftmenu=ressources',			// Put 0 if this is a top menu
@@ -400,7 +400,7 @@ class modRessource extends DolibarrModules
 					'target'=> '',
 					'user'=> 2
         );
-		
+
 		$r++;
         $this->menu[$r]=array(
 		            'fk_menu'=>'fk_mainmenu=ressource,fk_leftmenu=ressources',			// Put 0 if this is a top menu
@@ -416,7 +416,7 @@ class modRessource extends DolibarrModules
 					'target'=> '',
 					'user'=> 2
         );
-		
+
 		//AGENDA
 		$r++;
         $this->menu[$r]=array(
@@ -433,7 +433,7 @@ class modRessource extends DolibarrModules
 					'target'=> '',
 					'user'=> 2
         );
-		
+
 		$r++;
         $this->menu[$r]=array(
 		            'fk_menu'=>'fk_mainmenu=ressource,fk_leftmenu=agenda',			// Put 0 if this is a top menu
@@ -449,7 +449,7 @@ class modRessource extends DolibarrModules
 					'target'=> '',
 					'user'=> 2
         );
-		
+
 		$r++;
         $this->menu[$r]=array(
 		            'fk_menu'=>'fk_mainmenu=ressource,fk_leftmenu=agenda',			// Put 0 if this is a top menu
@@ -465,7 +465,7 @@ class modRessource extends DolibarrModules
 					'target'=> '',
 					'user'=> 2
         );
-		
+
 		//TYPES RESSOURCES
 		$r++;
 		$this->menu[$r]=array(
@@ -482,7 +482,7 @@ class modRessource extends DolibarrModules
 					'target'=> '',
 					'user'=> 2
         );
-		
+
 		$r++;
 		$this->menu[$r]=array(
 		            'fk_menu'=>'fk_mainmenu=ressource,fk_leftmenu=typeressource',			// Put 0 if this is a top menu
@@ -498,7 +498,7 @@ class modRessource extends DolibarrModules
 					'target'=> '',
 					'user'=> 2
         );
-		
+
         $r++;
         $this->menu[$r]=array(
 		            'fk_menu'=>'fk_mainmenu=ressource,fk_leftmenu=typeressource',			// Put 0 if this is a top menu
@@ -514,7 +514,7 @@ class modRessource extends DolibarrModules
 					'target'=> '',
 					'user'=> 2
         );
-		
+
 		//IMPORTS
 		$r++;
         $this->menu[$r]=array(
@@ -549,7 +549,7 @@ class modRessource extends DolibarrModules
 					'target'=> '',
 					'user'=> 2
         );
-		
+
 		$r++;
         $this->menu[$r]=array(
 		            'fk_menu'=>'fk_mainmenu=report,fk_leftmenu=rapportressource',			// Put 0 if this is a top menu
@@ -565,7 +565,7 @@ class modRessource extends DolibarrModules
 					'target'=> '',
 					'user'=> 2
         );
-		
+
 		$r++;
         $this->menu[$r]=array(
 		            'fk_menu'=>'fk_mainmenu=report,fk_leftmenu=rapportressource',			// Put 0 if this is a top menu
@@ -611,10 +611,10 @@ class modRessource extends DolibarrModules
 					'target'=> '',
 					'user'=> 2
         );
-		
+
 		$r++;
-		
-		
+
+
 		$this->menu[$r]=array(
 		            'fk_menu'=>'fk_mainmenu=report,fk_leftmenu=rapportressource',			// Put 0 if this is a top menu
 		        	'type'=> 'left',			// This is a Top menu entry
@@ -629,12 +629,12 @@ class modRessource extends DolibarrModules
 					'target'=> '',
 					'user'=> 2
         );
-		
+
 		$r++;
-		
-      
-		
-		
+
+
+
+
 
 		// Exports
 		$r=1;
@@ -668,20 +668,20 @@ class modRessource extends DolibarrModules
 		$result=$this->load_tables();
 
 		if(!is_file( dol_buildpath("/ressource/config.php" ))) {
-			 $data='<?php require(\'default.config.php\'); /* fichier de conf de base */';	
-			
+			 $data='<?php require(\'default.config.php\'); /* fichier de conf de base */';
+
 			file_put_contents( dol_buildpath("/ressource/config.php" ) , $data);
 		}
 
 		$url =dol_buildpath("/ressource/script/create-maj-base.php",1);
 		echo $url;
 		file_get_contents($url);
-		
-		
+
+
        	$extrafields=new ExtraFields($this->db);
 		$res = $extrafields->addExtraField('COMPTE_TIERS', 'CompteTiers', 'varchar', 0, 255, 'user');
-		
-		
+
+
 		return $this->_init($sql, $options);
 	}
 
