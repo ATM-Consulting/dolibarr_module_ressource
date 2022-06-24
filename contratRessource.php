@@ -1,4 +1,5 @@
 <?php
+
 	require('config.php');
 	require('./class/contrat.class.php');
 	require('./class/ressource.class.php');
@@ -137,7 +138,7 @@ function _liste(&$PDOdb, &$association, &$ressource,  $mode) {
 	?><div style="clear:both"></div></div><?php
 	llxFooter();
 }
-}
+
 
 function _fiche(&$PDOdb,  &$association, &$ressource,  $mode) {
 	global $db,$user;
