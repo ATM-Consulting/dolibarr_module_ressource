@@ -66,31 +66,31 @@ exit;*/
 
 switch ($action) {
 	case 'save':
-		
+
 		$TNumerosSpeciaux = $_REQUEST['TNumerosSpeciaux'];
-		
+
 		if(_saveNumerosSpeciaux($PDOdb, $TNumerosSpeciaux)) {
-			
+
 			setEventMessage($langs->trans('NumerosSpeciauxSaved'));
-			
+
 		}
 		break;
-	
+
 	case 'delete':
-	
+
 		TRH_Numero_special::deleteNumber($db, $_REQUEST['number']);
-	
+
 	default:
-		
+
 		break;
 }
- 
+
 /*
  * View
- */ 
+ */
 $TNumerosSpeciaux = TRH_Numero_special::getAllNumbers($db);
 //print_r($TFraisDePort);
- 
+
 $page_name = "NumerosSpeciauxSetup";
 llxHeader('', $langs->trans($page_name));
 
@@ -100,11 +100,11 @@ print_fiche_titre($langs->trans($page_name), $linkback);
 //echo $langs->trans("FraisDePortSetup");
 
 function _saveNumerosSpeciaux(&$PDOdb, $TNumerosSpeciaux) {
-		
+
 	global $db;
-	
+
 	$TNums = array();
-	
+
 	foreach($TNumerosSpeciaux as $num) {
 		$num = _returnCleanedPhoneNumber($num);
 		if(!empty($num) && !TRH_Numero_special::existeNumber($db, $num)){
@@ -113,15 +113,15 @@ function _saveNumerosSpeciaux(&$PDOdb, $TNumerosSpeciaux) {
 			$number->save($PDOdb);
 		}
 	}
-	
+
 	return 1;
-	
+
 }
 
 function _returnCleanedPhoneNumber($num) {
-	
+
 	if(empty($num)) return false;
-	
+
 	$num = strtr($num, array(
 							"."=>""
 							,"-"=>""
@@ -140,14 +140,14 @@ function _returnCleanedPhoneNumber($num) {
 		$num[1] = 3;
 		return $num;
 	}
-	
-	return $num;
-	
-}
 
+	return $num;
+
+}
+$newToken = function_exists('newToken') ? newToken() : $_SESSION['newtoken'];
 print '<form name="formNumerosSpeciaux" method="POST" action="'.dol_buildpath('/ressource/special_numbers.php', 2).'" />';
 print '<table class="noborder" width="100%">';
-	
+
 print '<tr class="liste_titre">';
 print '<td>'.$langs->trans('SpecialNumbersList').'</td><td></td>';
 print '</tr>';
@@ -155,17 +155,17 @@ print '</tr>';
 print '<input type="hidden" name="action" value="save" />';
 
 if(is_array($TNumerosSpeciaux) && count($TNumerosSpeciaux) > 0) {
-	
+
 	foreach($TNumerosSpeciaux as $numero) {
-		
+
 		print '<tr>';
 		//print '<td><input type="text" name="TNumerosSpeciaux[]" value="'.$numero.'" /></td>';
 		print '<td>'.$numero.'</td>';
-		print '<td><a href="'.$_SERVER['PHP_SELF'].'?number='.$numero.'&action=delete" />'.img_delete().'</a></td>';
+		print '<td><a href="'.$_SERVER['PHP_SELF'].'?number='.$numero.'&action=delete&token='. $newToken .'" />'.img_delete().'</a></td>';
 		print '</tr>';
-		
-	}	
-	
+
+	}
+
 }
 
 print '<tr>';

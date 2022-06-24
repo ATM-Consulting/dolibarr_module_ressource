@@ -86,7 +86,7 @@
 
 function _liste(&$PDOdb, &$ressourceType, &$even) {
 	global $langs,$conf, $db;
-
+	$newToken = function_exists('newToken') ? newToken() : $_SESSION['newtoken'];
 	llxHeader('','Règles sur les Ressources');
 	dol_fiche_head(ressourcePrepareHead($ressourceType, 'type-ressource')  , 'event', 'Type de ressource');
 
@@ -117,7 +117,7 @@ function _liste(&$PDOdb, &$ressourceType, &$even) {
 			,'nbLine'=>'30'
 		)
 		,'link'=>array(
-			'libelle'=>'<a href="?id='.$ressourceType->getId().'&idTypeEvent=@ID@&action=view">@val@</a>'
+			'libelle'=>'<a href="?id='.$ressourceType->getId().'&idTypeEvent=@ID@&action=view&token='. $newToken .'">@val@</a>'
 		)
 		,'translate'=>array(
 			'supprimable'=>array('vrai'=>'Non', 'faux'=>'Oui')
@@ -144,7 +144,7 @@ function _liste(&$PDOdb, &$ressourceType, &$even) {
 
 	));
 
-	?></div><a class="butAction" href="?id=<?php echo $ressourceType->getId()?>&action=new">Nouveau</a>
+	?></div><a class="butAction" href="?id=<?php echo $ressourceType->getId()?>&action=new&token=<?php echo $newToken; ?>">Nouveau</a>
 	<div style="clear:both"></div><?php
 	$form->end();
 	llxFooter();
