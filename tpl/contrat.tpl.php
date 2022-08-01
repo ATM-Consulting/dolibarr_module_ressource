@@ -1,20 +1,20 @@
 [onshow;block=begin;when [view.mode]=='view']
-		
+
 		[view.head;strconv=no]
-                                
+
 [onshow;block=end]
 [onshow;block=begin;when [view.mode]!='view']
-     
+
 	[view.onglet;strconv=no]
-	
+
 	[onshow;block=begin;when [view.mode]=='new']
 		[contrat.titreNouveau;strconv=no;protect=no]
 	[onshow;block=end]
 	[onshow;block=begin;when [view.mode]=='edit']
 		[contrat.titreModification;strconv=no;protect=no]
 	[onshow;block=end]
-	
-                            
+
+
 [onshow;block=end]
 
 
@@ -28,12 +28,12 @@
 	 		<td>Numéro du contrat</td>
 	 		<td>[contrat.numContrat;strconv=no;protect=no]</td>
 	 	</tr>
-	 	
+
 	 	<tr>
 	 		<td>Type de ressource associée</td>
 	 		<td>[contrat.typeRessource;strconv=no;protect=no]</td>
 	 	</tr>
-	 	
+
 	 	<tr>
 	 		<td>Fournisseur concerné</td>
 	 		<td>[contrat.tiersFournisseur;strconv=no;protect=no]</td>
@@ -60,7 +60,7 @@
 		 			{actuKm();})
 		 		$(document).ready(function()
 		 			{actuKm();});
-		 		
+
 		 		function actuKm(){
 		 			if ($('#fk_tier_fournisseur option:selected').html()=='Parcours'){
 		 				$('#km').show();
@@ -76,22 +76,22 @@
 	 	<script>
 	 		if ('[contrat.tiersFournisseur;strconv=no;protect=no]'!='Parcours'){
 	 			$('#km').hide();
-	 			
+
 	 		}
 	 	</script>
 	 	[onshow;block=end]
-	 	
+
 	 	[onshow;block=begin;when [view.userRightViewContrat]==1]
 		 	<tr>
 		 		<td>Montant entretien mensuel TTC</td>
 		 		<td>[contrat.entretien;strconv=no;protect=no] €</td>
 		 	</tr>
-		 	
+
 		 	<tr>
 		 		<td>Frais de gestion mensuel TTC</td>
 		 		<td>[contrat.frais;strconv=no;protect=no] €</td>
 		 	</tr>
-		 	
+
 		 	<tr>
 		 		<td>Assurance mensuelle</td>
 		 		<td>[contrat.assurance;strconv=no;protect=no] €</td>
@@ -108,7 +108,7 @@
 					ht = ht.toFixed(2)
 					$('#loyer_HT').val(ht);
 				}
-				
+
 				$('#loyer_TTC').live('keyup', function(){
 					actuHT();});
 				$(function() {$('#TVA').change(function(){actuHT();	});	});
@@ -123,7 +123,7 @@
 		 	</tr>
 	 	[onshow;block=end]
 	</table>
-	
+
 </div>
 
 
@@ -131,19 +131,19 @@
 	$(document).ready( function(){
 		//on empêche que la date de début dépasse pas celle de fin
 		function comparerDates(){
-		
+
 			dd = $("#date_debut").val().split("/");
 			df = $("#date_fin").val().split("/");
-			
-			var dDebut = new Date(dd[2], dd[1]-1, dd[0], 0,0,0,0); 
-			var dFin = new Date(df[2], df[1]-1, df[0], 0,0,0,0); 
-			
+
+			var dDebut = new Date(dd[2], dd[1]-1, dd[0], 0,0,0,0);
+			var dFin = new Date(df[2], df[1]-1, df[0], 0,0,0,0);
+
 			if(dFin.getTime() < dDebut.getTime()) {
 				$("#date_fin").val($("#date_debut").val());
 			}
 
 		};
-		
+
 		$("#date_debut").change(comparerDates);
 		$("#date_fin").change(comparerDates);
 	});
@@ -160,8 +160,9 @@
 				<input type="submit" value="Enregistrer" name="save" class="button">
 			[onshow;block=end]
 			[onshow;block=begin;when [view.mode]!='new']
+				<?php $newToken = function_exists('newToken') ? newToken() : $_SESSION['newtoken']; ?>
 				<a class="butAction"  href="?id=[contrat.id]&action=edit">Modifier</a>
-				&nbsp; &nbsp;<a class="butActionDelete"  onclick="if (window.confirm('Voulez vous supprimer l\'élément ?')){document.location.href='?id=[contrat.id]&action=delete'};">Supprimer</a>
+				&nbsp; &nbsp;<a class="butActionDelete"  onclick="if (window.confirm('Voulez vous supprimer l\'élément ?')){document.location.href='?id=[contrat.id]&action=delete&token=<?php echo $newToken  ?>'};">Supprimer</a>
 			[onshow;block=end]
 		[onshow;block=end]
 </div>

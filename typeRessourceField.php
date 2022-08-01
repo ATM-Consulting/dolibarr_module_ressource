@@ -2,16 +2,16 @@
 	require('config.php');
 	require('./class/ressource.class.php');
 	require('./lib/ressource.lib.php');
-	
+
 	$langs->load('ressource@ressource');
-	
+
 	//if (!$user->rights->financement->affaire->read)	{ accessforbidden(); }
 	$PDOdb=new TPDOdb;
 	$ressource=new TRH_ressource_type;
-	
+
 	$mesg = '';
 	$error=false;
-	
+
 	if(isset($_REQUEST['action'])) {
 		switch($_REQUEST['action']) {
 			case 'add':
@@ -20,14 +20,14 @@
 				$ressource->set_values($_REQUEST);
 				//$ressource->save($PDOdb);
 				_fiche($PDOdb, $ressource,'edit');
-				
-				break;	
+
+				break;
 			case 'edit'	:
 				//$PDOdb->db->debug=true;
 				$ressource->load($PDOdb, $_REQUEST['id']);
 				_fiche($PDOdb, $ressource,'edit');
 				break;
-				
+
 			case 'save':
 				//$PDOdb->db->debug=true;
 				$ressource->load($PDOdb, $_REQUEST['id']);
@@ -37,11 +37,11 @@
 				if(isset($_REQUEST['TField'])){
 					if (!empty($ressource->TField)){
 						foreach($_REQUEST['TField'] as $k=>$field) {
-							$ressource->TField[$k]->set_values($field);					
+							$ressource->TField[$k]->set_values($field);
 						}
 					}
 				}
-				
+
 				if ($_REQUEST['TNField']['libelle']!=''){
 					$ressource->addField($PDOdb, $_REQUEST['TNField']);
 					$mesg = '<div class="ok">Le champs a bien été créé</div>';
@@ -50,17 +50,17 @@
 					$mode = 'edit';
 				}
 
-				
+
 				$ressource->save($PDOdb);
 				$ressource->load($PDOdb, $_REQUEST['id']);
 				_fiche($PDOdb, $ressource,$mode);
 				break;
-			
+
 			case 'view':
 				$ressource->load($PDOdb, $_REQUEST['id']);
 				_fiche($PDOdb, $ressource,'view');
 				break;
-		
+
 			case 'deleteField':
 				//$PDOdb->db->debug=true;
 				if ($ressource->delField($PDOdb, $_REQUEST['idField'])){
@@ -70,19 +70,19 @@
 					$mesg = '<div class="error">Ce champ ne peut pas être supprimé</div>';
 				}
 				$ressource->load($PDOdb, $_REQUEST['id']);
-				
-				
+
+
 				$mode = 'edit';
 				_fiche($PDOdb, $ressource,$mode);
 				break;
-				
+
 		}
 	}
 	elseif(isset($_REQUEST['id'])) {
 		$ressource->load($PDOdb, $_REQUEST['id']);
-		
+
 		_fiche($PDOdb, $ressource, 'view');
-		
+
 	}
 	else {
 		/*
@@ -90,27 +90,27 @@
 		 */
 		 _liste($PDOdb, $ressource);
 	}
-	
-	
+
+
 	$PDOdb->close();
-	
-	
+
+
 function _liste(&$PDOdb, &$ressource) {
-	global $langs,$conf, $db;	
-	
+	global $langs,$conf, $db;
+	$newToken = function_exists('newToken') ? newToken() : $_SESSION['newtoken'];
 	llxHeader('','Type Ressource');
 	getStandartJS();
-	
+
 	$r = new TSSRenderControler($ressource);
 	$sql="SELECT rowid as 'ID', code as 'Code', libelle as 'Libellé'
 		FROM ".MAIN_DB_PREFIX."rh_ressource_field
 		WHERE fk_rh_ressource_type=".$ressource->getId();
-	
+
 	$TOrder = array('Code'=>'ASC');
 	if(isset($_REQUEST['orderDown']))$TOrder = array($_REQUEST['orderDown']=>'DESC');
 	if(isset($_REQUEST['orderUp']))$TOrder = array($_REQUEST['orderUp']=>'ASC');
-				
-	$page = isset($_REQUEST['page']) ? $_REQUEST['page'] : 1;			
+
+	$page = isset($_REQUEST['page']) ? $_REQUEST['page'] : 1;
 	//print $page;
 	$r->liste($PDOdb, $sql, array(
 		'limit'=>array(
@@ -118,7 +118,7 @@ function _liste(&$PDOdb, &$ressource) {
 			,'nbLine'=>'30'
 		)
 		,'link'=>array(
-			'Code'=>'<a href="?id=@ID@&action=view">@val@</a>'
+			'Code'=>'<a href="?id=@ID@&action=view&token='. $newToken .'">@val@</a>'
 		)
 		,'translate'=>array()
 		,'hide'=>array()
@@ -132,35 +132,35 @@ function _liste(&$PDOdb, &$ressource) {
 			,'messageNothing'=>"Il n'y a aucun type de ressource à afficher"
 			,'order_down'=>img_picto('','1downarrow.png', '', 0)
 			,'order_up'=>img_picto('','1uparrow.png', '', 0)
-			
+
 		)
 		,'orderBy'=>$TOrder
-		
+
 	));
-	
-	
+
+
 	llxFooter();
-}	
-	
+}
+
 function _fiche(&$PDOdb, &$ressource, $mode) {
 	global $db,$user;
 
 
 	llxHeader('','Type de ressource', '', '', 0, 0);
-	
+
 	$form=new TFormCore($_SERVER['PHP_SELF'],'form1','POST');
 	$form->Set_typeaff($mode);
 	echo $form->hidden('id', $ressource->getId());
 	echo $form->hidden('action', 'save');
-	
-	
-	
+
+
+
 	//Champs
 	$TFields=array();
 	foreach($ressource->TField as $k=>$field) {
-		
+
 		//print_r($field);
-		
+
 		$TFields[$k]=array(
 				'id'=>$field->getId()
 				,'code'=>$field->code //$form->texte('', 'TField['.$k.'][code]', $field->code, 20,255,'','','-')
@@ -175,9 +175,9 @@ function _fiche(&$PDOdb, &$ressource, $mode) {
 				,'numero'=>$k
 			);
 	}
-	
+
 	$TBS=new TTemplateTBS();
-	
+
 	print $TBS->render('./tpl/ressource.type.field.tpl.php'
 		,array(
 			'ressourceField'=>$TFields
@@ -208,18 +208,18 @@ function _fiche(&$PDOdb, &$ressource, $mode) {
 				,'head'=>dol_get_fiche_head(ressourcePrepareHead($ressource)  , 'field', 'Type de ressource')
 				,'onglet'=>dol_get_fiche_head(array()  , '', 'Type de ressource')
 			)
-			
-		)	
-		
+
+		)
+
 	);
-	
+
 	echo $form->end_form();
 	// End of page
-	
+
 	global $mesg, $error;
 	dol_htmloutput_mesg($mesg, '', ($error ? 'error' : 'ok'));
 	llxFooter();
 }
 
-	
-	
+
+

@@ -1,12 +1,12 @@
 [onshow;block=begin;when [view.mode]=='view']
-	[view.head;strconv=no]                     
-[onshow;block=end]  
+	[view.head;strconv=no]
+[onshow;block=end]
 
 [onshow;block=begin;when [view.mode]!='view']
-	[view.onglet;strconv=no]                     
-[onshow;block=end]  
-	
-			
+	[view.onglet;strconv=no]
+[onshow;block=end]
+
+
 <table width="100%" class="border">
 	<tr><td width="20%">Libellé</td><td>[ressourceType.libelle; strconv=no]</td></tr>
 	<tr><td width="20%">Code</td><td>[ressourceType.code; strconv=no]</td></tr>
@@ -24,7 +24,7 @@
 		<td>Code</td>
 		<td>[newEvent.code;strconv=no]</td>
 	</tr>
-	
+
 	<script>
 		String.prototype.sansAccent = function(){
 		    var accent = [
@@ -44,33 +44,34 @@
 		    }
     		return str;
 		}
-		
+
 		$('#libelle').change(function(){
 			texte = $('#libelle').val();
 			$('#code').val(texte.sansAccent());
 		})
-		
+
 	</script>
 	<tr>
 		<td>Code Comptable</td>
 		<td>[newEvent.codecomptable;strconv=no]</td>
 	</tr>
-	
+
 </table>
 
 
-[onshow;block=begin;when [view.mode]!='edit']		
+[onshow;block=begin;when [view.mode]!='edit']
 	<div class="tabsAction">
 		<a href="?id=[ressourceType.id]&idTypeEvent=[newEvent.id]&action=edit" class="butAction">Modifier</a>
-		[onshow;block=begin;when [newEvent.supprimable]=='vrai']		
-			<a class="butActionDelete" onclick="if (window.confirm('Voulez vous supprimer l\'élément ?')){document.location.href='?id=[ressourceType.id]&idTypeEvent=[newEvent.id]&action=delete'};">Supprimer</a>
-			
-		[onshow;block=end]	
+		[onshow;block=begin;when [newEvent.supprimable]=='vrai']
+		<?php $newToken = function_exists('newToken') ? newToken() : $_SESSION['newtoken']; ?>
+			<a class="butActionDelete" onclick="if (window.confirm('Voulez vous supprimer l\'élément ?')){document.location.href='?id=[ressourceType.id]&idTypeEvent=[newEvent.id]&action=delete&token=<?php echo $newToken ; ?>'};">Supprimer</a>
+
+		[onshow;block=end]
 	</div>
-[onshow;block=end]	
+[onshow;block=end]
 [onshow;block=begin;when [view.mode]=='edit']
 <div class="tabsAction" style="text-align:center;">
-	<input type="submit" value="Enregistrer" name="save" class="button"> 
+	<input type="submit" value="Enregistrer" name="save" class="button">
 	&nbsp; &nbsp; <input type="button" value="Annuler" name="cancel" class="button" onclick="document.location.href='?id=[ressourceType.id]'">
 </div>
 [onshow;block=end]

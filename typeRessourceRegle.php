@@ -3,16 +3,16 @@
 	require('./class/ressource.class.php');
 	require('./class/regle.class.php');
 	require('./lib/ressource.lib.php');
-	
+
 	$langs->load('ressource@ressource');
-	
+
 	//if (!$user->rights->financement->affaire->read)	{ accessforbidden(); }
 	$PDOdb=new TPDOdb;
 	$ressourceType=new TRH_ressource_type;
 	$regle = new TRH_Ressource_Regle;
 	$mesg = '';
 	$error=false;
-	
+
 	if(isset($_REQUEST['action'])) {
 		switch($_REQUEST['action']) {
 			case 'add':
@@ -22,14 +22,14 @@
 				//$ressourceType->save($PDOdb);
 				_fiche($PDOdb, $regle, $ressourceType,'new');
 				break;
-				
+
 			case 'edit'	:
 				//$PDOdb->db->debug=true;
 				$ressourceType->load($PDOdb, $_REQUEST['id']);
 				$regle->load($PDOdb, $_REQUEST['idRegle']);
 				_fiche($PDOdb,  $regle, $ressourceType,'edit');
 				break;
-				
+
 			case 'save':
 				//$PDOdb->db->debug=true;
 				$ressourceType->load($PDOdb, $_REQUEST['id']);
@@ -40,33 +40,33 @@
 				$regle->duree = timeToInt($_REQUEST['dureeH'],$_REQUEST['dureeM'] );
 				$regle->dureeInt = timeToInt($_REQUEST['dureeHInt'],$_REQUEST['dureeMInt'] );
 				$regle->dureeExt = timeToInt($_REQUEST['dureeHExt'],$_REQUEST['dureeMExt'] );
-								
+
 				$regle->save($PDOdb);
 				$ressourceType->load($PDOdb, $_REQUEST['id']);
 				_fiche($PDOdb,  $regle, $ressourceType,$mode);
 				break;
-			
+
 			case 'view':
 				$ressourceType->load($PDOdb, $_REQUEST['id']);
 				$regle->load($PDOdb, $_REQUEST['idRegle']);
 				_fiche($PDOdb,  $regle, $ressourceType,'view');
 				break;
-		
+
 			case 'delete':
 				$regle->load($PDOdb, $_REQUEST['idRegle']);
 				$regle->delete($PDOdb);
 				//$PDOdb->db->debug=true;
-				
+
 				/*
 				?>
 				<script language="javascript">
-					document.location.href="?delete_ok=1";					
+					document.location.href="?delete_ok=1";
 				</script>
 				<?*/
 				$ressourceType->load($PDOdb, $_REQUEST['id']);
 				$mesg = '<div class="ok">Le type de ressource est utilisé par une ressource. Il ne peut pas être supprimé.</div>';
 				_liste($PDOdb, $ressourceType, $regle);
-			
+
 				break;
 		}
 	}
@@ -75,11 +75,11 @@
 		$regle->load($PDOdb, $_REQUEST['idRegle']);
 		_fiche($PDOdb,  $regle, $ressourceType,'view');
 	}
-	
+
 	elseif(isset($_REQUEST['id'])) {
 		$ressourceType->load($PDOdb, $_REQUEST['id']);
 		_liste($PDOdb, $ressourceType, $regle);
-		
+
 	}
 	else {
 		/*
@@ -87,51 +87,51 @@
 		 */
 		 _liste($PDOdb, $ressourceType, $regle);
 	}
-	
-	
+
+
 	$PDOdb->close();
-	
-	
+
+
 function _liste(&$PDOdb, &$ressourceType, &$regle) {
-	global $langs,$conf, $db, $user;	
-	
+	global $langs,$conf, $db, $user;
+	$newToken = function_exists('newToken') ? newToken() : $_SESSION['newtoken'];
 	llxHeader('','Règles sur les Ressources');
 	dol_fiche_head(ressourcePrepareHead($ressourceType, 'type-ressource')  , 'regle', 'Type de ressource');
-	
+
 		echo '<table width="100%" class="border">
 			<tr><td width="20%">Libellé</td><td>'.$ressourceType->libelle.'</td></tr>
 			<tr><td width="20%">Code</td><td>'.$ressourceType->code.'</td></tr>
 		</table><br>';
-		
+
 	$r = new TSSRenderControler($ressourceType);
 	$sql="SELECT DISTINCT r.rowid as 'ID', r.choixApplication as 'CA',  r.choixLimite as 'CL', u.firstname ,u.lastname, g.nom as 'Groupe',
 		duree, dureeInt,dureeExt,dataIllimite, dataIphone, mailforfait, smsIllimite, data15Mo, '' as 'Supprimer'
 		FROM ".MAIN_DB_PREFIX."rh_ressource_regle as r
 		LEFT OUTER JOIN ".MAIN_DB_PREFIX."user as u ON (r.fk_user = u.rowid)
 		LEFT OUTER JOIN ".MAIN_DB_PREFIX."usergroup as g ON (r.fk_usergroup = g.rowid)
-		WHERE 1 
+		WHERE 1
 		 AND r.fk_rh_ressource_type=".$ressourceType->getId();
-	
+
 	$TOrder = array('ID'=>'ASC');
 	if(isset($_REQUEST['orderDown']))$TOrder = array($_REQUEST['orderDown']=>'DESC');
 	if(isset($_REQUEST['orderUp']))$TOrder = array($_REQUEST['orderUp']=>'ASC');
-	
+
 	$TOuiRien = array('vrai'=>'Oui', 'faux'=>'');
 	$TOuiNon = array('vrai'=>'Oui', 'faux'=>'Non');
 	$page = isset($_REQUEST['page']) ? $_REQUEST['page'] : 1;
 	$form=new TFormCore($_SERVER['PHP_SELF'].'?id='.$ressourceType->getId(),'formtranslateList','GET');
 	echo $form->hidden('id',$ressourceType->getId());
-	
+
 	$r->liste($PDOdb, $sql, array(
 		'limit'=>array(
 			'page'=>$page
 			,'nbLine'=>'30'
 		)
 		,'link'=>array(
-			'ID'=>'<a href="?id='.$ressourceType->getId().'&idRegle=@ID@&action=view">@val@</a>'
+			'ID'=>'<a href="?id='.$ressourceType->getId().'&idRegle=@ID@&action=view&token='.$newToken.'">@val@</a>'
 			,'Supprimer'=>"<a style=\"cursor:pointer;\" onclick=\"if (window.confirm('Voulez vous supprimer l\'élément ?')){document.location.href='?id=".$ressourceType->getId()."&idRegle=@ID@&action=delete'};\"><img src=\"./img/delete.png\"></a>"
 			//'<a href="?id='.$ressourceType->getId().'&idRegle=@ID@&action=delete"><img src="./img/delete.png"></a>'
-		) 
+		)
 		,'eval'=>array(
 			'dureeInt'=>'afficheOuPas(@val@, @CL@, "extint")'
 			,'dureeExt'=>'afficheOuPas(@val@, @CL@, "extint")'
@@ -187,17 +187,17 @@ function _liste(&$PDOdb, &$ressourceType, &$regle) {
 			//,'carteJumelle' => array('recherche'=>$TOuiNon)
 			,'name'=>TRUE
 			,'firstname'=>TRUE
-			//,'Statut'=>array('recherche'=>array('Libre'=>'Libre','Attribué'=>'Attribuée', 'Réservée'=>'Réservée'))	
+			//,'Statut'=>array('recherche'=>array('Libre'=>'Libre','Attribué'=>'Attribuée', 'Réservée'=>'Réservée'))
 		)
 		,'orderBy'=>$TOrder
-		
+
 	));
-	
-	?></div><a class="butAction" href="?id=<?=$ressourceType->getId()?>&action=new">Nouveau</a>
+
+	?></div><a class="butAction" href="?id=<?=$ressourceType->getId()?>&action=new&token=<?php echo $newToken; ?>">Nouveau</a>
 	<div style="clear:both"></div><?
 	$form->end();
 	llxFooter();
-}	
+}
 
 function TousOuPas($choix, $val){
 	if ($choix=='all'){
@@ -209,7 +209,7 @@ function TousOuPas($choix, $val){
 function _fiche(&$PDOdb, &$regle, &$ressourceType, $mode) {
 	global $user;
 	llxHeader('','Règle sur les Ressources', '', '', 0, 0);
-	
+
 
 
 	$form=new TFormCore($_SERVER['PHP_SELF'],'form1','POST');
@@ -218,17 +218,17 @@ function _fiche(&$PDOdb, &$regle, &$ressourceType, $mode) {
 	echo $form->hidden('idRegle', $regle->getId());
 	echo $form->hidden('action', 'save');
 	echo $form->hidden('fk_rh_ressource_type', $ressourceType->getId());
-	
+
 	$TBool = array('faux'=>'Non', 'vrai'=>'Oui');
 	$TBS=new TTemplateTBS();
 	$regle->load_liste($PDOdb);
-	
+
 	if ($mode == 'new'){
 		$regle->choixApplication = 'all';
 		$regle->choixLimite = 'gen';
 		$mode = 'edit';
 	}
-	
+
 	print $TBS->render('./tpl/ressource.type.regle.tpl.php'
 		,array()
 		,array(
@@ -260,7 +260,7 @@ function _fiche(&$PDOdb, &$regle, &$ressourceType, $mode) {
 				,'mailforfait'=>$form->combo('', 'mailforfait',$TBool, $regle->mailforfait)
 				,'data15Mo'=>$form->combo('', 'data15Mo',$TBool, $regle->data15Mo)
 				,'numeroExclus'=>$form->texte('', 'numeroExclus', $regle->numeroExclus,30 ,255,'','','')
-		
+
 			)
 			,'view'=>array(
 				'mode'=>$mode
@@ -268,14 +268,14 @@ function _fiche(&$PDOdb, &$regle, &$ressourceType, $mode) {
 				,'head'=>dol_get_fiche_head(ressourcePrepareHead($ressourceType)  , 'regle', 'Type de ressource')
 				,'onglet'=>dol_get_fiche_head(array()  , '', 'Règle')
 			)
-			
-		)	
-		
+
+		)
+
 	);
-	
+
 	echo $form->end_form();
 	// End of page
-	
+
 	global $mesg, $error;
 	dol_htmloutput_mesg($mesg, '', ($error ? 'error' : 'ok'));
 	llxFooter();

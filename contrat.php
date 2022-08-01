@@ -2,29 +2,29 @@
 	require('config.php');
 	require('./class/contrat.class.php');
 	require('./lib/ressource.lib.php');
-	
+
 	$langs->load('ressource@ressource');
-	
+
 	//if (!$user->rights->financement->affaire->read)	{ accessforbidden(); }
 	$PDOdb=new TPDOdb;
 	$contrat=new TRH_contrat;
-	
+
 	$mesg = '';
 	$error=false;
-	
+
 	if(isset($_REQUEST['action'])) {
 		switch($_REQUEST['action']) {
 			case 'add':
 			case 'new':
 				$contrat->set_values($_REQUEST);
 				_fiche($PDOdb, $contrat,'new');
-				
-				break;	
+
+				break;
 			case 'edit'	:
 				$contrat->load($PDOdb, $_REQUEST['id']);
 				_fiche($PDOdb, $contrat,'edit');
 				break;
-				
+
 			case 'save':
 				//$PDOdb->db->debug=true;
 				$contrat->load($PDOdb, $_REQUEST['id']);
@@ -32,7 +32,7 @@
 				$contrat->save($PDOdb);
 				$contrat->load($PDOdb, $_REQUEST['id']);
 				if ($_REQUEST['libelle']!=''){
-					
+
 					$mesg = '<div class="ok">Modifications effectuées</div>';
 					$mode = 'view';
 				}
@@ -43,7 +43,7 @@
 
 					_fiche($PDOdb, $contrat,$mode);
 				break;
-			
+
 			case 'view':
 				$contrat->load($PDOdb, $_REQUEST['id']);
 				_fiche($PDOdb, $contrat,'view');
@@ -55,7 +55,7 @@
 				$contrat->delete($PDOdb);
 				?>
 				<script language="javascript">
-					document.location.href="?delete_ok=1";					
+					document.location.href="?delete_ok=1";
 				</script>
 				<?php
 				break;
@@ -72,21 +72,21 @@
 		 //$PDOdb->db->debug=true;
 		 _liste($PDOdb, $contrat);
 	}
-	
-	
+
+
 	$PDOdb->close();
-	
+
 	llxFooter();
-	
+
 function _liste(&$PDOdb, &$contrat) {
 	global $langs,$conf,$db,$user;
 	llxHeader('','Liste des contrats');
 	print dol_get_fiche_head(array()  , '', 'Liste contrats');
 	getStandartJS();
-	
+	$newToken = function_exists('newToken') ? newToken() : $_SESSION['newtoken'];
 	$r = new TSSRenderControler($contrat);
-	
-	$sql= "SELECT c.rowid as 'ID', c.libelle , c.numContrat,   DATE(c.date_debut) as 'Date début', 
+
+	$sql= "SELECT c.rowid as 'ID', c.libelle , c.numContrat,   DATE(c.date_debut) as 'Date début',
 			DATE(c.date_fin) as 'Date fin',
 			t.libelle as 'Type Ressource' , s.nom as 'Fournisseur'";
 	if($user->rights->ressource->contrat->createContract){
@@ -104,13 +104,13 @@ function _liste(&$PDOdb, &$contrat) {
 		$sql.=" AND e.type ='emprunt'";
 		$sql.=" AND e.fk_user=".$user->id;
 	}
-	
+
 	$form=new TFormCore($_SERVER['PHP_SELF'],'form1','GET');
-	
+
 	$TOrder = array('Date début'=>'ASC');
 	if(isset($_REQUEST['orderDown']))$TOrder = array($_REQUEST['orderDown']=>'DESC');
 	if(isset($_REQUEST['orderUp']))$TOrder = array($_REQUEST['orderUp']=>'ASC');
-				
+
 	$page = isset($_REQUEST['page']) ? $_REQUEST['page'] : 1;
 	$r->liste($PDOdb, $sql, array(
 		'limit'=>array(
@@ -118,8 +118,8 @@ function _liste(&$PDOdb, &$contrat) {
 			,'nbLine'=>'30'
 		)
 		,'link'=>array(
-			'libelle'=>'<a href="?id=@ID@&action=view">@val@</a>'
-			,'Supprimer'=>"<a style=\"cursor:pointer;\"  onclick=\"if (window.confirm('Voulez vous supprimer l\'élément ?')){document.location.href='?id=@ID@&action=delete'};\"><img src=\"./img/delete.png\"></a>"
+			'libelle'=>'<a href="?id=@ID@&action=view&token='.$newToken.'">@val@</a>'
+			,'Supprimer'=>"<a style=\"cursor:pointer;\"  onclick=\"if (window.confirm('Voulez vous supprimer l\'élément ?')){document.location.href='?id=@ID@&action=delete&token=".$newToken."'};\"><img src=\"./img/delete.png\"></a>"
 		)
 		,'translate'=>array()
 		,'hide'=>array()
@@ -137,7 +137,7 @@ function _liste(&$PDOdb, &$contrat) {
 			,'order_down'=>img_picto('','1downarrow.png', '', 0)
 			,'order_up'=>img_picto('','1uparrow.png', '', 0)
 			,'picto_search'=>'<img src="../../theme/rh/img/search.png">'
-			
+
 		)
 		,'title'=>array(
 			'libelle'=>'Libellé'
@@ -148,24 +148,24 @@ function _liste(&$PDOdb, &$contrat) {
 			,'libelle'=>array('recherche'=>true,'table'=>'c')
 		)
 		,'orderBy'=>$TOrder
-		
+
 	));
-	
+
 	$form->end();
 	llxFooter();
-}	
-	
+}
+
 function _fiche(&$PDOdb, &$contrat, $mode) {
 	global $db,$user, $conf;
 	llxHeader('', 'Contrat');
-
+	$newToken = function_exists('newToken') ? newToken() : $_SESSION['newtoken'];
 	$html=new Form($db);
 	$form=new TFormCore($_SERVER['PHP_SELF'],'form1','POST');
 	$form->Set_typeaff($mode);
 	echo $form->hidden('id', $contrat->getId());
 	echo $form->hidden('action', 'save');
 	$contrat->load_liste($PDOdb);
-	
+
 	$TBS=new TTemplateTBS();
 	print $TBS->render('./tpl/contrat.tpl.php'
 		,array()
@@ -191,8 +191,8 @@ function _fiche(&$PDOdb, &$contrat, $mode) {
 				,'loyer_TTC'=>$form->texte('', 'loyer_TTC', $contrat->loyer_TTC, 10,20,'','','0')
 				,'TVA'=>$form->combo('','TVA',$contrat->TTVA,$contrat->TVA)
 				,'loyer_HT'=>$form->texte('', 'loyer_HT', number_format(($contrat->loyer_TTC)/(1+($contrat->TTVA[$contrat->TVA]/100)),2), 10,20,'disabled','','')
-				
-				
+
+
 			)
 			,'view'=>array(
 				'mode'=>$mode
@@ -201,13 +201,13 @@ function _fiche(&$PDOdb, &$contrat, $mode) {
 				,'head'=>dol_get_fiche_head(ressourcePrepareHead($contrat, 'contrat')  , 'fiche', 'Contrat')
 				,'onglet'=>dol_get_fiche_head(array()  , '', 'Création contrat')
 			)
-			
-			
-		)	
-		
+
+
+		)
+
 	);
-	
-	
+
+
 	if ($mode == 'view' ){
 		print "<br/>";
 		//liste des ressources associées
@@ -227,8 +227,8 @@ function _fiche(&$PDOdb, &$contrat, $mode) {
 		$TOrder = array('ID'=>'ASC');
 		if(isset($_REQUEST['orderDown']))$TOrder = array($_REQUEST['orderDown']=>'DESC');
 		if(isset($_REQUEST['orderUp']))$TOrder = array($_REQUEST['orderUp']=>'ASC');
-					
-		$page = isset($_REQUEST['page']) ? $_REQUEST['page'] : 1;			
+
+		$page = isset($_REQUEST['page']) ? $_REQUEST['page'] : 1;
 		//print $page;
 		$r->liste($PDOdb, $sql, array(
 			'limit'=>array(
@@ -236,7 +236,7 @@ function _fiche(&$PDOdb, &$contrat, $mode) {
 				,'nbLine'=>'30'
 			)
 			,'link'=>array(
-				'Libellé'=>'<a href="ressource.php?id=@ID@&action=view">@val@</a>'
+				'Libellé'=>'<a href="ressource.php?id=@ID@&action=view&token='.$newToken.'">@val@</a>'
 			)
 			,'translate'=>array()
 			,'hide'=>array()
@@ -250,12 +250,12 @@ function _fiche(&$PDOdb, &$contrat, $mode) {
 				,'messageNothing'=>"Il n'y a aucune ressource associée"
 				,'order_down'=>img_picto('','1downarrow.png', '', 0)
 				,'order_up'=>img_picto('','1uparrow.png', '', 0)
-				
+
 			)
 			,'orderBy'=>$TOrder
-			
+
 		));
-		
+
 		print "<br/>";
 		//liste des adresses liés au contrat
 		$r = new TSSRenderControler($contrat);
@@ -268,7 +268,7 @@ function _fiche(&$PDOdb, &$contrat, $mode) {
 		$TOrder = array('ID'=>'ASC');
 		if(isset($_REQUEST['orderDown']))$TOrder = array($_REQUEST['orderDown']=>'DESC');
 		if(isset($_REQUEST['orderUp']))$TOrder = array($_REQUEST['orderUp']=>'ASC');
-					
+
 		$page = isset($_REQUEST['page']) ? $_REQUEST['page'] : 1;
 		$r->liste($PDOdb, $sql, array(
 			'limit'=>array(
@@ -276,7 +276,7 @@ function _fiche(&$PDOdb, &$contrat, $mode) {
 				,'nbLine'=>'30'
 			)
 			,'link'=>array(
-				'Nom'=>'<a href="../../contact/fiche.php?id=@ID@">@val@</a>'
+				'Nom'=>'<a href="../../contact/fiche.php?id=@ID@&token='.$newToken.'">@val@</a>'
 			)
 			,'translate'=>array()
 			,'hide'=>array()
@@ -290,14 +290,14 @@ function _fiche(&$PDOdb, &$contrat, $mode) {
 				,'messageNothing'=>"Il n'y a aucune agence liée"
 				,'order_down'=>img_picto('','1downarrow.png', '', 0)
 				,'order_up'=>img_picto('','1uparrow.png', '', 0)
-				
+
 			)
 			,'orderBy'=>$TOrder
-			
+
 		));
 	}
-	
-	
+
+
 	echo $form->end_form();
 	// End of page
 	global $mesg, $error;
@@ -305,5 +305,5 @@ function _fiche(&$PDOdb, &$contrat, $mode) {
 	llxFooter();
 }
 
-	
-	
+
+
