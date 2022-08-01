@@ -29,7 +29,7 @@ function _liste(&$PDOdb, &$ressource) {
 	global $langs,$conf,$db,$user;
 	llxHeader('','Liste des ressources');
 	print dol_get_fiche_head(array()  , '', 'Liste ressources');
-
+	$newToken = function_exists('newToken') ? newToken() : $_SESSION['newtoken'];
 
 	//récupération des champs spéciaux à afficher.
 	$sqlReq="SELECT code, libelle, type, options FROM ".MAIN_DB_PREFIX."rh_ressource_field WHERE inliste='oui' ";
@@ -83,7 +83,7 @@ function _liste(&$PDOdb, &$ressource) {
 			,'nbLine'=>$nbLine
 		)
 		,'link'=>array(
-			'libelle'=>'<a href="ressource.php?id=@ID@&action=view">@val@</a>'
+			'libelle'=>'<a href="ressource.php?id=@ID@&action=view&token='. $newToken .'">@val@</a>'
 			,'Supprimer'=>"<a style=\"cursor:pointer;\" onclick=\"if (window.confirm('Voulez vous supprimer l\'élément ?')){document.location.href='?id=@ID@&action=delete'};\"><img src=\"./img/delete.png\"></a>"
 		)
 		,'translate'=>array(

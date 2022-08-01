@@ -173,7 +173,7 @@ function _liste(&$PDOdb, &$ressource) {
 	global $langs,$conf,$db,$user;
 	llxHeader('','Liste des ressources');
 	print dol_get_fiche_head(array()  , '', 'Liste ressources');
-
+	$newToken = function_exists('newToken') ? newToken() : $_SESSION['newtoken'];
 	//récupération des champs spéciaux à afficher.
 	$sqlReq="SELECT code, libelle, type, options FROM ".MAIN_DB_PREFIX."rh_ressource_field WHERE inliste='oui' ";
 	$PDOdb->Execute($sqlReq);
@@ -297,7 +297,7 @@ function _liste(&$PDOdb, &$ressource) {
 			,'nbLine'=>$nbLine
 		)
 		,'link'=>array(
-			'libelle'=>'<a href="?id=@ID@&action=view">@val@</a>'
+			'libelle'=>'<a href="?id=@ID@&action=view&token='. $newToken .'">@val@</a>'
 			,'Supprimer'=>"<a style=\"cursor:pointer;\"  onclick=\"if (window.confirm('Voulez vous supprimer l\'élément ?')){document.location.href='?id=@ID@&action=delete'};\"><img src=\"./img/delete.png\"></a>"
 		)
 		,'eval'=>array(
@@ -368,7 +368,7 @@ function _liste(&$PDOdb, &$ressource) {
 
 		$r->liste($PDOdb, $sql, array(
 			'link'=>array(
-				'ID'=>'<a href="typeRessourceRegle.php?id='.$idTelephone.'&idRegle=@ID@&action=view">@val@</a>'
+				'ID'=>'<a href="typeRessourceRegle.php?id='.$idTelephone.'&idRegle=@ID@&action=view&token='. $newToken .'">@val@</a>'
 			)
 			,'eval'=>array(
 				'dureeInt'=>'afficheOuPas(@val@, @CL@, "extint")'
@@ -425,7 +425,7 @@ function getStatut($val){
 
 function _fiche(&$PDOdb, &$emprunt, &$ressource, &$contrat, $mode) {
 	global $db,$user,$conf,$mc,$mysoc;
-
+	$newToken = function_exists('newToken') ? newToken() : $_SESSION['newtoken'];
 	$arrayofjs = array();
 	if (!empty($conf->rhhierarchie->enabled)) $arrayofjs[] = '/hierarchie/js/jquery.jOrgChart.js';
 
@@ -510,7 +510,7 @@ function _fiche(&$PDOdb, &$emprunt, &$ressource, &$contrat, $mode) {
 	$reqVide=0;	//variable permettant de savoir si la requete existe, et donc au final si on affichera l'organigramme
 	while($PDOdb->Get_line()) {
 		//récupère les id des différents nom des  groupes de l'utilisateur
-		$Tab_sous_ressource[$k]=array('libelle'=>'<a href="?id='.$PDOdb->Get_field('rowid').'">'.$PDOdb->Get_field('libelle').'</a>');
+		$Tab_sous_ressource[$k]=array('libelle'=>'<a href="?id='.$PDOdb->Get_field('rowid').'&token='. $newToken .'">'.$PDOdb->Get_field('libelle').'</a>');
 		$k++;
 		$reqVide=1;
 	}

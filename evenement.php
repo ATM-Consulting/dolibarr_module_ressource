@@ -4,13 +4,13 @@
 	require('./class/ressource.class.php');
 	require('./lib/ressource.lib.php');
 	$langs->load('ressource@ressource');
-	
+
 	$PDOdb=new TPDOdb;
 	$evenement=new TRH_Evenement;
 	$ressource = new TRH_Ressource;
 	$mesg = '';
 	$error=false;
-	
+
 	if(isset($_REQUEST['action'])) {
 		switch($_REQUEST['action']) {
 			case 'add':
@@ -19,25 +19,25 @@
 				$ressource->load($PDOdb, $_REQUEST['id']);
 				$evenement->set_values($_REQUEST);
 				_fiche($PDOdb, $evenement,$ressource,'edit');
-				
-				break;	
+
+				break;
 			case 'edit'	:
 				//$PDOdb->db->debug=true;
 				$ressource->load($PDOdb, $_REQUEST['id']);
 				$evenement->load($PDOdb, $_REQUEST['idEven']);
 				_fiche($PDOdb, $evenement,$ressource,'edit');
 				break;
-				
+
 			case 'save':
 				//$PDOdb->db->debug=true;
 				$evenement->load($PDOdb, $_REQUEST['idEven']);
 				$evenement->set_values($_REQUEST);
-				
+
 				$evenement->save($PDOdb);
 				if (!isset($_REQUEST['motif'])|| $_REQUEST['motif']==''){
 					$mesg = '<div class="error">Le motif doit être renseigné.</div>';
 					$mode = 'edit';
-					
+
 				}
 				else{
 					$mesg = '<div class="ok">Modifications effectuées</div>';
@@ -46,34 +46,34 @@
 				$ressource->load($PDOdb, $_REQUEST['id']);
 				_fiche($PDOdb, $evenement,$ressource,$mode);
 				break;
-			
+
 			case 'view':
 				//$PDOdb->db->debug=true;
 				$ressource->load($PDOdb, $_REQUEST['id']);
 				$evenement->load($PDOdb, $_REQUEST['idEven'],true);
-				
+
 				_fiche($PDOdb, $evenement,$ressource,'view');
 				break;
-			
+
 			case 'deleteEvent':
 				//$PDOdb->db->debug=true;
 				$evenement->load($PDOdb, $_REQUEST['idEven']);
 				$evenement->delete($PDOdb);
 				?>
 				<script language="javascript">
-					document.location.href="?id=<?php echo $_REQUEST['id'];?>&delete_ok=1";					
+					document.location.href="?id=<?php echo $_REQUEST['id'];?>&delete_ok=1";
 				</script>
 				<?php
 				/*$ressource->load($PDOdb, $_REQUEST['id']);
 				$mesg = '<div class="ok">L\'attribution a bien été supprimée.</div>';
 				_liste($PDOdb, $evenement, $ressource, $_REQUEST['type']);*/
 				break;
-				
+
 			case 'afficherListe':
 				$ressource->load($PDOdb, $_REQUEST['id']);
 				_liste($PDOdb, $evenement, $ressource, $_REQUEST['type']);
 				break;
-			
+
 		}
 	}
 	elseif(isset($_REQUEST['id'])) {
@@ -87,26 +87,26 @@
 		 //$PDOdb->db->debug=true;
 		 _liste($PDOdb, $evenement,$ressource);
 	}
-	
-	
+
+
 	$PDOdb->close();
-	
+
 	llxFooter();
-	
+
 function _liste(&$PDOdb, &$evenement, &$ressource, $type = "all") {
-	global $conf,$user;	
+	global $conf,$user;
 	llxHeader('','Liste des événements');
-	
+	$newToken = function_exists('newToken') ? newToken() : $_SESSION['newtoken'];
 	dol_fiche_head(ressourcePrepareHead($ressource, 'ressource')  , 'evenement', 'Ressource');
-	
+
 	printLibelle($ressource);
-	
+
 	$form=new TFormCore($_SERVER['PHP_SELF'],'form2','GET');
-	
+
 	echo $form->hidden('action', 'afficherListe');
 	echo $form->hidden('id',$ressource->getId());
 	$evenement->load_liste_type( $ressource->fk_rh_ressource_type);
-	
+
 	?>
 	<table>
 		<tr>
@@ -117,25 +117,25 @@ function _liste(&$PDOdb, &$evenement, &$ressource, $type = "all") {
 	</table>
 	<?php
 	//'onclick=\'document.location.href="?id='.$ressource->getId().'&action=afficherListe "\''
-	
+
 	$r = new TSSRenderControler($evenement);
 	switch($type){
 		case 'all' :
 			$jointureChamps ="DATE(e.date_debut) as 'Date début', DATE(e.date_fin) as 'Date fin', e.type as 'Type',
-				e.motif as 'Motif', tr.codecomptable as 'code comptable', e.commentaire as 'Commentaire', CONCAT (CAST(e.coutTTC as DECIMAL(16,2)), ' €') as 'Coût TTC', 
+				e.motif as 'Motif', tr.codecomptable as 'code comptable', e.commentaire as 'Commentaire', CONCAT (CAST(e.coutTTC as DECIMAL(16,2)), ' €') as 'Coût TTC',
 				CONCAT (CAST(e.coutEntrepriseTTC as DECIMAL(16,2)), ' €') as 'Coût pour l\'entreprise TTC', t.taux as 'TVA' ";
 			$jointureType = " AND e.type<>'emprunt' ";
 			break;
 		default :
 			$jointureChamps ="DATE(e.date_debut) as 'Date début', DATE(e.date_fin) as 'Date fin',
-				e.motif as 'Motif', e.commentaire as 'Commentaire', CONCAT (CAST(e.coutTTC as DECIMAL(16,2)), ' €') as 'Coût', 
+				e.motif as 'Motif', e.commentaire as 'Commentaire', CONCAT (CAST(e.coutTTC as DECIMAL(16,2)), ' €') as 'Coût',
 				CONCAT (CAST(e.coutEntrepriseTTC as DECIMAL(16,2)), ' €') as 'Coût pour l\'entreprise TTC', t.taux as 'TVA' ,
 				CONCAT (CAST(e.coutEntrepriseHT as DECIMAL(16,2)), ' €') as 'Coût pour l\'entreprise HT'";
 			$jointureType = " AND e.type='".$type."'";
 		break;
-		}	
-	
-	$sql = "SELECT DISTINCT e.rowid as 'ID', u.rowid as idUser, 
+		}
+
+	$sql = "SELECT DISTINCT e.rowid as 'ID', u.rowid as idUser,
 			CONCAT(u.firstname,' ',u.lastname) as 'Utilisateur', ".$jointureChamps;
 	if($user->rights->ressource->ressource->manageEvents){
 		$sql.=",'' as 'Supprimer'";
@@ -152,19 +152,19 @@ function _liste(&$PDOdb, &$evenement, &$ressource, $type = "all") {
 	if(!$user->rights->ressource->ressource->readEvenementConfidentiel){
 		$sql.=" AND e.confidentiel='non' ";
 	}
-	
+
 	$TOrder = array('ID'=>'ASC');
 	if(isset($_REQUEST['orderDown']))$TOrder = array($_REQUEST['orderDown']=>'DESC');
 	if(isset($_REQUEST['orderUp']))$TOrder = array($_REQUEST['orderUp']=>'ASC');
-				
-	$page = isset($_REQUEST['page']) ? $_REQUEST['page'] : 1;			
+
+	$page = isset($_REQUEST['page']) ? $_REQUEST['page'] : 1;
 	$r->liste($PDOdb, $sql, array(
 		'limit'=>array(
 			'page'=>$page
 			,'nbLine'=>'30'
 		)
 		,'link'=>array(
-			'Motif'=>'<a href="?id='.$ressource->getId().'&idEven=@ID@&action=view">@val@</a>'
+			'Motif'=>'<a href="?id='.$ressource->getId().'&idEven=@ID@&action=view&token='.$newToken.'">@val@</a>'
 			,'Supprimer'=>"<a style=\"cursor:pointer;\" onclick=\"if (window.confirm('Voulez vous supprimer l\'élément ?')){document.location.href='?id=".$ressource->getId()."&idEven=@ID@&type=".$type."&action=deleteEvent'};\"><img src=\"./img/delete.png\"></a>"
 		)
 		,'translate'=>array('Type'=>$evenement->TType)
@@ -174,12 +174,12 @@ function _liste(&$PDOdb, &$evenement, &$ressource, $type = "all") {
 			,'Date fin'=>'date'
 			,'Date'=>'date'
 			,'Traité le'=>'date'
-			
+
 		)
 		,'eval'=>array(
 			'Utilisateur'=>'htmlentities("@val@", ENT_COMPAT , "ISO8859-1")'
 		)
-		
+
 		,'liste'=>array(
 			'titre'=>'Liste des événements de type '.$evenement->TType[$type]
 			,'image'=>img_picto('','title.png', '', 0)
@@ -190,21 +190,21 @@ function _liste(&$PDOdb, &$evenement, &$ressource, $type = "all") {
 			,'order_down'=>img_picto('','1downarrow.png', '', 0)
 			,'order_up'=>img_picto('','1uparrow.png', '', 0)
 			//,'id'=>$ressource->getId()
-			
+
 		)
 		,'orderBy'=>$TOrder
-		
+
 	));
-	
+
 	if($user->rights->ressource->ressource->manageEvents){
-	?></div><a class="butAction" href="?id=<?php echo $ressource->getId()?>&action=new">Nouveau</a><?php
+	?></div><a class="butAction" href="?id=<?php echo $ressource->getId()?>&action=new&token=<?php echo $newToken; ?>">Nouveau</a><?php
 	}
 	?><div style="clear:both"></div></div><?php
 	$form->end();
 	global $mesg, $error;
 	dol_htmloutput_mesg($mesg, '', ($error ? 'error' : 'ok'));
 	llxFooter();
-}	
+}
 
 function _fiche(&$PDOdb, &$evenement,&$ressource,  $mode) {
 	global $db,$user,$conf,$langs;
@@ -263,18 +263,18 @@ function _fiche(&$PDOdb, &$evenement,&$ressource,  $mode) {
 				,'head'=>dol_get_fiche_head(ressourcePrepareHead($evenement, 'evenement', $ressource)  , 'fiche', 'Evénement')
 				,'onglet'=>dol_get_fiche_head(array()  , '', 'Evénement')
 			)
-		)	
-		
+		)
+
 	);
-	
+
 	echo $form->end_form();
 	// End of page
-	
+
 	global $mesg, $error;
 	dol_htmloutput_mesg($mesg, '', ($error ? 'error' : 'ok'));
 	llxFooter();
-		
+
 }
 
-	
-	
+
+
